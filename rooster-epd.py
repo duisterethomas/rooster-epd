@@ -11,8 +11,10 @@ else:
     with open("token.txt", "w") as f:
         f.write(token)
 
-user = cl.get_user(token)
-print(user)
+usercode = cl.get_user(token)["response"]["data"][0]["code"]
+enrollments = cl.get_liveschedule(token, "202403", usercode) # Requests week 03 of the year 2024
+lessons = enrollments['response']['data'][0]['appointments']
+print(lessons)
 
-appointments = cl.get_appointments(token, time.time()-36000, time.time()+36000)
-print(appointments)
+with open("test.json", "w") as f:
+    f.write(str(lessons))
