@@ -17,3 +17,4 @@ Zermelo rooster op een e-paper schermpje
 - https://github.com/wouter173/zermelo.py
 - https://pypi.org/project/zermelo.py/
 - https://csghetstreek.zportal.nl/app/
+- https://stackoverflow.com/questions/76138267/read-write-data-over-raspberry-pi-pico-usb-cable
