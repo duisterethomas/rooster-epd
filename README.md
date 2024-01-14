@@ -5,7 +5,7 @@ Zermelo rooster op een e-paper schermpje
 - `init`: Initializes the display
 - `rectCXXXYYYWWWHHHF`: Rectangle
 
-  `C`: The colour (r/b)
+  `C`: The colour (r/b/w)
   
   `XXX`: X position
   
@@ -16,9 +16,11 @@ Zermelo rooster op een e-paper schermpje
   `HHH`: Height
   
   `F`: Filled (0/1)
-- `tCXXXYYYTEXT`: Text
 
-  `C`: The colour (r/b)
+  Filled black rectangle on x 2, y 2, width 30, height 30 example: `rectb0020020300301`
+- `textCXXXYYYTEXT`: Text
+
+  `C`: The colour (r/b/w)
   
   `XXX`: X position
   
@@ -26,11 +28,11 @@ Zermelo rooster op een e-paper schermpje
   
   `TEXT`: The text
 
-  Red "Hello, world!" on x 2 and y 2 example: `r002002Hello, world!`
+  Red "Hello, world!" on x 2 and y 2 example: `textr002002Hello, world!`
 - `show`: Shows the final result
 - `cancel`: Cancel
 
-## Handige links
+## Useful links
 - https://support.zermelo.nl/guides/developers-api/examples/authentication-obtaining-an-access-token#access_token_created_in_the_portal
 - https://github.com/wouter173/zermelo.py
 - https://pypi.org/project/zermelo.py/
