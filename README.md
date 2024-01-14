@@ -3,12 +3,30 @@ Zermelo rooster op een e-paper schermpje
 
 ## Pico commands
 - `init`: Initializes the display
-- `rXXXYYYTEXT`: Red text
+- `rectCXXXYYYWWWHHHF`: Rectangle
+
+  `C`: The colour (r/b)
+  
+  `XXX`: X position
+  
+  `YYY`: Y position
+  
+  `WWW`: Width
+  
+  `HHH`: Height
+  
+  `F`: Filled (0/1)
+- `tCXXXYYYTEXT`: Text
+
+  `C`: The colour (r/b)
+  
+  `XXX`: X position
+  
+  `YYY`: Y position
+  
+  `TEXT`: The text
 
   Red "Hello, world!" on x 2 and y 2 example: `r002002Hello, world!`
-- `bXXXYYYTEXT`: Black text
-
-  Black "Hello, world!" on x 2 and y 2 example: `b002002Hello, world!`
 - `show`: Shows the final result
 - `cancel`: Cancel
 
