@@ -216,15 +216,73 @@ while True:
             epd.imageblack.fill(0x00)
             epd.imagered.fill(0xff)
             
-        elif data[0] == "r":
-            print(f'Red text X{int(data[1:4])} Y{int(data[4:7])}: {data[7:]}')
-            # Put text on the layer
-            epd.imagered.text(data[7:], int(data[1:4]), int(data[4:7]), 0x00)
+        elif data[0:4] == "rect":
+            if len(data) == 18:
+                if data[4] == "r":
+                    # Red rectangle
+                    print(f'Red{" filled" * int(data[17])} rectangle X{int(data[5:8])} Y{int(data[8:11])} W{int(data[11:14])} H{int(data[14:17])}')
+                    epd.imagered.rect(int(data[5:8]),
+                                    int(data[8:11]),
+                                    int(data[11:14]),
+                                    int(data[14:17]),
+                                    0x00, int(data[17]))
+                    epd.imageblack.rect(int(data[5:8]),
+                                        int(data[8:11]),
+                                        int(data[11:14]),
+                                        int(data[14:17]),
+                                        0x00, int(data[17]))
+                
+                elif data[4] == "b":
+                    # Black rectangle
+                    print(f'Black{" filled" * int(data[17])} rectangle X{int(data[5:8])} Y{int(data[8:11])} W{int(data[11:14])} H{int(data[14:17])}')
+                    epd.imagered.rect(int(data[5:8]),
+                                    int(data[8:11]),
+                                    int(data[11:14]),
+                                    int(data[14:17]),
+                                    0xff, int(data[17]))
+                    epd.imageblack.rect(int(data[5:8]),
+                                        int(data[8:11]),
+                                        int(data[11:14]),
+                                        int(data[14:17]),
+                                        0xff, int(data[17]))
+                
+                elif data[4] == "w":
+                    # White rectangle
+                    print(f'Black{" filled" * int(data[17])} rectangle X{int(data[5:8])} Y{int(data[8:11])} W{int(data[11:14])} H{int(data[14:17])}')
+                    epd.imagered.rect(int(data[5:8]),
+                                    int(data[8:11]),
+                                    int(data[11:14]),
+                                    int(data[14:17]),
+                                    0xff, int(data[17]))
+                    epd.imageblack.rect(int(data[5:8]),
+                                        int(data[8:11]),
+                                        int(data[11:14]),
+                                        int(data[14:17]),
+                                        0x00, int(data[17]))
+            else:
+                print("Invalid parameters")
             
-        elif data[0] == "b":
-            print(f'Black text X{int(data[1:4])} Y{int(data[4:7])}: {data[7:]}')
-            # Put text on the layer
-            epd.imageblack.text(data[7:], int(data[1:4]), int(data[4:7]), 0xff)
+        elif data[0:4] == "text":
+            if len(data) > 11:
+                if data[4] == "r":
+                    # Red text
+                    print(f'Red text X{int(data[5:8])} Y{int(data[8:11])}: {data[11:]}')
+                    epd.imagered.text(data[11:], int(data[5:8]), int(data[8:11]), 0x00)
+                    epd.imageblack.text(data[11:], int(data[5:8]), int(data[8:11]), 0x00)
+                
+                elif data[4] == "b":
+                    # Black text
+                    print(f'Black text X{int(data[5:8])} Y{int(data[8:11])}: {data[11:]}')
+                    epd.imageblack.text(data[11:], int(data[5:8]), int(data[8:11]), 0xff)
+                    epd.imagered.text(data[11:], int(data[5:8]), int(data[8:11]), 0xff)
+                
+                elif data[4] == "w":
+                    # White text
+                    print(f'White text X{int(data[5:8])} Y{int(data[8:11])}: {data[11:]}')
+                    epd.imagered.text(data[11:], int(data[5:8]), int(data[8:11]), 0xff)
+                    epd.imageblack.text(data[11:], int(data[5:8]), int(data[8:11]), 0x00)
+            else:
+                print("Invalid parameters")
             
         elif data == "show":
             print("Showing final result...")

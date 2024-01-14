@@ -6,12 +6,13 @@ pico.flush()
 
 data = ""
 
-while data not in ("show", "cancel"):
+while data not in ("exit", "cancel"):
     data = input("Data to send: ")
 
-    pico.write(f"{data}\r".encode())
-    recieved = pico.read_until().strip()
-    while not recieved:
-        sleep(0.1)
+    if data != "exit":
+        pico.write(f"{data}\r".encode())
         recieved = pico.read_until().strip()
-    print(recieved.decode())
+        while not recieved:
+            sleep(0.1)
+            recieved = pico.read_until().strip()
+        print(recieved.decode())
