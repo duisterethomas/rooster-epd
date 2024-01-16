@@ -33,15 +33,16 @@ usercode = cl.get_user(token)["response"]["data"][0]["code"]
 today = datetime.date.today()
 isocal = datetime.date.isocalendar(today)
 # If weeknum below 10 add zero: {"0"*isocal[1]<10}
-#enrollments = cl.get_liveschedule(token, f"{isocal[0]}{"0"*(isocal[1]<10)}{isocal[1]}", usercode)
-enrollments = cl.get_liveschedule(token, "202343", usercode) ### Temp for debugging
+enrollments = cl.get_liveschedule(token, f"{isocal[0]}{"0"*(isocal[1]<10)}{isocal[1]}", usercode)
+
+with open("test.json", "w") as f:
+    f.write(str(enrollments))
 
 # Get the lessons of today
 lessons : list = enrollments['response']['data'][0]['appointments']
 lessons_today = []
 for lesson in lessons:
-    #if datetime.datetime.fromtimestamp(lesson['start']).isoweekday() == today.isoweekday():
-    if datetime.datetime.fromtimestamp(lesson['start']).isoweekday() == 1:### Temp for debugging
+    if datetime.datetime.fromtimestamp(lesson['start']).isoweekday() == today.isoweekday():
         lessons_today.append(deepcopy(lesson))
 
 # Show it on the epd
@@ -49,17 +50,58 @@ pico = serial.Serial(port="COM5", parity=serial.PARITY_EVEN, stopbits=serial.STO
 pico.flush()
 send_to_pico("init")
 
-for lesson in enumerate(lessons_today):
-    ypos = lesson[0] * 32
-    lesson_ypos = ypos + 12
-    lesson_subject : str = lesson[1]['subjects'][0]
+for lesson in lessons_today:
+    lesson_starttime = datetime.datetime.fromtimestamp(lesson['start'])
+    lesson_endtime = datetime.datetime.fromtimestamp(lesson['end'])
     
-    # Set the right colour
-    if lesson[1]['cancelled']: colour = "r"
+    # Set the colour
+    if lesson['cancelled']: colour = "r"
     else: colour = "b"
-
-    send_to_pico(f"rect{colour}000{"0"*((ypos<100)+(ypos<10))}{ypos}1520300")
-    send_to_pico(f"text{colour}010{"0"*((lesson_ypos<100)+(lesson_ypos<10))}{lesson_ypos}{lesson_subject.upper()}")
+    
+    # Set the block position and size
+    # 510 is 08:30 in minutes
+    # 970 is 16:10 in minutes - 510 is 460
+    ystartpos = round(((lesson_starttime.hour * 60) + lesson_starttime.minute - 510) / 460 * 298)
+    yendpos = round(((lesson_endtime.hour * 60) + lesson_endtime.minute - 510) / 460 * 298) - 2
+    ysize = yendpos - ystartpos
+    send_to_pico(f"rect{colour}000{"0"*((ystartpos<100)+(ystartpos<10))}{ystartpos}152{"0"*((ysize<100)+(ysize<10))}{ysize}0")
+    
+    # Set the timestamps + positions
+    starttimestamp = lesson_starttime.strftime('%H:%M').removeprefix("0")
+    if len(starttimestamp) < 5: starttimestamp = " " + starttimestamp
+    starttimestamp_ypos = ystartpos + 4
+    send_to_pico(f"text{colour}003{"0"*((starttimestamp_ypos<100)+(starttimestamp_ypos<10))}{starttimestamp_ypos}{starttimestamp}")
+    
+    endtimestamp = lesson_endtime.strftime('%H:%M').removeprefix("0")
+    if len(endtimestamp) < 5: endtimestamp = " " + endtimestamp
+    endtimestamp_ypos = yendpos - 11
+    send_to_pico(f"text{colour}003{"0"*((endtimestamp_ypos<100)+(endtimestamp_ypos<10))}{endtimestamp_ypos}{endtimestamp}")
+    
+    # Set the subjects + position
+    if len(lesson['subjects']) != 0:
+        for subject in enumerate(lesson['subjects']):
+            if subject[0] == 0:
+                subjects = subject[1].upper()
+            else:
+                subjects += f",{subject[1].upper()}"
+        subject_ypos = ystartpos + 4
+        send_to_pico(f"text{colour}050{"0"*((subject_ypos<100)+(subject_ypos<10))}{subject_ypos}{subjects}")
+    
+    # Set the locations + position
+    if len(lesson['locations']) != 0:
+        for location in enumerate(lesson['locations']):
+            if location[0] == 0:
+                locations = location[1]
+            else:
+                locations += f",{location[1]}"
+        location_ypos = ystartpos + 16
+        send_to_pico(f"text{colour}050{"0"*((location_ypos<100)+(location_ypos<10))}{location_ypos}{locations}")
+    
+    # Set the hour + position
+    hour : str = lesson['startTimeSlotName'].upper()
+    hour_ypos = ystartpos + 4
+    hour_xpos = 149 - (len(hour) * 8)
+    send_to_pico(f"text{colour}{"0"*((hour_xpos<100)+(hour_xpos<10))}{hour_xpos}{"0"*((hour_ypos<100)+(hour_ypos<10))}{hour_ypos}{hour}")
 
 send_to_pico("show")
 pico.close()
