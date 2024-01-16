@@ -35,9 +35,6 @@ isocal = datetime.date.isocalendar(today)
 # If weeknum below 10 add zero: {"0"*isocal[1]<10}
 enrollments = cl.get_liveschedule(token, f"{isocal[0]}{"0"*(isocal[1]<10)}{isocal[1]}", usercode)
 
-with open("test.json", "w") as f:
-    f.write(str(enrollments))
-
 # Get the lessons of today
 lessons : list = enrollments['response']['data'][0]['appointments']
 lessons_today = []
