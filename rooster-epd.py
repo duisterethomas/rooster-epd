@@ -4,6 +4,36 @@ from copy import deepcopy
 from time import sleep
 import datetime
 import serial
+import glob
+import sys
+
+def serial_ports():
+    """ Lists serial port names
+
+        :raises EnvironmentError:
+            On unsupported or unknown platforms
+        :returns:
+            A list of the serial ports available on the system
+    """
+    if sys.platform.startswith('win'):
+        ports = ['COM%s' % (i + 1) for i in range(256)]
+    elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
+        # this excludes your current terminal "/dev/tty"
+        ports = glob.glob('/dev/tty[A-Za-z]*')
+    elif sys.platform.startswith('darwin'):
+        ports = glob.glob('/dev/tty.*')
+    else:
+        raise EnvironmentError('Unsupported platform')
+
+    result = []
+    for port in ports:
+        try:
+            s = serial.Serial(port)
+            s.close()
+            result.append(port)
+        except (OSError, serial.SerialException):
+            pass
+    return result
 
 def send_to_pico(command):
     pico.write(f"{command}\r".encode())
@@ -39,14 +69,28 @@ enrollments = cl.get_liveschedule(token, f"{isocal[0]}{"0"*(isocal[1]<10)}{isoca
 lessons : list = enrollments['response']['data'][0]['appointments']
 lessons_today = []
 for lesson in lessons:
-    if datetime.datetime.fromtimestamp(lesson['start']).isoweekday() == today.isoweekday():
+    #if datetime.datetime.fromtimestamp(lesson['start']).isoweekday() == today.isoweekday():
+    if datetime.datetime.fromtimestamp(lesson['start']).isoweekday() == 1 or True:
         lessons_today.append(deepcopy(lesson))
 
-# Show it on the epd
-pico = serial.Serial(port="COM5", parity=serial.PARITY_EVEN, stopbits=serial.STOPBITS_ONE, timeout=1)
+# Connect the pico
+available_ports = serial_ports()
+if exists("prev_port.txt"):
+    port = open("prev_port.txt", "r").read()
+else:
+    print('Available ports:')
+    for available_port in available_ports:
+        print(available_port)
+    port = input("Port: COM")
+
+    with open("prev_port.txt", "w") as f:
+        f.write(port)
+
+pico = serial.Serial(port=f"COM{port}", parity=serial.PARITY_EVEN, stopbits=serial.STOPBITS_ONE, timeout=1)
 pico.flush()
 send_to_pico("init")
 
+# Show it on the epd
 for lesson in lessons_today:
     lesson_starttime = datetime.datetime.fromtimestamp(lesson['start'])
     lesson_endtime = datetime.datetime.fromtimestamp(lesson['end'])
