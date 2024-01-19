@@ -69,8 +69,7 @@ enrollments = cl.get_liveschedule(token, f"{isocal[0]}{"0"*(isocal[1]<10)}{isoca
 lessons : list = enrollments['response']['data'][0]['appointments']
 lessons_today = []
 for lesson in lessons:
-    #if datetime.datetime.fromtimestamp(lesson['start']).isoweekday() == today.isoweekday():
-    if datetime.datetime.fromtimestamp(lesson['start']).isoweekday() == 1 or True:
+    if datetime.datetime.fromtimestamp(lesson['start']).isoweekday() == today.isoweekday():
         lessons_today.append(deepcopy(lesson))
 
 # Connect the pico
