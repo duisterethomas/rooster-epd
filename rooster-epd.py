@@ -2,6 +2,7 @@ from zermelo import Client
 from os.path import exists
 from copy import deepcopy
 from time import sleep
+from pickle import load, dump
 import datetime
 import serial
 import glob
@@ -47,54 +48,93 @@ def send_to_pico(command):
     
     return recieved.decode()
 
-cl = Client("csghetstreek")
+available_ports = serial_ports()
 
-if exists("token.txt"):
-    token = open("token.txt", "r").read()
+# Check if save data exist
+if exists("rooster-epd.data"):
+    # Open and load the save_dict
+    with open("rooster-epd.data", "rb") as save_file:
+        save_dict = load(save_file)
+    
+    # Create the zermelo client
+    cl = Client(save_dict["school"])
+    
+    # Check if the port is available
+    if save_dict["port"] not in available_ports:
+        # List the available ports
+        print('Available ports:')
+        for available_port in enumerate(available_ports):
+            print(f"{available_port[0]}. {available_port[1]}")
+        
+        # Save the available port
+        save_dict["port"] = available_ports[int(input("Port: "))]
+        
+        # Save the save_dict
+        with open("rooster-epd.data", "wb") as save_file:
+            dump(save_dict, save_file)
 else:
-    token = cl.authenticate(input("Koppel code: "))["access_token"]
-    with open("token.txt", "w") as f:
-        f.write(token)
+    # Create a new ave_dict
+    save_dict = {}
+    
+    # Get and save the school name
+    save_dict["school"] = input("School: ")
+    
+    # Create the zermelo client
+    cl = Client(save_dict["school"])
+    
+    # Get and a new zermelo token
+    save_dict["token"] = cl.authenticate(input("Koppel code: "))["access_token"]
+    
+    # Set the pico port
+    # List the available ports
+    print('Available ports:')
+    for available_port in enumerate(available_ports):
+        print(f"{available_port[0]}. {available_port[1]}")
+    
+    # Save the available port
+    save_dict["port"] = available_ports[int(input("Port: "))]
+    
+    # Save the save_dict
+    with open("rooster-epd.data", "wb") as save_file:
+        dump(save_dict, save_file)
+    
+    # Save the save_dict
+    with open("rooster-epd.data", "wb") as save_file:
+        dump(save_dict, save_file)
+
+# Connect and initialize the pico epd
+pico = serial.Serial(port=save_dict["port"], parity=serial.PARITY_EVEN, stopbits=serial.STOPBITS_ONE, timeout=1)
+pico.flush()
+send_to_pico("init")
 
 # Get the user code
-usercode = cl.get_user(token)["response"]["data"][0]["code"]
+usercode = cl.get_user(save_dict["token"])["response"]["data"][0]["code"]
 
-# Get the current week
+# Get the current week and day
 today = datetime.date.today()
 isocal = datetime.date.isocalendar(today)
-# If weeknum below 10 add zero: {"0"*isocal[1]<10}
-enrollments = cl.get_liveschedule(token, f"{isocal[0]}{"0"*(isocal[1]<10)}{isocal[1]}", usercode)
+# Request: yyyyww
+# yyyy = year: {isocal[0]}
+# ww = weeknumber: {"0"*(isocal[1]<10)}{isocal[1]}
+# If weeknum < 10 add zero: {"0"*isocal[1]<10}
+enrollments = cl.get_liveschedule(save_dict["token"], f"{isocal[0]}{"0"*(isocal[1]<10)}{isocal[1]}", usercode)
 
 # Get the lessons of today
 lessons : list = enrollments['response']['data'][0]['appointments']
 lessons_today = []
 for lesson in lessons:
+    # Check the day number: 1 = monday...
     if datetime.datetime.fromtimestamp(lesson['start']).isoweekday() == today.isoweekday():
         lessons_today.append(deepcopy(lesson))
 
-# Connect the pico
-available_ports = serial_ports()
-if exists("prev_port.txt"):
-    port = open("prev_port.txt", "r").read()
-else:
-    print('Available ports:')
-    for available_port in available_ports:
-        print(available_port)
-    port = input("Port: COM")
-
-    with open("prev_port.txt", "w") as f:
-        f.write(port)
-
-pico = serial.Serial(port=f"COM{port}", parity=serial.PARITY_EVEN, stopbits=serial.STOPBITS_ONE, timeout=1)
-pico.flush()
-send_to_pico("init")
-
 # Show it on the epd
 for lesson in lessons_today:
+    # Get the start and end time in datetime format
     lesson_starttime = datetime.datetime.fromtimestamp(lesson['start'])
     lesson_endtime = datetime.datetime.fromtimestamp(lesson['end'])
     
     # Set the colour
+    # If cancelled: red (r), else: black (b)
     if lesson['cancelled']: colour = "r"
     else: colour = "b"
     
@@ -143,5 +183,6 @@ for lesson in lessons_today:
     hour_xpos = 149 - (len(hour) * 8)
     send_to_pico(f"text{colour}{"0"*((hour_xpos<100)+(hour_xpos<10))}{hour_xpos}{"0"*((hour_ypos<100)+(hour_ypos<10))}{hour_ypos}{hour}")
 
+# Show the result
 send_to_pico("show")
 pico.close()
