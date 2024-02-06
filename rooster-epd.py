@@ -97,10 +97,6 @@ else:
     # Save the save_dict
     with open("rooster-epd.data", "wb") as save_file:
         dump(save_dict, save_file)
-    
-    # Save the save_dict
-    with open("rooster-epd.data", "wb") as save_file:
-        dump(save_dict, save_file)
 
 # Connect and initialize the pico epd
 pico = serial.Serial(port=save_dict["port"], parity=serial.PARITY_EVEN, stopbits=serial.STOPBITS_ONE, timeout=1)
