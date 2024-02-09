@@ -1,8 +1,8 @@
+from pickle import load, dump
 from zermelo import Client
 from os.path import exists
 from copy import deepcopy
 from time import sleep
-from pickle import load, dump
 import datetime
 import serial
 import glob
@@ -15,40 +15,25 @@ class Ui_Rooster_epd(object):
     def setupUi(self, Rooster_epd):
         if not Rooster_epd.objectName():
             Rooster_epd.setObjectName(u"Rooster_epd")
-        Rooster_epd.resize(271, 151)
+        Rooster_epd.resize(271, 91)
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(Rooster_epd.sizePolicy().hasHeightForWidth())
         Rooster_epd.setSizePolicy(sizePolicy)
-        Rooster_epd.setMinimumSize(QSize(271, 151))
-        Rooster_epd.setMaximumSize(QSize(271, 151))
+        Rooster_epd.setMinimumSize(QSize(271, 91))
+        Rooster_epd.setMaximumSize(QSize(271, 91))
         self.centralwidget = QWidget(Rooster_epd)
         self.centralwidget.setObjectName(u"centralwidget")
-        self.save = QPushButton(self.centralwidget)
-        self.save.setObjectName(u"save")
-        self.save.setGeometry(QRect(90, 100, 81, 24))
         self.update_epd = QPushButton(self.centralwidget)
         self.update_epd.setObjectName(u"update_epd")
-        self.update_epd.setGeometry(QRect(180, 100, 81, 24))
-        self.koppelcode = QLineEdit(self.centralwidget)
-        self.koppelcode.setObjectName(u"koppelcode")
-        self.koppelcode.setGeometry(QRect(90, 10, 171, 22))
-        self.schoolnaam = QLineEdit(self.centralwidget)
-        self.schoolnaam.setObjectName(u"schoolnaam")
-        self.schoolnaam.setGeometry(QRect(90, 40, 171, 22))
+        self.update_epd.setGeometry(QRect(180, 40, 81, 24))
         self.pico_port = QComboBox(self.centralwidget)
         self.pico_port.setObjectName(u"pico_port")
-        self.pico_port.setGeometry(QRect(90, 70, 171, 22))
-        self.label_koppelcode = QLabel(self.centralwidget)
-        self.label_koppelcode.setObjectName(u"label_koppelcode")
-        self.label_koppelcode.setGeometry(QRect(10, 10, 81, 21))
-        self.label_schoolnaam = QLabel(self.centralwidget)
-        self.label_schoolnaam.setObjectName(u"label_schoolnaam")
-        self.label_schoolnaam.setGeometry(QRect(10, 40, 81, 16))
+        self.pico_port.setGeometry(QRect(90, 10, 171, 22))
         self.label_pico_port = QLabel(self.centralwidget)
         self.label_pico_port.setObjectName(u"label_pico_port")
-        self.label_pico_port.setGeometry(QRect(10, 70, 81, 16))
+        self.label_pico_port.setGeometry(QRect(10, 10, 81, 16))
         Rooster_epd.setCentralWidget(self.centralwidget)
         self.statusbar = QStatusBar(Rooster_epd)
         self.statusbar.setObjectName(u"statusbar")
@@ -61,11 +46,51 @@ class Ui_Rooster_epd(object):
 
     def retranslateUi(self, Rooster_epd):
         Rooster_epd.setWindowTitle(QCoreApplication.translate("Rooster_epd", u"Rooster epd", None))
-        self.save.setText(QCoreApplication.translate("Rooster_epd", u"Save", None))
         self.update_epd.setText(QCoreApplication.translate("Rooster_epd", u"Update epd", None))
-        self.label_koppelcode.setText(QCoreApplication.translate("Rooster_epd", u"Koppelcode:", None))
-        self.label_schoolnaam.setText(QCoreApplication.translate("Rooster_epd", u"Schoolnaam:", None))
         self.label_pico_port.setText(QCoreApplication.translate("Rooster_epd", u"Pico port:", None))
+    # retranslateUi
+
+class Ui_Rooster_epd_setup(object):
+    def setupUi(self, Rooster_epd_setup):
+        if not Rooster_epd_setup.objectName():
+            Rooster_epd_setup.setObjectName(u"Rooster_epd_setup")
+        Rooster_epd_setup.resize(271, 101)
+        sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(Rooster_epd_setup.sizePolicy().hasHeightForWidth())
+        Rooster_epd_setup.setSizePolicy(sizePolicy)
+        Rooster_epd_setup.setMinimumSize(QSize(271, 101))
+        Rooster_epd_setup.setMaximumSize(QSize(271, 101))
+        self.centralwidget = QWidget(Rooster_epd_setup)
+        self.centralwidget.setObjectName(u"centralwidget")
+        self.save = QPushButton(self.centralwidget)
+        self.save.setObjectName(u"save")
+        self.save.setGeometry(QRect(180, 70, 81, 24))
+        self.koppelcode = QLineEdit(self.centralwidget)
+        self.koppelcode.setObjectName(u"koppelcode")
+        self.koppelcode.setGeometry(QRect(90, 10, 171, 22))
+        self.schoolnaam = QLineEdit(self.centralwidget)
+        self.schoolnaam.setObjectName(u"schoolnaam")
+        self.schoolnaam.setGeometry(QRect(90, 40, 171, 22))
+        self.label_koppelcode = QLabel(self.centralwidget)
+        self.label_koppelcode.setObjectName(u"label_koppelcode")
+        self.label_koppelcode.setGeometry(QRect(10, 10, 81, 21))
+        self.label_schoolnaam = QLabel(self.centralwidget)
+        self.label_schoolnaam.setObjectName(u"label_schoolnaam")
+        self.label_schoolnaam.setGeometry(QRect(10, 40, 81, 16))
+        Rooster_epd_setup.setCentralWidget(self.centralwidget)
+
+        self.retranslateUi(Rooster_epd_setup)
+
+        QMetaObject.connectSlotsByName(Rooster_epd_setup)
+    # setupUi
+
+    def retranslateUi(self, Rooster_epd_setup):
+        Rooster_epd_setup.setWindowTitle(QCoreApplication.translate("Rooster_epd_setup", u"Rooster epd", None))
+        self.save.setText(QCoreApplication.translate("Rooster_epd_setup", u"Save", None))
+        self.label_koppelcode.setText(QCoreApplication.translate("Rooster_epd_setup", u"Koppelcode:", None))
+        self.label_schoolnaam.setText(QCoreApplication.translate("Rooster_epd_setup", u"Schoolnaam:", None))
     # retranslateUi
 
 def serial_ports():
@@ -213,17 +238,20 @@ class Worker(QObject):
 class mainWindow(QMainWindow, Ui_Rooster_epd):
     def __init__(self, parent=None):
         global available_ports
+        global save_dict
         
         super().__init__(parent)
         self.setupUi(self)
         
-        self.save.clicked.connect(self.saveClicked)
+        # Connect the buttons to functions
         self.update_epd.clicked.connect(self.updateEpdClicked)
         
+        # Add the available ports to the dropdown
         self.pico_port.addItem("")
         for available_port in available_ports:
             self.pico_port.addItem(available_port)
-            
+        
+        # Set the selected port to the saved port if available
         if save_dict["port"] in available_ports:
             self.pico_port.setCurrentIndex(available_ports.index(available_port))
         
@@ -245,8 +273,58 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start()
         
+class setupWindow(QMainWindow, Ui_Rooster_epd_setup):
+    def __init__(self, parent=None):
+        global save_dict
+        
+        super().__init__(parent)
+        self.setupUi(self)
+        
+        # Connect the buttons to functions
+        self.save.clicked.connect(self.saveClicked)
+        
+        self.koppelcode.textChanged.connect(self.checkSaveDisabled)
+        self.schoolnaam.textChanged.connect(self.checkSaveDisabled)
+        
+        # Disable the save button
+        self.save.setDisabled(True)
+        
+        if False:
+            # Set the schoolnaam text
+            self.schoolnaam.setText(save_dict["school"])
+        else:
+            # Create a new save_dict
+            save_dict = {}
+    
+    def checkSaveDisabled(self):
+        self.save.setDisabled(self.koppelcode.text and self.schoolnaam.text)
+    
+    def saveClicked(self):
+        # Get the schoolnaam
+        save_dict["school"] = self.schoolnaam.text
+        
+        # Create the zermelo client
+        cl = Client(save_dict["school"])
+    
+        # Get and a new zermelo token
+        save_dict["token"] = cl.authenticate(self.koppelcode.text)["access_token"]
+    
+        # Save the save_dict
+        with open("rooster-epd.data", "wb") as save_file:
+            dump(save_dict, save_file)
+        
+        # Close the ui
+        self.close()
+    
+    def closeEvent(self, event):
+        global setup_closed
+        setup_closed = True
 
 available_ports = serial_ports()
+
+app = QApplication(sys.argv)
+
+setup_closed = False
 
 # Check if save data exist
 if exists("rooster-epd.data"):
@@ -257,46 +335,12 @@ if exists("rooster-epd.data"):
     # Create the zermelo client
     cl = Client(save_dict["school"])
     
-    # Check if the port is available
-    if save_dict["port"] not in available_ports and False:
-        # List the available ports
-        print('Available ports:')
-        for available_port in enumerate(available_ports):
-            print(f"{available_port[0]}. {available_port[1]}")
-        
-        # Save the available port
-        save_dict["port"] = available_ports[int(input("Port: "))]
-        
-        # Save the save_dict
-        with open("rooster-epd.data", "wb") as save_file:
-            dump(save_dict, save_file)
 else:
-    # Create a new ave_dict
-    save_dict = {}
-    
-    # Get and save the school name
-    save_dict["school"] = input("School: ")
-    
-    # Create the zermelo client
-    cl = Client(save_dict["school"])
-    
-    # Get and a new zermelo token
-    save_dict["token"] = cl.authenticate(input("Koppel code: "))["access_token"]
-    
-    # Set the pico port
-    # List the available ports
-    print('Available ports:')
-    for available_port in enumerate(available_ports):
-        print(f"{available_port[0]}. {available_port[1]}")
-    
-    # Save the available port
-    save_dict["port"] = available_ports[int(input("Port: "))]
-    
-    # Save the save_dict
-    with open("rooster-epd.data", "wb") as save_file:
-        dump(save_dict, save_file)
+    win = setupWindow()
+    win.show()
+    app.exec()
 
-app = QApplication(sys.argv)
-win = mainWindow()
-win.show()
-sys.exit(app.exec())
+if not setup_closed:
+    win = mainWindow()
+    win.show()
+    sys.exit(app.exec())
