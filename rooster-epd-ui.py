@@ -293,22 +293,19 @@ class setupWindow(QMainWindow, Ui_Rooster_epd_setup):
         if False:
             # Set the schoolnaam text
             self.schoolnaam.setText(save_dict["school"])
-        else:
-            # Create a new save_dict
-            save_dict = {}
     
     def checkSaveDisabled(self):
-        self.save.setDisabled(self.koppelcode.text and self.schoolnaam.text)
+        self.save.setDisabled(len(self.koppelcode.text()) == 0 or len(self.schoolnaam.text()) == 0)
     
     def saveClicked(self):
         # Get the schoolnaam
-        save_dict["school"] = self.schoolnaam.text
+        save_dict["school"] = self.schoolnaam.text()
         
         # Create the zermelo client
         cl = Client(save_dict["school"])
     
         # Get and a new zermelo token
-        save_dict["token"] = cl.authenticate(self.koppelcode.text)["access_token"]
+        save_dict["token"] = cl.authenticate(self.koppelcode.text())["access_token"]
     
         # Save the save_dict
         with open("rooster-epd.data", "wb") as save_file:
@@ -316,16 +313,10 @@ class setupWindow(QMainWindow, Ui_Rooster_epd_setup):
         
         # Close the ui
         self.close()
-    
-    def closeEvent(self, event):
-        global setup_closed
-        setup_closed = True
 
 available_ports = serial_ports()
 
 app = QApplication(sys.argv)
-
-setup_closed = False
 
 # Check if save data exist
 if exists("rooster-epd.data"):
@@ -337,11 +328,15 @@ if exists("rooster-epd.data"):
     cl = Client(save_dict["school"])
     
 else:
+    # Create a new save_dict
+    save_dict = {"port": ""}
+    
+    # Open the setup window
     win = setupWindow()
     win.show()
     app.exec()
 
-if not setup_closed:
+if save_dict != {"port": ""}:
     win = mainWindow()
     win.show()
     sys.exit(app.exec())
