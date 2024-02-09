@@ -121,6 +121,7 @@ def serial_ports():
             pass
     return result
 
+# Function to send commands to the pico
 def send_to_pico(command):
     pico.write(f"{command}\r".encode())
     
