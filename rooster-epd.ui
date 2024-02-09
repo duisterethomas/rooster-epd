@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>271</width>
+    <width>251</width>
     <height>91</height>
    </rect>
   </property>
@@ -18,13 +18,13 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>271</width>
+    <width>251</width>
     <height>91</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>271</width>
+    <width>251</width>
     <height>91</height>
    </size>
   </property>
@@ -32,23 +32,23 @@
    <string>Rooster epd</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QPushButton" name="update_epd">
+   <widget class="QPushButton" name="morgen">
     <property name="geometry">
      <rect>
-      <x>180</x>
+      <x>160</x>
       <y>40</y>
       <width>81</width>
       <height>24</height>
      </rect>
     </property>
     <property name="text">
-     <string>Update epd</string>
+     <string>Morgen</string>
     </property>
    </widget>
    <widget class="QComboBox" name="pico_port">
     <property name="geometry">
      <rect>
-      <x>90</x>
+      <x>70</x>
       <y>10</y>
       <width>171</width>
       <height>22</height>
@@ -60,12 +60,44 @@
      <rect>
       <x>10</x>
       <y>10</y>
-      <width>81</width>
-      <height>16</height>
+      <width>51</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
      <string>Pico port:</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="vandaag">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>40</y>
+      <width>81</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Vandaag</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_pico_port_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>40</y>
+      <width>51</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Upload:</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
   </widget>
