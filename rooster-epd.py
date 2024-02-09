@@ -73,7 +73,7 @@ if exists("rooster-epd.data"):
         with open("rooster-epd.data", "wb") as save_file:
             dump(save_dict, save_file)
 else:
-    # Create a new ave_dict
+    # Create a new save_dict
     save_dict = {}
     
     # Get and save the school name
