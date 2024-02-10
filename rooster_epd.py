@@ -255,9 +255,9 @@ class setupWindow(QMainWindow, Ui_Rooster_epd_setup):
         self.save.setDisabled(len(self.koppelcode.text()) == 0 or len(self.schoolnaam.text()) == 0)
     
     def saveClicked(self):
-        global save_clicked
+        global open_main_window
         
-        save_clicked = True
+        open_main_window = True
         
         # Get the schoolnaam
         save_dict["school"] = self.schoolnaam.text()
@@ -275,12 +275,15 @@ class setupWindow(QMainWindow, Ui_Rooster_epd_setup):
         # Close the ui
         self.close()
 
+# Get the available ports
 available_ports = serial_ports()
 
+# Create a QApplication
 app = QApplication(sys.argv)
 
-save_clicked = False
+open_main_window = False
 
+# Function to open the setup ui
 def openSetupUI():
     win = setupWindow()
     win.show()
@@ -298,14 +301,14 @@ if exists("rooster-epd.data"):
     try:
         # Get the usercode
         usercode = cl.get_user(save_dict["token"])["response"]["data"][0]["code"]
-        save_clicked = True
+        open_main_window = True
         
     except ValueError:
         # Generate new token if token inactive
         openSetupUI()
         
-        # Get the usercode if save_clicked
-        if save_clicked:
+        # Get the usercode if open_main_window is True
+        if open_main_window:
             usercode = cl.get_user(save_dict["token"])["response"]["data"][0]["code"]
     
 else:
@@ -316,7 +319,7 @@ else:
     openSetupUI()
 
 # Open the main ui if the save data is available
-if save_clicked:
+if open_main_window:
     win = mainWindow()
     win.show()
     sys.exit(app.exec())
