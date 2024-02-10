@@ -33,9 +33,7 @@ Zermelo rooster op een e-paper schermpje
 - `cancel`: Cancel
 
 ## Useful links
-- https://support.zermelo.nl/guides/developers-api/examples/authentication-obtaining-an-access-token#access_token_created_in_the_portal
 - https://github.com/wouter173/zermelo.py
 - https://pypi.org/project/zermelo.py/
-- https://csghetstreek.zportal.nl/app/
 - https://stackoverflow.com/questions/76138267/read-write-data-over-raspberry-pi-pico-usb-cable
 - https://note.nkmk.me/en/python-unix-time-datetime/#convert-unix-time-epoch-time-to-datetime-fromtimestamp
