@@ -42,40 +42,38 @@ def serial_ports():
             pass
     return result
 
-# Function to send commands to the pico
-def send_to_pico(command):
-    pico.write(f"{command}\r".encode())
-    
-    recieved = pico.read_until().strip()
-    while not recieved:
-        sleep(0.1)
-        recieved = pico.read_until().strip()
-    
-    print(recieved.decode())
-    
-    return recieved.decode()
-
 # Thread for updating the epd
 class Worker(QObject):
     finished = Signal()
     
-    def run(self):
-        global ui_self
-        global pico
-        global cl
-        global usercode
-        global morgen
+    def __init__(self, ui_self, morgen):
+        self.ui_self = ui_self
+        self.morgen = morgen
+    
+    # Function to send commands to the pico
+    def send_to_pico(self, command):
+        self.pico.write(f"{command}\r".encode())
         
+        recieved = self.pico.read_until().strip()
+        while not recieved:
+            sleep(0.1)
+            recieved = self.pico.read_until().strip()
+        
+        print(recieved.decode())
+        
+        return recieved.decode()
+    
+    def run(self):
         # Disable the button and show message
-        ui_self.vandaag.setEnabled(False)
-        ui_self.morgen.setEnabled(False)
-        ui_self.pico_port.setEnabled(False)
+        self.ui_self.vandaag.setEnabled(False)
+        self.ui_self.morgen.setEnabled(False)
+        self.ui_self.pico_port.setEnabled(False)
         
         # Connect and initialize the pico epd
-        pico = serial.Serial(port=save_dict["port"], parity=serial.PARITY_EVEN, stopbits=serial.STOPBITS_ONE, timeout=1)
-        pico.flush()
-        recv = send_to_pico("init")
-        ui_self.statusbar.showMessage(recv)
+        self.pico = serial.Serial(port=save_dict["port"], parity=serial.PARITY_EVEN, stopbits=serial.STOPBITS_ONE, timeout=1)
+        self.pico.flush()
+        recv = self.send_to_pico("init")
+        self.ui_self.statusbar.showMessage(recv)
 
         # Get the current week and day
         today = datetime.date.today()
@@ -85,7 +83,7 @@ class Worker(QObject):
         weekday = today.isoweekday()
         
         # If morgen add 1 day
-        if morgen:
+        if self.morgen:
             if weekday == 7:
                 weekday = 1
                 if week == 52:
@@ -127,21 +125,21 @@ class Worker(QObject):
             ystartpos = round(((lesson_starttime.hour * 60) + lesson_starttime.minute - 510) / 460 * 298)
             yendpos = round(((lesson_endtime.hour * 60) + lesson_endtime.minute - 510) / 460 * 298) - 2
             ysize = yendpos - ystartpos
-            recv = send_to_pico(f"rect{colour}000{"0"*((ystartpos<100)+(ystartpos<10))}{ystartpos}152{"0"*((ysize<100)+(ysize<10))}{ysize}0")
-            ui_self.statusbar.showMessage(recv)
+            recv = self.send_to_pico(f"rect{colour}000{"0"*((ystartpos<100)+(ystartpos<10))}{ystartpos}152{"0"*((ysize<100)+(ysize<10))}{ysize}0")
+            self.ui_self.statusbar.showMessage(recv)
             
             # Set the timestamps + positions
             starttimestamp = lesson_starttime.strftime('%H:%M').removeprefix("0")
             if len(starttimestamp) < 5: starttimestamp = " " + starttimestamp
             starttimestamp_ypos = ystartpos + 4
-            recv = send_to_pico(f"text{colour}003{"0"*((starttimestamp_ypos<100)+(starttimestamp_ypos<10))}{starttimestamp_ypos}{starttimestamp}")
-            ui_self.statusbar.showMessage(recv)
+            recv = self.send_to_pico(f"text{colour}003{"0"*((starttimestamp_ypos<100)+(starttimestamp_ypos<10))}{starttimestamp_ypos}{starttimestamp}")
+            self.ui_self.statusbar.showMessage(recv)
             
             endtimestamp = lesson_endtime.strftime('%H:%M').removeprefix("0")
             if len(endtimestamp) < 5: endtimestamp = " " + endtimestamp
             endtimestamp_ypos = yendpos - 11
-            recv = send_to_pico(f"text{colour}003{"0"*((endtimestamp_ypos<100)+(endtimestamp_ypos<10))}{endtimestamp_ypos}{endtimestamp}")
-            ui_self.statusbar.showMessage(recv)
+            recv = self.send_to_pico(f"text{colour}003{"0"*((endtimestamp_ypos<100)+(endtimestamp_ypos<10))}{endtimestamp_ypos}{endtimestamp}")
+            self.ui_self.statusbar.showMessage(recv)
             
             # Set the subjects + position
             if len(lesson['subjects']) != 0:
@@ -151,8 +149,8 @@ class Worker(QObject):
                     else:
                         subjects += f",{subject[1].upper()}"
                 subject_ypos = ystartpos + 4
-                recv = send_to_pico(f"text{colour}050{"0"*((subject_ypos<100)+(subject_ypos<10))}{subject_ypos}{subjects}")
-                ui_self.statusbar.showMessage(recv)
+                recv = self.send_to_pico(f"text{colour}050{"0"*((subject_ypos<100)+(subject_ypos<10))}{subject_ypos}{subjects}")
+                self.ui_self.statusbar.showMessage(recv)
             
             # Set the locations + position
             if len(lesson['locations']) != 0:
@@ -162,35 +160,32 @@ class Worker(QObject):
                     else:
                         locations += f",{location[1]}"
                 location_ypos = ystartpos + 16
-                recv = send_to_pico(f"text{colour}050{"0"*((location_ypos<100)+(location_ypos<10))}{location_ypos}{locations}")
-                ui_self.statusbar.showMessage(recv)
+                recv = self.send_to_pico(f"text{colour}050{"0"*((location_ypos<100)+(location_ypos<10))}{location_ypos}{locations}")
+                self.ui_self.statusbar.showMessage(recv)
             
             # Set the hour + position
             hour : str = lesson['startTimeSlotName'].upper()
             hour_ypos = ystartpos + 4
             hour_xpos = 149 - (len(hour) * 8)
-            recv = send_to_pico(f"text{colour}{"0"*((hour_xpos<100)+(hour_xpos<10))}{hour_xpos}{"0"*((hour_ypos<100)+(hour_ypos<10))}{hour_ypos}{hour}")
-            ui_self.statusbar.showMessage(recv)
+            recv = self.send_to_pico(f"text{colour}{"0"*((hour_xpos<100)+(hour_xpos<10))}{hour_xpos}{"0"*((hour_ypos<100)+(hour_ypos<10))}{hour_ypos}{hour}")
+            self.ui_self.statusbar.showMessage(recv)
 
         # Show the result
-        recv = send_to_pico("show")
-        ui_self.statusbar.showMessage(recv)
-        pico.close()
+        recv = self.send_to_pico("show")
+        self.ui_self.statusbar.showMessage(recv)
+        self.pico.close()
         
         # Enable the button and show message
-        ui_self.vandaag.setEnabled(True)
-        ui_self.morgen.setEnabled(True)
-        ui_self.pico_port.setEnabled(True)
-        ui_self.statusbar.clearMessage()
+        self.ui_self.vandaag.setEnabled(True)
+        self.ui_self.morgen.setEnabled(True)
+        self.ui_self.pico_port.setEnabled(True)
+        self.ui_self.statusbar.clearMessage()
         
         # Send finished signal
         self.finished.emit()
 
 class mainWindow(QMainWindow, Ui_Rooster_epd):
     def __init__(self, parent=None):
-        global available_ports
-        global save_dict
-        
         super().__init__(parent)
         self.setupUi(self)
         
@@ -223,24 +218,14 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
                 dump(save_dict, save_file)
     
     def vandaagClicked(self):
-        global morgen
-        
-        morgen = False
-        self.updateEpd()
+        self.updateEpd(False)
         
     def morgenClicked(self):
-        global morgen
-        
-        morgen = True
-        self.updateEpd()
+        self.updateEpd(True)
     
-    def updateEpd(self):
-        global ui_self
-        
-        ui_self = self
-    
+    def updateEpd(self, morgen):
         self.thread = QThread()
-        self.worker = Worker()
+        self.worker = Worker(self, morgen)
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.run)
         self.worker.finished.connect(self.thread.quit)
@@ -250,8 +235,6 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         
 class setupWindow(QMainWindow, Ui_Rooster_epd_setup):
     def __init__(self, parent=None):
-        global save_dict
-        
         super().__init__(parent)
         self.setupUi(self)
         
