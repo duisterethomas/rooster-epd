@@ -1,4 +1,5 @@
 /.vscode
+/__pycache__
 /Pico code/.vscode
 /Pico code/.micropico
 rooster-epd.data
