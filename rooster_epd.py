@@ -314,7 +314,8 @@ else:
     
     # Open the setup window
     openSetupUI()
-    
+
+# Open the main ui if the save data is available
 if save_clicked:
     win = mainWindow()
     win.show()
