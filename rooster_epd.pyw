@@ -331,7 +331,7 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
             # First time setup
             
             # Create a new save_dict
-            save_dict = {"school": "", "token": "", "starttijd": 510, "begintijd": 970, "port": ""}
+            save_dict = {"school": "", "token": "", "begintijd": 510, "eindtijd": 970, "port": ""}
             
             # Open the setup window
             self.zermeloKoppelenClicked()
