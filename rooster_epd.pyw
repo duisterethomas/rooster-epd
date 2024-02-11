@@ -340,25 +340,12 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         # Connect the buttons to functions
         self.actionZermelo_koppelen.triggered.connect(self.zermeloKoppelenClicked)
         self.actionTijden_instellen.triggered.connect(self.tijdenInstellenClicked)
+        self.actionRefresh_ports.triggered.connect(self.refreshPorts)
         self.vandaag.clicked.connect(self.vandaagClicked)
         self.morgen.clicked.connect(self.morgenClicked)
         self.pico_port.currentTextChanged.connect(self.portSelected)
 
-        # Get the available ports
-        available_ports = serial_ports()
-        
-        # Add the available ports to the dropdown
-        self.pico_port.addItem("<select port>")
-        for available_port in available_ports:
-            self.pico_port.addItem(available_port)
-        
-        # Check if there is a port selected
-        self.vandaag.setDisabled(self.pico_port.currentText() == "<select port>" or save_dict["token"] == "")
-        self.morgen.setDisabled(self.pico_port.currentText() == "<select port>" or save_dict["token"] == "")
-        
-        # Set the selected port to the saved port if available
-        if save_dict["port"] in available_ports:
-            self.pico_port.setCurrentText(save_dict["port"])
+        self.refreshPorts()
     
     def zermeloKoppelenClicked(self):
         prev_token = deepcopy(save_dict)["token"]
@@ -373,6 +360,24 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
     def tijdenInstellenClicked(self):
         dlg = tijdenWindow()
         dlg.exec()
+    
+    def refreshPorts(self):
+        # Get the available ports
+        available_ports = serial_ports()
+        
+        # Add the available ports to the dropdown
+        self.pico_port.clear()
+        self.pico_port.addItem("<select port>")
+        for available_port in available_ports:
+            self.pico_port.addItem(available_port)
+        
+        # Check if there is a port selected
+        self.vandaag.setDisabled(self.pico_port.currentText() == "<select port>" or save_dict["token"] == "")
+        self.morgen.setDisabled(self.pico_port.currentText() == "<select port>" or save_dict["token"] == "")
+        
+        # Set the selected port to the saved port if available
+        if save_dict["port"] in available_ports:
+            self.pico_port.setCurrentText(save_dict["port"])
     
     def portSelected(self):
         # Check if there is a port selected

@@ -19,6 +19,8 @@ class Ui_Rooster_epd(object):
         self.actionTijden_instellen.setObjectName(u"actionTijden_instellen")
         self.actionZermelo_koppelen = QAction(Rooster_epd)
         self.actionZermelo_koppelen.setObjectName(u"actionZermelo_koppelen")
+        self.actionRefresh_ports = QAction(Rooster_epd)
+        self.actionRefresh_ports.setObjectName(u"actionRefresh_ports")
         self.centralwidget = QWidget(Rooster_epd)
         self.centralwidget.setObjectName(u"centralwidget")
         self.morgen = QPushButton(self.centralwidget)
@@ -52,6 +54,8 @@ class Ui_Rooster_epd(object):
         self.menuBar.addAction(self.menuSettings.menuAction())
         self.menuSettings.addAction(self.actionZermelo_koppelen)
         self.menuSettings.addAction(self.actionTijden_instellen)
+        self.menuSettings.addSeparator()
+        self.menuSettings.addAction(self.actionRefresh_ports)
 
         self.retranslateUi(Rooster_epd)
 
@@ -62,6 +66,7 @@ class Ui_Rooster_epd(object):
         Rooster_epd.setWindowTitle(QCoreApplication.translate("Rooster_epd", u"Rooster epd", None))
         self.actionTijden_instellen.setText(QCoreApplication.translate("Rooster_epd", u"Tijden instellen", None))
         self.actionZermelo_koppelen.setText(QCoreApplication.translate("Rooster_epd", u"Zermelo koppelen", None))
+        self.actionRefresh_ports.setText(QCoreApplication.translate("Rooster_epd", u"Refresh ports", None))
         self.morgen.setText(QCoreApplication.translate("Rooster_epd", u"Morgen", None))
         self.label_pico_port.setText(QCoreApplication.translate("Rooster_epd", u"Pico port:", None))
         self.vandaag.setText(QCoreApplication.translate("Rooster_epd", u"Vandaag", None))

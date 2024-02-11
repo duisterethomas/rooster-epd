@@ -117,6 +117,8 @@
     </property>
     <addaction name="actionZermelo_koppelen"/>
     <addaction name="actionTijden_instellen"/>
+    <addaction name="separator"/>
+    <addaction name="actionRefresh_ports"/>
    </widget>
    <addaction name="menuSettings"/>
   </widget>
@@ -128,6 +130,11 @@
   <action name="actionZermelo_koppelen">
    <property name="text">
     <string>Zermelo koppelen</string>
+   </property>
+  </action>
+  <action name="actionRefresh_ports">
+   <property name="text">
+    <string>Refresh ports</string>
    </property>
   </action>
  </widget>
