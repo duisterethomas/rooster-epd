@@ -50,6 +50,11 @@ First download the [latest release](https://github.com/duisterethomas/rooster-ep
    ![Setup window](/Images/setup_window.png)
 
    Note: This screen can popup again, this means that Zermelo has logged you out on all of your devices. This is normal, Zermelo does that each year I think. If it happens you only have to enter a new "Koppelcode", the "Schoolnaam" is saved for your convenience.
+8. Enter the start time of your first possible lesson and the end time of your last possible lesson into their respective fields and click on save
+
+    ![Tijden window](/Images/tijden_window.png)
+
+   Note: In the example above the first possible lesson (u1) starts at 8:30 and the last possible lesson (u9) ends at 16:10
 
 ## Usage
 Note: The order is important, otherwise the Raspberry Pi Pico won't be detected in the software
