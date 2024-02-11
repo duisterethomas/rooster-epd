@@ -302,13 +302,14 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
                 self.zermeloKoppelenClicked()
             
         else:
+            # First time setup
+            
             # Create a new save_dict
             save_dict = {"school": "", "token": "", "starttime": 510, "endtime": 970, "port": ""}
             
             # Open the setup window
-            self.vandaag.setDisabled(True)
-            self.morgen.setDisabled(True)
             self.zermeloKoppelenClicked()
+            self.tijdenInstellenClicked()
             
         # Connect the buttons to functions
         self.actionZermelo_koppelen.triggered.connect(self.zermeloKoppelenClicked)
