@@ -18,8 +18,8 @@ Front | Back | USB port
 First download the [latest release](https://github.com/duisterethomas/rooster-epd/releases) or clone the source code
    
 ### Setting up your Raspberry Pi  Pico
-1. Follow [this article](https://projects.raspberrypi.org/en/projects/getting-started-with-the-pico/0) to install Thonny and install MicroPython onto your Raspberry Pi Pico
-2. Open `/Pico code/main.py` with Thonny
+1. Follow [this article](https://projects.raspberrypi.org/en/projects/getting-started-with-the-pico/0) to install Thonny onto your computer and install MicroPython onto your Raspberry Pi Pico
+2. Open `serial_epd.py` with Thonny
 3. Click on "`File`->`Save as`"
 4. On the "Where to save to?" prompt click on `MicroPython device`
 
