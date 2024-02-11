@@ -131,21 +131,35 @@ class Worker(QObject):
             ystartpos = round(((lesson_starttime.hour * 60) + lesson_starttime.minute - save_dict["begintijd"]) / (save_dict["eindtijd"] - save_dict["begintijd"]) * 298)
             yendpos = round(((lesson_endtime.hour * 60) + lesson_endtime.minute - save_dict["begintijd"]) / (save_dict["eindtijd"] - save_dict["begintijd"]) * 298) - 2
             ysize = yendpos - ystartpos
-            recv = self.send_to_pico(f"rect{colour}000{"0"*((ystartpos<100)+(ystartpos<10))}{ystartpos}152{"0"*((ysize<100)+(ysize<10))}{ysize}0")
-            self.ui_self.statusbar.showMessage(recv)
             
-            # Set the timestamps + positions
+            # If the startpos and size are greater than or equal to 0 draw a rect on the epd
+            if ystartpos >= 0 and ysize >= 0:
+                recv = self.send_to_pico(f"rect{colour}000{"0"*((ystartpos<100)+(ystartpos<10))}{ystartpos}152{"0"*((ysize<100)+(ysize<10))}{ysize}0")
+                self.ui_self.statusbar.showMessage(recv)
+            
+            # Set the starttimestamp + position
             starttimestamp = lesson_starttime.strftime('%H:%M').removeprefix("0")
+            
+            # Add a space if the hour is only one digit long
             if len(starttimestamp) < 5: starttimestamp = " " + starttimestamp
             starttimestamp_ypos = ystartpos + 4
-            recv = self.send_to_pico(f"text{colour}003{"0"*((starttimestamp_ypos<100)+(starttimestamp_ypos<10))}{starttimestamp_ypos}{starttimestamp}")
-            self.ui_self.statusbar.showMessage(recv)
             
+            # If starttimestamp y pos is greater than or equal to 0 draw the start timestamp on the epd
+            if starttimestamp_ypos >= 0:
+                recv = self.send_to_pico(f"text{colour}003{"0"*((starttimestamp_ypos<100)+(starttimestamp_ypos<10))}{starttimestamp_ypos}{starttimestamp}")
+                self.ui_self.statusbar.showMessage(recv)
+            
+            # Set the endtimestamp + position
             endtimestamp = lesson_endtime.strftime('%H:%M').removeprefix("0")
+            
+            # Add a space if the hour is only one digit long
             if len(endtimestamp) < 5: endtimestamp = " " + endtimestamp
             endtimestamp_ypos = yendpos - 11
-            recv = self.send_to_pico(f"text{colour}003{"0"*((endtimestamp_ypos<100)+(endtimestamp_ypos<10))}{endtimestamp_ypos}{endtimestamp}")
-            self.ui_self.statusbar.showMessage(recv)
+            
+            # If endtimestamp y pos is greater than or equal to 0 draw the end timestamp on the epd
+            if endtimestamp_ypos >= 0:
+                recv = self.send_to_pico(f"text{colour}003{"0"*((endtimestamp_ypos<100)+(endtimestamp_ypos<10))}{endtimestamp_ypos}{endtimestamp}")
+                self.ui_self.statusbar.showMessage(recv)
             
             # Set the subjects + position
             if len(lesson['subjects']) != 0:
@@ -155,8 +169,11 @@ class Worker(QObject):
                     else:
                         subjects += f",{subject[1].upper()}"
                 subject_ypos = ystartpos + 4
-                recv = self.send_to_pico(f"text{colour}050{"0"*((subject_ypos<100)+(subject_ypos<10))}{subject_ypos}{subjects}")
-                self.ui_self.statusbar.showMessage(recv)
+                
+                # If the subject y pos is greater than or equal to 0 draw the subject on the epd
+                if subject_ypos >= 0:
+                    recv = self.send_to_pico(f"text{colour}050{"0"*((subject_ypos<100)+(subject_ypos<10))}{subject_ypos}{subjects}")
+                    self.ui_self.statusbar.showMessage(recv)
             
             # Set the locations + position
             if len(lesson['locations']) != 0:
@@ -166,15 +183,21 @@ class Worker(QObject):
                     else:
                         locations += f",{location[1]}"
                 location_ypos = ystartpos + 16
-                recv = self.send_to_pico(f"text{colour}050{"0"*((location_ypos<100)+(location_ypos<10))}{location_ypos}{locations}")
-                self.ui_self.statusbar.showMessage(recv)
+                
+                # If the location y pos is greater than or equal to 0 draw the location on the epd
+                if location_ypos >= 0:
+                    recv = self.send_to_pico(f"text{colour}050{"0"*((location_ypos<100)+(location_ypos<10))}{location_ypos}{locations}")
+                    self.ui_self.statusbar.showMessage(recv)
             
             # Set the hour + position
             hour : str = lesson['startTimeSlotName'].upper()
             hour_ypos = ystartpos + 4
             hour_xpos = 149 - (len(hour) * 8)
-            recv = self.send_to_pico(f"text{colour}{"0"*((hour_xpos<100)+(hour_xpos<10))}{hour_xpos}{"0"*((hour_ypos<100)+(hour_ypos<10))}{hour_ypos}{hour}")
-            self.ui_self.statusbar.showMessage(recv)
+            
+            # if the hour position is greater than or equal to 0 draw the hour
+            if hour_ypos >= 0 and hour_xpos >= 0:
+                recv = self.send_to_pico(f"text{colour}{"0"*((hour_xpos<100)+(hour_xpos<10))}{hour_xpos}{"0"*((hour_ypos<100)+(hour_ypos<10))}{hour_ypos}{hour}")
+                self.ui_self.statusbar.showMessage(recv)
 
         # Show the result
         recv = self.send_to_pico("show")
