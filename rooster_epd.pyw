@@ -320,6 +320,9 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         self.vandaag.clicked.connect(self.vandaagClicked)
         self.morgen.clicked.connect(self.morgenClicked)
         self.pico_port.currentTextChanged.connect(self.portSelected)
+
+        # Get the available ports
+        available_ports = serial_ports()
         
         # Add the available ports to the dropdown
         self.pico_port.addItem("<select port>")
@@ -373,9 +376,6 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         self.worker.finished.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start()
-
-# Get the available ports
-available_ports = serial_ports()
 
 # Create a QApplication
 app = QApplication(sys.argv)
