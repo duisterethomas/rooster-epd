@@ -54,7 +54,11 @@ Note: The order is important, otherwise the Raspberry Pi Pico won't be detected 
 
 
 ## Useful links
-- https://github.com/wouter173/zermelo.py
+### Required python modules for the source code
+- https://pypi.org/project/pyserial/
 - https://pypi.org/project/zermelo.py/
+- https://pypi.org/project/PySide6/
+### Other links
+- https://github.com/wouter173/zermelo.py
 - https://stackoverflow.com/questions/76138267/read-write-data-over-raspberry-pi-pico-usb-cable
 - https://note.nkmk.me/en/python-unix-time-datetime/#convert-unix-time-epoch-time-to-datetime-fromtimestamp
