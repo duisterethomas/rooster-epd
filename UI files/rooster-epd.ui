@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>251</width>
-    <height>91</height>
+    <height>111</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>251</width>
-    <height>91</height>
+    <height>111</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>251</width>
-    <height>91</height>
+    <height>111</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -102,6 +102,34 @@
    </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>251</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuSettings">
+    <property name="title">
+     <string>Instellingen</string>
+    </property>
+    <addaction name="actionZermelo_koppelen"/>
+    <addaction name="actionTijden_instellen"/>
+   </widget>
+   <addaction name="menuSettings"/>
+  </widget>
+  <action name="actionTijden_instellen">
+   <property name="text">
+    <string>Tijden instellen</string>
+   </property>
+  </action>
+  <action name="actionZermelo_koppelen">
+   <property name="text">
+    <string>Zermelo koppelen</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>

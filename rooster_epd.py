@@ -3,15 +3,16 @@ from zermelo import Client
 from os.path import exists
 from copy import deepcopy
 from time import sleep
+from math import floor
 import datetime
 import serial
 import glob
 import sys
 
-from PySide6.QtCore import QObject, Signal, QThread
-from PySide6.QtWidgets import QMainWindow, QApplication
+from PySide6.QtCore import QObject, Signal, QThread, QTime
+from PySide6.QtWidgets import QMainWindow, QApplication, QDialog, QDialogButtonBox
 
-from rooster_epd_ui import Ui_Rooster_epd, Ui_Rooster_epd_setup
+from rooster_epd_ui import Ui_Rooster_epd, Ui_Rooster_epd_setup, Ui_Rooster_epd_tijden
 
 # List available serial ports function
 def serial_ports():
@@ -94,6 +95,9 @@ class Worker(QObject):
             else:
                 weekday += 1
         
+        # Get the usercode
+        usercode = cl.get_user(save_dict["token"])["response"]["data"][0]["code"]
+        
         # Request: yyyyww
         # yyyy = year: {isocal[0]}
         # ww = weeknumber: {"0"*(isocal[1]<10)}{isocal[1]}
@@ -120,10 +124,10 @@ class Worker(QObject):
             else: colour = "b"
             
             # Set the block position and size
-            # 510 is 08:30 in minutes
-            # 970 is 16:10 in minutes - 510 is 460
-            ystartpos = round(((lesson_starttime.hour * 60) + lesson_starttime.minute - 510) / 460 * 298)
-            yendpos = round(((lesson_endtime.hour * 60) + lesson_endtime.minute - 510) / 460 * 298) - 2
+            # (Lesson starttime in minutes - first lesson starttime) / (First lesson starttime - Last lesson endtime) * 298
+            # (Lesson endtime in minutes - first lesson starttime) / (First lesson starttime - Last lesson endtime) * 298 - 2
+            ystartpos = round(((lesson_starttime.hour * 60) + lesson_starttime.minute - save_dict["begintijd"]) / (save_dict["begintijd"] - save_dict["eindtijd"]) * 298)
+            yendpos = round(((lesson_endtime.hour * 60) + lesson_endtime.minute - save_dict["begintijd"]) / (save_dict["begintijd"] - save_dict["eindtijd"]) * 298) - 2
             ysize = yendpos - ystartpos
             recv = self.send_to_pico(f"rect{colour}000{"0"*((ystartpos<100)+(ystartpos<10))}{ystartpos}152{"0"*((ysize<100)+(ysize<10))}{ysize}0")
             self.ui_self.statusbar.showMessage(recv)
@@ -183,13 +187,132 @@ class Worker(QObject):
         
         # Send finished signal
         self.finished.emit()
-
-class mainWindow(QMainWindow, Ui_Rooster_epd):
+        
+class setupWindow(QDialog, Ui_Rooster_epd_setup):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
         
         # Connect the buttons to functions
+        self.buttonBox.accepted.connect(self.saveClicked)
+        
+        # Connect the changes to check if save button must be disabled
+        self.koppelcode.textChanged.connect(self.checkSaveDisabled)
+        self.schoolnaam.textChanged.connect(self.checkSaveDisabled)
+        
+        # Disable the save button
+        self.buttonBox.button(QDialogButtonBox.Save).setDisabled(True)
+        
+        if "school" in save_dict.keys():
+            # Set the schoolnaam text
+            self.schoolnaam.setText(save_dict["school"])
+    
+    # Check if save button must be disabled
+    def checkSaveDisabled(self):
+        self.buttonBox.button(QDialogButtonBox.Save).setDisabled(len(self.koppelcode.text()) == 0 or len(self.schoolnaam.text()) == 0)
+    
+    def saveClicked(self):
+        # Get the schoolnaam
+        save_dict["school"] = self.schoolnaam.text()
+        
+        # Create the zermelo client
+        cl = Client(save_dict["school"])
+    
+        # Get and a new zermelo token
+        save_dict["token"] = cl.authenticate(self.koppelcode.text())["access_token"]
+    
+        # Save the save_dict
+        with open("rooster-epd.data", "wb") as save_file:
+            dump(save_dict, save_file)
+        
+        # Close the ui
+        self.close()
+
+class tijdenWindow(QDialog, Ui_Rooster_epd_tijden):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setupUi(self)
+        
+        # Connect buttons to functions
+        self.buttonBox.accepted.connect(self.saveTijden)
+        
+        # Connect the changes to check if save button must be disabled
+        self.beginTijd.timeChanged.connect(self.checkSaveDisabled)
+        self.eindTijd.timeChanged.connect(self.checkSaveDisabled)
+        
+        # Calculate the begin and eind hour and minute
+        begin_hour = int(floor(save_dict["begintijd"]/60))
+        begin_minute = int(save_dict["begintijd"] - (begin_hour * 60))
+        
+        eind_hour = int(floor(save_dict["eindtijd"]/60))
+        eind_minute = int(save_dict["eindtijd"] - (eind_hour * 60))
+        
+        # Set begin tijd
+        q_time = QTime()
+        q_time.setHMS(begin_hour, begin_minute, 0, 0)
+        self.beginTijd.setTime(q_time)
+        
+        # Set eind tijd
+        q_time = QTime()
+        q_time.setHMS(eind_hour, eind_minute, 0, 0)
+        self.eindTijd.setTime(q_time)
+        
+        # Check if save button must be disabled
+        self.begintijd = self.beginTijd.time().hour()*60 + self.beginTijd.time().minute()
+        self.eindtijd = self.eindTijd.time().hour()*60 + self.eindTijd.time().minute()
+        self.buttonBox.button(QDialogButtonBox.Save).setDisabled(self.begintijd >= self.eindtijd)
+    
+    # Check if save button must be disabled
+    def checkSaveDisabled(self):
+        self.begintijd = self.beginTijd.time().hour()*60 + self.beginTijd.time().minute()
+        self.eindtijd = self.eindTijd.time().hour()*60 + self.eindTijd.time().minute()
+        self.buttonBox.button(QDialogButtonBox.Save).setDisabled(self.begintijd >= self.eindtijd)
+
+    def saveTijden(self):
+        save_dict["begintijd"] = self.begintijd
+        save_dict["eindtijd"] = self.eindtijd
+        with open("rooster-epd.data", "wb") as save_file:
+            dump(save_dict, save_file)
+
+class mainWindow(QMainWindow, Ui_Rooster_epd):
+    def __init__(self, parent=None):
+        global save_dict
+        global cl
+        
+        super().__init__(parent)
+        self.setupUi(self)
+        
+        # Check if save data exist
+        if exists("rooster-epd.data"):
+            # Open and load the save_dict
+            with open("rooster-epd.data", "rb") as save_file:
+                save_dict = load(save_file)
+            
+            # Create the zermelo client
+            cl = Client(save_dict["school"])
+            
+            try:
+                # Dummy request to check if token is active
+                cl.get_user(save_dict["token"])
+                
+            except ValueError:
+                # Generate new token if token inactive
+                self.vandaag.setDisabled(True)
+                self.morgen.setDisabled(True)
+                self.zermeloKoppelenClicked()
+            
+        else:
+            # Create a new save_dict
+            save_dict = {"school": "", "token": "", "starttime": 510, "endtime": 970, "port": ""}
+            
+            # Open the setup window
+            self.vandaag.setDisabled(True)
+            self.morgen.setDisabled(True)
+            self.zermeloKoppelenClicked()
+            
+        # Connect the buttons to functions
+        self.actionZermelo_koppelen.triggered.connect(self.zermeloKoppelenClicked)
+        self.actionTijden_instellen.triggered.connect(self.tijdenInstellenClicked)
         self.vandaag.clicked.connect(self.vandaagClicked)
         self.morgen.clicked.connect(self.morgenClicked)
         self.pico_port.currentTextChanged.connect(self.portSelected)
@@ -200,17 +323,31 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
             self.pico_port.addItem(available_port)
         
         # Check if there is a port selected
-        self.vandaag.setDisabled(self.pico_port.currentText() == "<select port>")
-        self.morgen.setDisabled(self.pico_port.currentText() == "<select port>")
+        self.vandaag.setDisabled(self.pico_port.currentText() == "<select port>" or save_dict["token"] == "")
+        self.morgen.setDisabled(self.pico_port.currentText() == "<select port>" or save_dict["token"] == "")
         
         # Set the selected port to the saved port if available
         if save_dict["port"] in available_ports:
             self.pico_port.setCurrentText(save_dict["port"])
-        
+    
+    def zermeloKoppelenClicked(self):
+        prev_token = deepcopy(save_dict)["token"]
+        dlg = setupWindow()
+        dlg.exec()
+                
+        if save_dict["token"] == "":
+            self.statusbar.showMessage("Koppel met zermelo om verder te gaan")
+        elif save_dict["token"] != prev_token:
+            self.statusbar.showMessage("Zermelo gekoppeld")
+    
+    def tijdenInstellenClicked(self):
+        dlg = tijdenWindow()
+        dlg.exec()
+    
     def portSelected(self):
         # Check if there is a port selected
-        self.vandaag.setDisabled(self.pico_port.currentText() == "<select port>")
-        self.morgen.setDisabled(self.pico_port.currentText() == "<select port>")
+        self.vandaag.setDisabled(self.pico_port.currentText() == "<select port>" or save_dict["token"] == "")
+        self.morgen.setDisabled(self.pico_port.currentText() == "<select port>" or save_dict["token"] == "")
         
         # Save the port
         if self.pico_port.currentText() != "<select port>":
@@ -232,48 +369,6 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         self.worker.finished.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start()
-        
-class setupWindow(QMainWindow, Ui_Rooster_epd_setup):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setupUi(self)
-        
-        # Connect the buttons to functions
-        self.save.clicked.connect(self.saveClicked)
-        
-        self.koppelcode.textChanged.connect(self.checkSaveDisabled)
-        self.schoolnaam.textChanged.connect(self.checkSaveDisabled)
-        
-        # Disable the save button
-        self.save.setDisabled(True)
-        
-        if "school" in save_dict.keys():
-            # Set the schoolnaam text
-            self.schoolnaam.setText(save_dict["school"])
-    
-    def checkSaveDisabled(self):
-        self.save.setDisabled(len(self.koppelcode.text()) == 0 or len(self.schoolnaam.text()) == 0)
-    
-    def saveClicked(self):
-        global open_main_window
-        
-        open_main_window = True
-        
-        # Get the schoolnaam
-        save_dict["school"] = self.schoolnaam.text()
-        
-        # Create the zermelo client
-        cl = Client(save_dict["school"])
-    
-        # Get and a new zermelo token
-        save_dict["token"] = cl.authenticate(self.koppelcode.text())["access_token"]
-    
-        # Save the save_dict
-        with open("rooster-epd.data", "wb") as save_file:
-            dump(save_dict, save_file)
-        
-        # Close the ui
-        self.close()
 
 # Get the available ports
 available_ports = serial_ports()
@@ -281,45 +376,7 @@ available_ports = serial_ports()
 # Create a QApplication
 app = QApplication(sys.argv)
 
-open_main_window = False
-
-# Function to open the setup ui
-def openSetupUI():
-    win = setupWindow()
-    win.show()
-    app.exec()
-
-# Check if save data exist
-if exists("rooster-epd.data"):
-    # Open and load the save_dict
-    with open("rooster-epd.data", "rb") as save_file:
-        save_dict = load(save_file)
-    
-    # Create the zermelo client
-    cl = Client(save_dict["school"])
-    
-    try:
-        # Get the usercode
-        usercode = cl.get_user(save_dict["token"])["response"]["data"][0]["code"]
-        open_main_window = True
-        
-    except ValueError:
-        # Generate new token if token inactive
-        openSetupUI()
-        
-        # Get the usercode if open_main_window is True
-        if open_main_window:
-            usercode = cl.get_user(save_dict["token"])["response"]["data"][0]["code"]
-    
-else:
-    # Create a new save_dict
-    save_dict = {"port": ""}
-    
-    # Open the setup window
-    openSetupUI()
-
-# Open the main ui if the save data is available
-if open_main_window:
-    win = mainWindow()
-    win.show()
-    sys.exit(app.exec())
+# Open the main ui
+win = mainWindow()
+win.show()
+sys.exit(app.exec())
