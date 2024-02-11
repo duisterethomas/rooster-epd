@@ -1,5 +1,8 @@
 # rooster-epd
 With this you can show your Zermelo schedule on an E-Paper display.
+Front | Back | USB port
+:--:|:--:|:--:
+![Front](/Images/epd_front.png) | ![Back](/Images/epd_back.png) | ![USB](/Images/epd_usb.png)
 
 ## Required materials
 - [Raspberry Pi Pico with headers](https://www.raspberrystore.nl/PrestaShop/nl/raspberry-pi-pico/471-raspberry-pi-pico-h.html)
@@ -21,6 +24,13 @@ First download the [latest release](https://github.com/duisterethomas/rooster-ep
 4. On the "Where to save to?" prompt click on `MicroPython device`
 
    ![Thonny "Where to save to?"](/Images/thonny_save.png)
+
+5. Unplug the Raspberry Pi Pico
+6. Plug the Raspberry Pi Pico into the E-Paper display and make sure it is facing the right way
+
+   Tip: On the E-Paper display is a "USB" marking
+
+   ![E-Paper display](/Images/epaper_display.png)
 
 ### Setting up the computer side
 1. Go to the Zermelo zportal of your school
@@ -50,7 +60,9 @@ Note: The order is important, otherwise the Raspberry Pi Pico won't be detected 
    ![Main window](/Images/main_window.png)
 
    Note: The port is saved for your convenience, so you don't have to select it every time you run the program.
-5. Finally click on `Vandaag` or `Morgen` depending on which day you'd like to upload
+5. Click on `Vandaag` or `Morgen` depending on which day you'd like to upload
+6. Wait until the led on the Raspberry Pi Pico turns off
+7. Unplug the Raspberry Pi Pico
 
 
 ## Useful links
