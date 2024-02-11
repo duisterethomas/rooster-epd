@@ -48,6 +48,7 @@ class Worker(QObject):
     finished = Signal()
     
     def __init__(self, ui_self, morgen):
+        super(Worker, self).__init__()
         self.ui_self = ui_self
         self.morgen = morgen
     
@@ -66,6 +67,7 @@ class Worker(QObject):
     
     def run(self):
         # Disable the button and show message
+        self.ui_self.menuSettings.setEnabled(False)
         self.ui_self.vandaag.setEnabled(False)
         self.ui_self.morgen.setEnabled(False)
         self.ui_self.pico_port.setEnabled(False)
@@ -124,10 +126,10 @@ class Worker(QObject):
             else: colour = "b"
             
             # Set the block position and size
-            # (Lesson starttime in minutes - first lesson starttime) / (First lesson starttime - Last lesson endtime) * 298
-            # (Lesson endtime in minutes - first lesson starttime) / (First lesson starttime - Last lesson endtime) * 298 - 2
-            ystartpos = round(((lesson_starttime.hour * 60) + lesson_starttime.minute - save_dict["begintijd"]) / (save_dict["begintijd"] - save_dict["eindtijd"]) * 298)
-            yendpos = round(((lesson_endtime.hour * 60) + lesson_endtime.minute - save_dict["begintijd"]) / (save_dict["begintijd"] - save_dict["eindtijd"]) * 298) - 2
+            # (Lesson starttime in minutes - first lesson starttime) / (Last lesson endtime - First lesson starttime) * 298
+            # (Lesson endtime in minutes - first lesson starttime) / (Last lesson endtime - First lesson starttime) * 298 - 2
+            ystartpos = round(((lesson_starttime.hour * 60) + lesson_starttime.minute - save_dict["begintijd"]) / (save_dict["eindtijd"] - save_dict["begintijd"]) * 298)
+            yendpos = round(((lesson_endtime.hour * 60) + lesson_endtime.minute - save_dict["begintijd"]) / (save_dict["eindtijd"] - save_dict["begintijd"]) * 298) - 2
             ysize = yendpos - ystartpos
             recv = self.send_to_pico(f"rect{colour}000{"0"*((ystartpos<100)+(ystartpos<10))}{ystartpos}152{"0"*((ysize<100)+(ysize<10))}{ysize}0")
             self.ui_self.statusbar.showMessage(recv)
@@ -180,6 +182,7 @@ class Worker(QObject):
         self.pico.close()
         
         # Enable the button and show message
+        self.ui_self.menuSettings.setEnabled(True)
         self.ui_self.vandaag.setEnabled(True)
         self.ui_self.morgen.setEnabled(True)
         self.ui_self.pico_port.setEnabled(True)
