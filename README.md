@@ -64,7 +64,7 @@ Note: The order is important, otherwise the Raspberry Pi Pico won't be detected 
 
    ![Main window](/Images/main_window.png)
 
-   Note: The port is saved for your convenience, so you don't have to select it every time you run the program.
+   Note: The port is saved for your convenience. Also if you connected the Raspberry Pi Pico after running the software you need to click on "`Instellingen`->`Refresh ports`" before you can select the port
 5. Click on `Vandaag` or `Morgen` depending on which day you'd like to upload
 6. Wait until the led on the Raspberry Pi Pico turns off
 7. Unplug the Raspberry Pi Pico
