@@ -44,7 +44,7 @@ First download the [latest release](https://github.com/duisterethomas/rooster-ep
    
    ![Zermelo koppel externe applicatie](/Images/zermelo_koppel_externe_app.png)
 5. Connect the Raspberry Pi Pico to the computer
-6. Run `rooster-epd.exe` or `rooster_epd.py`
+6. Run `Rooster_epd.exe` or `rooster_epd.py`
 7. Enter the "Schoolnaam" and "Koppelcode" into their respective fields and click on save
    
    ![Setup window](/Images/setup_window.png)
@@ -59,7 +59,7 @@ First download the [latest release](https://github.com/duisterethomas/rooster-ep
 ## Usage
 Note: The order is important, otherwise the Raspberry Pi Pico won't be detected in the software
 1. Connect the Raspberry Pi Pico to the computer
-2. Run `rooster-epd.exe` or `rooster_epd.py`
+2. Run `Rooster_epd.exe` or `rooster_epd.py`
 3. Select the port that the Rapsberry Pi Pico is connected to
 
    ![Main window](/Images/main_window.png)
