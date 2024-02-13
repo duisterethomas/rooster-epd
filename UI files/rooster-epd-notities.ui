@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>261</width>
+    <width>231</width>
     <height>261</height>
    </rect>
   </property>
@@ -18,13 +18,13 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>261</width>
+    <width>231</width>
     <height>261</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>261</width>
+    <width>231</width>
     <height>261</height>
    </size>
   </property>
@@ -36,7 +36,7 @@
     <rect>
      <x>10</x>
      <y>220</y>
-     <width>241</width>
+     <width>211</width>
      <height>32</height>
     </rect>
    </property>
@@ -55,9 +55,12 @@
     <rect>
      <x>80</x>
      <y>10</y>
-     <width>171</width>
+     <width>141</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="maxLength">
+    <number>18</number>
    </property>
    <property name="clearButtonEnabled">
     <bool>true</bool>
@@ -68,9 +71,12 @@
     <rect>
      <x>80</x>
      <y>40</y>
-     <width>171</width>
+     <width>141</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="maxLength">
+    <number>18</number>
    </property>
    <property name="clearButtonEnabled">
     <bool>true</bool>
@@ -81,9 +87,12 @@
     <rect>
      <x>80</x>
      <y>70</y>
-     <width>171</width>
+     <width>141</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="maxLength">
+    <number>18</number>
    </property>
    <property name="clearButtonEnabled">
     <bool>true</bool>
@@ -94,9 +103,12 @@
     <rect>
      <x>80</x>
      <y>100</y>
-     <width>171</width>
+     <width>141</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="maxLength">
+    <number>18</number>
    </property>
    <property name="clearButtonEnabled">
     <bool>true</bool>
@@ -107,9 +119,12 @@
     <rect>
      <x>80</x>
      <y>130</y>
-     <width>171</width>
+     <width>141</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="maxLength">
+    <number>18</number>
    </property>
    <property name="clearButtonEnabled">
     <bool>true</bool>
@@ -120,9 +135,12 @@
     <rect>
      <x>80</x>
      <y>160</y>
-     <width>171</width>
+     <width>141</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="maxLength">
+    <number>18</number>
    </property>
    <property name="clearButtonEnabled">
     <bool>true</bool>
@@ -133,9 +151,12 @@
     <rect>
      <x>80</x>
      <y>190</y>
-     <width>171</width>
+     <width>141</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="maxLength">
+    <number>18</number>
    </property>
    <property name="clearButtonEnabled">
     <bool>true</bool>
