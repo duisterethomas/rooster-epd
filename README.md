@@ -43,14 +43,13 @@ First download the [latest release](https://github.com/duisterethomas/rooster-ep
 4. Make note of the "Schoolnaam" and "Koppelcode" as shown in the image
    
    ![Zermelo koppel externe applicatie](/Images/zermelo_koppel_externe_app.png)
-5. Connect the Raspberry Pi Pico to the computer
-6. Run `Rooster_epd.exe` or `rooster_epd.pyw`
-7. Enter the "Schoolnaam" and "Koppelcode" into their respective fields and click on save
+5. Run `Rooster_epd.exe` or `rooster_epd.pyw`
+6. Enter the "Schoolnaam" and "Koppelcode" into their respective fields and click on save
    
    ![Setup window](/Images/setup_window.png)
 
    Note: This screen can popup again, this means that Zermelo has logged you out on all of your devices. This is normal, Zermelo does that each year I think. If it happens you only have to enter a new "Koppelcode", the "Schoolnaam" is saved for your convenience.
-8. Enter the start time of your first possible lesson and the end time of your last possible lesson into their respective fields and click on save
+7. Enter the start time of your first possible lesson and the end time of your last possible lesson into their respective fields and click on save
 
     ![Tijden window](/Images/tijden_window.png)
 
@@ -58,13 +57,16 @@ First download the [latest release](https://github.com/duisterethomas/rooster-ep
 
 ## Usage
 Note: The order is important, otherwise the Raspberry Pi Pico won't be detected in the software
-1. Connect the Raspberry Pi Pico to the computer
+1. Connect the Raspberry Pi Pico with the E-Paper display to the computer
 2. Run `Rooster_epd.exe` or `rooster_epd.pyw`
 3. Select the port that the Rapsberry Pi Pico is connected to
 
    ![Main window](/Images/main_window.png)
 
-   Note: The port is saved for your convenience. Also if you connected the Raspberry Pi Pico after running the software you need to click on "`Instellingen`->`Refresh ports`" before you can select the port
+   Note: If you connected the Raspberry Pi Pico after running the software you need to click on "`Instellingen`->`Refresh ports`" before you can select the port
+4. If you want to add notes click on "`Notities`->`Notities bewerken`", add your notes and click on save
+
+   ![Main window](/Images/notities_window.png)
 5. Click on `Vandaag` or `Morgen` depending on which day you'd like to upload
 6. Wait until the led on the Raspberry Pi Pico turns off
 7. Unplug the Raspberry Pi Pico
