@@ -1,12 +1,12 @@
+from serial import Serial, SerialException, PARITY_EVEN, STOPBITS_ONE
 from pickle import load, dump
 from zermelo import Client
 from os.path import exists
 from copy import deepcopy
 from time import sleep
 from math import floor
+from glob import glob
 import datetime
-import serial
-import glob
 import sys
 
 from PySide6.QtCore import QObject, Signal, QThread, QTime
@@ -27,19 +27,19 @@ def serial_ports():
         ports = ['COM%s' % (i + 1) for i in range(256)]
     elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
         # this excludes your current terminal "/dev/tty"
-        ports = glob.glob('/dev/tty[A-Za-z]*')
+        ports = glob('/dev/tty[A-Za-z]*')
     elif sys.platform.startswith('darwin'):
-        ports = glob.glob('/dev/tty.*')
+        ports = glob('/dev/tty.*')
     else:
         raise EnvironmentError('Unsupported platform')
 
     result = []
     for port in ports:
         try:
-            s = serial.Serial(port)
+            s = Serial(port)
             s.close()
             result.append(port)
-        except (OSError, serial.SerialException):
+        except (OSError, SerialException):
             pass
     return result
 
@@ -71,7 +71,7 @@ class Worker(QObject):
         self.ui_self.menuBar.setDisabled(True)
         
         # Connect and initialize the pico epd
-        self.pico = serial.Serial(port=save_dict["port"], parity=serial.PARITY_EVEN, stopbits=serial.STOPBITS_ONE, timeout=1)
+        self.pico = Serial(port=save_dict["port"], parity=PARITY_EVEN, stopbits=STOPBITS_ONE, timeout=1)
         self.pico.flush()
         recv = self.send_to_pico("init")
         self.ui_self.statusbar.showMessage(recv)
