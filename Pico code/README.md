@@ -3,6 +3,19 @@ main.py is the code that you need to flash to the raspberry pi pico.
 
 ## Pico commands
 - `init`: Initializes the display
+- `lineCXXXYYYXXXYYY`: Line
+
+  `C`: The colour (r/b/w)
+  
+  `XXX`: X position start
+  
+  `YYY`: Y position start
+  
+  `XXX`: X position end
+  
+  `YYY`: Y position end
+
+  Black line start position x 2, y 2, end position x 30, y 30 example: `lineb002002030030`
 - `rectCXXXYYYWWWHHHF`: Rectangle
 
   `C`: The colour (r/b/w)
@@ -30,4 +43,4 @@ main.py is the code that you need to flash to the raspberry pi pico.
 
   Red "Hello, world!" on x 2 and y 2 example: `textr002002Hello, world!`
 - `show`: Shows the final result
-- `cancel`: Cancel
+- `exit`: Exit/cancel

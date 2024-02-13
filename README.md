@@ -19,7 +19,7 @@ First download the [latest release](https://github.com/duisterethomas/rooster-ep
    
 ### Setting up your Raspberry Pi  Pico
 1. Follow [this article](https://projects.raspberrypi.org/en/projects/getting-started-with-the-pico/0) to install Thonny onto your computer and install MicroPython onto your Raspberry Pi Pico
-2. Open `serial_epd.py` with Thonny
+2. Open `main.py` with Thonny
 3. Click on "`File`->`Save as`"
 4. On the "Where to save to?" prompt click on `MicroPython device`
 

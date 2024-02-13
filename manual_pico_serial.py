@@ -34,18 +34,12 @@ def serial_ports():
 
 # Connect the pico
 available_ports = serial_ports()
-if exists("prev_port.txt"):
-    port = open("prev_port.txt", "r").read()
-else:
-    print('Available ports:')
-    for available_port in available_ports:
-        print(available_port)
-    port = input("Port: COM")
+print('Available ports:')
+for available_port in enumerate(available_ports):
+    print(f"{available_port[0]}. {available_port[1]}")
+port = available_ports[int(input("Port: "))]
 
-    with open("prev_port.txt", "w") as f:
-        f.write(port)
-
-pico = serial.Serial(port=f"COM{port}", parity=serial.PARITY_EVEN, stopbits=serial.STOPBITS_ONE, timeout=1)
+pico = serial.Serial(port=port, parity=serial.PARITY_EVEN, stopbits=serial.STOPBITS_ONE, timeout=1)
 pico.flush()
 
 data = ""
