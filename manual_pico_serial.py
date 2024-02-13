@@ -47,7 +47,7 @@ data = ""
 while data not in ("exit", "cancel"):
     data = input("Data to send: ")
 
-    if data != "exit":
+    if data != "quit":
         pico.write(f"{data}\r".encode())
         recieved = pico.read_until().strip()
         while not recieved:
