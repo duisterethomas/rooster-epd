@@ -139,6 +139,14 @@ class Worker(QObject):
                 recv = self.send_to_pico(f"rect{colour}000{"0"*((ystartpos<100)+(ystartpos<10))}{ystartpos}152{"0"*((ysize<100)+(ysize<10))}{ysize}0")
                 self.ui_self.statusbar.showMessage(recv)
             
+            lineystartpos = ystartpos + 3
+            lineyendpos = yendpos - 4
+            
+            # If the startpos and endpos are greater than or equal to 0 draw a line on the epd
+            if lineystartpos >= 0 and lineyendpos >= 0:
+                recv = self.send_to_pico(f"line{colour}046{"0"*((lineystartpos<100)+(lineystartpos<10))}{lineystartpos}046{"0"*((lineyendpos<100)+(lineyendpos<10))}{lineyendpos}")
+                self.ui_self.statusbar.showMessage(recv)
+            
             # Set the starttimestamp + position
             starttimestamp = lesson_starttime.strftime('%H:%M').removeprefix("0")
             
@@ -203,8 +211,10 @@ class Worker(QObject):
                 recv = self.send_to_pico(f"text{colour}{"0"*((hour_xpos<100)+(hour_xpos<10))}{hour_xpos}{"0"*((hour_ypos<100)+(hour_ypos<10))}{hour_ypos}{hour}")
                 self.ui_self.statusbar.showMessage(recv)
 
-        recv = self.send_to_pico(f"textb002288{save_dict["notities"][weekday-1]}")
-        self.ui_self.statusbar.showMessage(recv)
+        # Draw the note if it isn't empty
+        if save_dict["notities"][weekday-1] != "":
+            recv = self.send_to_pico(f"textb002288{save_dict["notities"][weekday-1]}")
+            self.ui_self.statusbar.showMessage(recv)
         
         # Show the result
         recv = self.send_to_pico("show")
