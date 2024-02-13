@@ -120,7 +120,14 @@
     <addaction name="separator"/>
     <addaction name="actionRefresh_ports"/>
    </widget>
+   <widget class="QMenu" name="menuNotities">
+    <property name="title">
+     <string>Notities</string>
+    </property>
+    <addaction name="actionNotities_bewerken"/>
+   </widget>
    <addaction name="menuSettings"/>
+   <addaction name="menuNotities"/>
   </widget>
   <action name="actionTijden_instellen">
    <property name="text">
@@ -135,6 +142,11 @@
   <action name="actionRefresh_ports">
    <property name="text">
     <string>Refresh ports</string>
+   </property>
+  </action>
+  <action name="actionNotities_bewerken">
+   <property name="text">
+    <string>Notities bewerken</string>
    </property>
   </action>
  </widget>

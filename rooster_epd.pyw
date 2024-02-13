@@ -12,7 +12,7 @@ import sys
 from PySide6.QtCore import QObject, Signal, QThread, QTime
 from PySide6.QtWidgets import QMainWindow, QApplication, QDialog, QDialogButtonBox
 
-from rooster_epd_ui import Ui_Rooster_epd, Ui_Rooster_epd_setup, Ui_Rooster_epd_tijden
+from rooster_epd_ui import *
 
 # List available serial ports function
 def serial_ports():
@@ -66,11 +66,9 @@ class Worker(QObject):
         return recieved.decode()
     
     def run(self):
-        # Disable the button and show message
-        self.ui_self.menuSettings.setEnabled(False)
-        self.ui_self.vandaag.setEnabled(False)
-        self.ui_self.morgen.setEnabled(False)
-        self.ui_self.pico_port.setEnabled(False)
+        # Disable the UI and show message
+        self.ui_self.centralwidget.setDisabled(True)
+        self.ui_self.menuBar.setDisabled(True)
         
         # Connect and initialize the pico epd
         self.pico = serial.Serial(port=save_dict["port"], parity=serial.PARITY_EVEN, stopbits=serial.STOPBITS_ONE, timeout=1)
@@ -114,6 +112,10 @@ class Worker(QObject):
             if datetime.datetime.fromtimestamp(lesson['start']).isoweekday() == weekday:
                 lessons_today.append(deepcopy(lesson))
 
+        # Set the max size base don if there is a note
+        if save_dict["notities"][weekday-1] == "": max_size = 298
+        else: max_size = 286
+        
         # Show it on the epd
         for lesson in lessons_today:
             # Get the start and end time in datetime format
@@ -126,10 +128,10 @@ class Worker(QObject):
             else: colour = "b"
             
             # Set the block position and size
-            # (Lesson starttime in minutes - first lesson starttime) / (Last lesson endtime - First lesson starttime) * 298
-            # (Lesson endtime in minutes - first lesson starttime) / (Last lesson endtime - First lesson starttime) * 298 - 2
-            ystartpos = round(((lesson_starttime.hour * 60) + lesson_starttime.minute - save_dict["begintijd"]) / (save_dict["eindtijd"] - save_dict["begintijd"]) * 298)
-            yendpos = round(((lesson_endtime.hour * 60) + lesson_endtime.minute - save_dict["begintijd"]) / (save_dict["eindtijd"] - save_dict["begintijd"]) * 298) - 2
+            # (Lesson starttime in minutes - first lesson starttime) / (Last lesson endtime - First lesson starttime) * max_size
+            # (Lesson endtime in minutes - first lesson starttime) / (Last lesson endtime - First lesson starttime) * max_size - 2
+            ystartpos = round(((lesson_starttime.hour * 60) + lesson_starttime.minute - save_dict["begintijd"]) / (save_dict["eindtijd"] - save_dict["begintijd"]) * max_size)
+            yendpos = round(((lesson_endtime.hour * 60) + lesson_endtime.minute - save_dict["begintijd"]) / (save_dict["eindtijd"] - save_dict["begintijd"]) * max_size) - 2
             ysize = yendpos - ystartpos
             
             # If the startpos and size are greater than or equal to 0 draw a rect on the epd
@@ -199,16 +201,17 @@ class Worker(QObject):
                 recv = self.send_to_pico(f"text{colour}{"0"*((hour_xpos<100)+(hour_xpos<10))}{hour_xpos}{"0"*((hour_ypos<100)+(hour_ypos<10))}{hour_ypos}{hour}")
                 self.ui_self.statusbar.showMessage(recv)
 
+        recv = self.send_to_pico(f"textb002288{save_dict["notities"][weekday-1]}")
+        self.ui_self.statusbar.showMessage(recv)
+        
         # Show the result
         recv = self.send_to_pico("show")
         self.ui_self.statusbar.showMessage(recv)
         self.pico.close()
         
-        # Enable the button and show message
-        self.ui_self.menuSettings.setEnabled(True)
-        self.ui_self.vandaag.setEnabled(True)
-        self.ui_self.morgen.setEnabled(True)
-        self.ui_self.pico_port.setEnabled(True)
+        # Enable the UI and clear the message
+        self.ui_self.centralwidget.setDisabled(True)
+        self.ui_self.menuBar.setDisabled(True)
         self.ui_self.statusbar.clearMessage()
         
         # Send finished signal
@@ -300,6 +303,36 @@ class tijdenWindow(QDialog, Ui_Rooster_epd_tijden):
         with open("rooster-epd.data", "wb") as save_file:
             dump(save_dict, save_file)
 
+class notitiesWindow(QDialog, Ui_Rooster_epd_notities):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setupUi(self)
+        
+        # Connect buttons to functions
+        self.buttonBox.accepted.connect(self.saveNotities)
+        
+        # Set the previous notes in all the line edits
+        self.maandag.setText(save_dict["notities"][0])
+        self.dinsdag.setText(save_dict["notities"][1])
+        self.woensdag.setText(save_dict["notities"][2])
+        self.donderdag.setText(save_dict["notities"][3])
+        self.vrijdag.setText(save_dict["notities"][4])
+        self.zaterdag.setText(save_dict["notities"][5])
+        self.zondag.setText(save_dict["notities"][6])
+
+    # Save the notities
+    def saveNotities(self):
+        save_dict["notities"] = (self.maandag.text(),
+                                 self.dinsdag.text(),
+                                 self.woensdag.text(),
+                                 self.donderdag.text(),
+                                 self.vrijdag.text(),
+                                 self.zaterdag.text(),
+                                 self.zondag.text())
+
+        with open("rooster-epd.data", "wb") as save_file:
+            dump(save_dict, save_file)
+
 class mainWindow(QMainWindow, Ui_Rooster_epd):
     def __init__(self, parent=None):
         global save_dict
@@ -326,12 +359,21 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
                 self.vandaag.setDisabled(True)
                 self.morgen.setDisabled(True)
                 self.zermeloKoppelenClicked()
+                
+            # Add notities to save_dict if it isn't
+            if "notities" not in save_dict.keys():
+                save_dict["notities"] = ("", "", "", "", "", "", "")
             
         else:
             # First time setup
             
             # Create a new save_dict
-            save_dict = {"school": "", "token": "", "begintijd": 510, "eindtijd": 970, "port": ""}
+            save_dict = {"school": "",
+                         "token": "",
+                         "begintijd": 510,
+                         "eindtijd": 970,
+                         "port": "",
+                         "notities": ("", "", "", "", "", "", "")}
             
             # Open the setup window
             self.zermeloKoppelenClicked()
@@ -340,6 +382,7 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         # Connect the buttons to functions
         self.actionZermelo_koppelen.triggered.connect(self.zermeloKoppelenClicked)
         self.actionTijden_instellen.triggered.connect(self.tijdenInstellenClicked)
+        self.actionNotities_bewerken.triggered.connect(self.notitiesBewerkenClicked)
         self.actionRefresh_ports.triggered.connect(self.refreshPorts)
         self.vandaag.clicked.connect(self.vandaagClicked)
         self.morgen.clicked.connect(self.morgenClicked)
@@ -359,6 +402,10 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
     
     def tijdenInstellenClicked(self):
         dlg = tijdenWindow()
+        dlg.exec()
+    
+    def notitiesBewerkenClicked(self):
+        dlg = notitiesWindow()
         dlg.exec()
     
     def refreshPorts(self):
@@ -386,6 +433,7 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         
         # Save the port
         if self.pico_port.currentText() != "<select port>":
+            save_dict["port"] = self.pico_port.currentText()
             with open("rooster-epd.data", "wb") as save_file:
                 dump(save_dict, save_file)
     
