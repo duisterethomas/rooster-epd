@@ -184,7 +184,9 @@ class Worker(QObject):
                         locations = location[1]
                     else:
                         locations += f",{location[1]}"
-                location_ypos = ystartpos + 16
+                
+                # Set the location_ypos to the endtimestamp_ypos if endtimestamp_ypos is smaller than ystartpos + 16
+                location_ypos = min(ystartpos + 16, endtimestamp_ypos)
                 
                 # If the location y pos is greater than or equal to 0 draw the location on the epd
                 if location_ypos >= 0:
@@ -210,8 +212,8 @@ class Worker(QObject):
         self.pico.close()
         
         # Enable the UI and clear the message
-        self.ui_self.centralwidget.setDisabled(True)
-        self.ui_self.menuBar.setDisabled(True)
+        self.ui_self.centralwidget.setDisabled(False)
+        self.ui_self.menuBar.setDisabled(False)
         self.ui_self.statusbar.clearMessage()
         
         # Send finished signal
