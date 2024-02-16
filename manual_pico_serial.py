@@ -44,7 +44,7 @@ pico.flush()
 
 data = ""
 
-while data not in ("quit"):
+while data != "quit":
     data = input("Data to send: ")
 
     if data != "quit":
