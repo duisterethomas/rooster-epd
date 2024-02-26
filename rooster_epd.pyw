@@ -406,8 +406,8 @@ class afsprakenWindow(QDialog, Ui_Rooster_epd_afspraken):
     # Resize the ui if the window is resized
     def resizeEvent(self, event):
         QDialog.resizeEvent(self, event)
-        self.scrollArea.setGeometry(QRect(-1, 0, 402, event.size().height()-40))
-        self.buttonBox.setGeometry(QRect(0, event.size().height()-41, 401, 41))
+        self.scrollArea.setGeometry(QRect(-1, 0, 396, event.size().height()-40))
+        self.buttonBox.setGeometry(QRect(0, event.size().height()-41, 396, 41))
     
     # Add an afspraak
     def addAfspraak(self, afspraak = None):
