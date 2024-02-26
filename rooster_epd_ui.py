@@ -1,5 +1,5 @@
 from PySide6.QtCore import QCoreApplication, QMetaObject, QRect, QSize, Qt
-from PySide6.QtWidgets import QComboBox, QLabel, QLineEdit, QPushButton, QSizePolicy, QStatusBar, QWidget, QDialogButtonBox, QTimeEdit, QMenu, QMenuBar
+from PySide6.QtWidgets import QComboBox, QLabel, QLineEdit, QPushButton, QSizePolicy, QStatusBar, QWidget, QDialogButtonBox, QTimeEdit, QDateEdit, QMenu, QMenuBar, QScrollArea, QFrame, QVBoxLayout, QSpacerItem
 from PySide6.QtGui import QAction
 
 # The main UI
@@ -23,6 +23,8 @@ class Ui_Rooster_epd(object):
         self.actionRefresh_ports.setObjectName(u"actionRefresh_ports")
         self.actionNotities_bewerken = QAction(Rooster_epd)
         self.actionNotities_bewerken.setObjectName(u"actionNotities_bewerken")
+        self.actionAfspraken_bewerken = QAction(Rooster_epd)
+        self.actionAfspraken_bewerken.setObjectName(u"actionAfspraken_bewerken")
         self.centralwidget = QWidget(Rooster_epd)
         self.centralwidget.setObjectName(u"centralwidget")
         self.morgen = QPushButton(self.centralwidget)
@@ -51,17 +53,18 @@ class Ui_Rooster_epd(object):
         self.menuBar.setGeometry(QRect(0, 0, 251, 22))
         self.menuSettings = QMenu(self.menuBar)
         self.menuSettings.setObjectName(u"menuSettings")
-        self.menuNotities = QMenu(self.menuBar)
-        self.menuNotities.setObjectName(u"menuNotities")
+        self.menuBewerken = QMenu(self.menuBar)
+        self.menuBewerken.setObjectName(u"menuBewerken")
         Rooster_epd.setMenuBar(self.menuBar)
 
+        self.menuBar.addAction(self.menuBewerken.menuAction())
         self.menuBar.addAction(self.menuSettings.menuAction())
-        self.menuBar.addAction(self.menuNotities.menuAction())
         self.menuSettings.addAction(self.actionZermelo_koppelen)
         self.menuSettings.addAction(self.actionTijden_instellen)
         self.menuSettings.addSeparator()
         self.menuSettings.addAction(self.actionRefresh_ports)
-        self.menuNotities.addAction(self.actionNotities_bewerken)
+        self.menuBewerken.addAction(self.actionNotities_bewerken)
+        self.menuBewerken.addAction(self.actionAfspraken_bewerken)
 
         self.retranslateUi(Rooster_epd)
 
@@ -74,12 +77,13 @@ class Ui_Rooster_epd(object):
         self.actionZermelo_koppelen.setText(QCoreApplication.translate("Rooster_epd", u"Zermelo koppelen", None))
         self.actionRefresh_ports.setText(QCoreApplication.translate("Rooster_epd", u"Refresh ports", None))
         self.actionNotities_bewerken.setText(QCoreApplication.translate("Rooster_epd", u"Notities bewerken", None))
+        self.actionAfspraken_bewerken.setText(QCoreApplication.translate("Rooster_epd", u"Afspraken bewerken", None))
         self.morgen.setText(QCoreApplication.translate("Rooster_epd", u"Morgen", None))
         self.label_pico_port.setText(QCoreApplication.translate("Rooster_epd", u"Pico port:", None))
         self.vandaag.setText(QCoreApplication.translate("Rooster_epd", u"Vandaag", None))
         self.label_pico_port_2.setText(QCoreApplication.translate("Rooster_epd", u"Upload:", None))
         self.menuSettings.setTitle(QCoreApplication.translate("Rooster_epd", u"Instellingen", None))
-        self.menuNotities.setTitle(QCoreApplication.translate("Rooster_epd", u"Notities", None))
+        self.menuBewerken.setTitle(QCoreApplication.translate("Rooster_epd", u"Bewerken", None))
     # retranslateUi
 
 # The setup UI
@@ -266,4 +270,107 @@ class Ui_Rooster_epd_notities(object):
         self.label_5.setText(QCoreApplication.translate("Rooster_epd_notities", u"Vrijdag:", None))
         self.label_6.setText(QCoreApplication.translate("Rooster_epd_notities", u"Zaterdag:", None))
         self.label_7.setText(QCoreApplication.translate("Rooster_epd_notities", u"Zondag:", None))
+    # retranslateUi
+
+# The afspraken ui
+class Ui_Rooster_epd_afspraken(object):
+    def setupUi(self, Rooster_epd_afspraken):
+        if not Rooster_epd_afspraken.objectName():
+            Rooster_epd_afspraken.setObjectName(u"Rooster_epd_afspraken")
+        Rooster_epd_afspraken.resize(402, 281)
+        Rooster_epd_afspraken.setMinimumSize(QSize(402, 171))
+        Rooster_epd_afspraken.setMaximumSize(QSize(402, 16777215))
+        self.buttonBox = QDialogButtonBox(Rooster_epd_afspraken)
+        self.buttonBox.setObjectName(u"buttonBox")
+        self.buttonBox.setGeometry(QRect(0, 240, 401, 41))
+        self.buttonBox.setOrientation(Qt.Horizontal)
+        self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Save)
+        self.buttonBox.setCenterButtons(True)
+        self.scrollArea = QScrollArea(Rooster_epd_afspraken)
+        self.scrollArea.setObjectName(u"scrollArea")
+        self.scrollArea.setGeometry(QRect(-1, 0, 402, 241))
+        self.scrollArea.setFrameShape(QFrame.NoFrame)
+        self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollAreaWidgetContents = QWidget()
+        self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 385, 241))
+        self.verticalLayout = QVBoxLayout(self.scrollAreaWidgetContents)
+        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.nieuwButton = QPushButton(self.scrollAreaWidgetContents)
+        self.nieuwButton.setObjectName(u"nieuwButton")
+
+        self.verticalLayout.addWidget(self.nieuwButton)
+
+        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+        self.verticalLayout.addItem(self.verticalSpacer)
+
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+
+        self.retranslateUi(Rooster_epd_afspraken)
+        self.buttonBox.accepted.connect(Rooster_epd_afspraken.accept)
+        self.buttonBox.rejected.connect(Rooster_epd_afspraken.reject)
+
+        QMetaObject.connectSlotsByName(Rooster_epd_afspraken)
+    # setupUi
+
+    def retranslateUi(self, Rooster_epd_afspraken):
+        Rooster_epd_afspraken.setWindowTitle(QCoreApplication.translate("Rooster_epd_afspraken", u"Afspraken bewerken", None))
+        self.nieuwButton.setText(QCoreApplication.translate("Rooster_epd_afspraken", u"Nieuwe afspraak", None))
+    # retranslateUi
+
+# The afspraak frame
+class Ui_Afspraak(object):
+    def setupUi(self, Afspraak):
+        if not Afspraak.objectName():
+            Afspraak.setObjectName(u"Afspraak")
+        Afspraak.resize(361, 71)
+        Afspraak.setMinimumSize(QSize(361, 71))
+        Afspraak.setMaximumSize(QSize(361, 71))
+        Afspraak.setFrameShape(QFrame.StyledPanel)
+        self.lesuur = QLineEdit(Afspraak)
+        self.lesuur.setObjectName(u"lesuur")
+        self.lesuur.setGeometry(QRect(210, 10, 41, 22))
+        self.line = QFrame(Afspraak)
+        self.line.setObjectName(u"line")
+        self.line.setGeometry(QRect(60, 10, 21, 51))
+        self.line.setFrameShadow(QFrame.Plain)
+        self.line.setFrameShape(QFrame.VLine)
+        self.onderwerpen = QLineEdit(Afspraak)
+        self.onderwerpen.setObjectName(u"onderwerpen")
+        self.onderwerpen.setGeometry(QRect(80, 10, 121, 22))
+        self.locaties = QLineEdit(Afspraak)
+        self.locaties.setObjectName(u"locaties")
+        self.locaties.setGeometry(QRect(80, 40, 121, 22))
+        self.verwijderButton = QPushButton(Afspraak)
+        self.verwijderButton.setObjectName(u"verwijderButton")
+        self.verwijderButton.setGeometry(QRect(271, 39, 81, 24))
+        self.startTime = QTimeEdit(Afspraak)
+        self.startTime.setObjectName(u"startTime")
+        self.startTime.setGeometry(QRect(10, 10, 51, 22))
+        self.endTime = QTimeEdit(Afspraak)
+        self.endTime.setObjectName(u"endTime")
+        self.endTime.setGeometry(QRect(10, 40, 51, 22))
+        self.datum = QDateEdit(Afspraak)
+        self.datum.setObjectName(u"datum")
+        self.datum.setGeometry(QRect(270, 10, 81, 22))
+        self.line_2 = QFrame(Afspraak)
+        self.line_2.setObjectName(u"line_2")
+        self.line_2.setGeometry(QRect(250, 0, 21, 71))
+        self.line_2.setFrameShadow(QFrame.Plain)
+        self.line_2.setFrameShape(QFrame.VLine)
+
+        self.retranslateUi(Afspraak)
+
+        QMetaObject.connectSlotsByName(Afspraak)
+    # setupUi
+
+    def retranslateUi(self, Afspraak):
+        Afspraak.setWindowTitle(QCoreApplication.translate("Afspraak", u"Frame", None))
+        self.lesuur.setPlaceholderText(QCoreApplication.translate("Afspraak", u"Lesuur", None))
+        self.onderwerpen.setPlaceholderText(QCoreApplication.translate("Afspraak", u"Onderwerp(en)", None))
+        self.locaties.setPlaceholderText(QCoreApplication.translate("Afspraak", u"Locatie(s)", None))
+        self.verwijderButton.setText(QCoreApplication.translate("Afspraak", u"Verwijder", None))
     # retranslateUi

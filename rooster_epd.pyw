@@ -9,7 +9,7 @@ from glob import glob
 import datetime
 import sys
 
-from PySide6.QtCore import QObject, Signal, QThread, QTime
+from PySide6.QtCore import QObject, Signal, QThread, QTime, QDate
 from PySide6.QtWidgets import QMainWindow, QApplication, QDialog, QDialogButtonBox
 
 from rooster_epd_ui import *
@@ -108,8 +108,28 @@ class Worker(QObject):
         lessons : list = enrollments['response']['data'][0]['appointments']
         lessons_today = []
         for lesson in lessons:
+            # Preprocess some of the data
+            lesson['start'] = datetime.datetime.fromtimestamp(lesson['start'])
+            lesson['end'] = datetime.datetime.fromtimestamp(lesson['end'])
+            lesson['startTimeSlotName'] = lesson['startTimeSlotName'].upper()
+            for i in range(len(lesson["subjects"])):
+                lesson['subjects'][i] = lesson['subjects'][i].upper()
+            
             # Check the day number: 1 = monday...
-            if datetime.datetime.fromtimestamp(lesson['start']).isoweekday() == weekday:
+            if lesson['start'].isoweekday() == weekday:
+                lessons_today.append(deepcopy(lesson))
+        
+        # Add the afspraken to lessons_today
+        for afspraak in save_dict["afspraken"]:
+            if datetime.date(afspraak["date"].year(), afspraak["date"].month(), afspraak["date"].day()).isoweekday() == weekday:
+                lesson = {}
+                lesson["start"] = datetime.time(afspraak["startTime"].hour(), afspraak["startTime"].minute(), 0, 0)
+                lesson["end"] = datetime.time(afspraak["endTime"].hour(), afspraak["endTime"].minute(), 0, 0)
+                lesson["cancelled"] = False
+                lesson["subjects"] = [afspraak["subjects"]]
+                lesson["locations"] = [afspraak["locations"]]
+                lesson['startTimeSlotName'] = afspraak["timeSlotName"]
+                
                 lessons_today.append(deepcopy(lesson))
 
         # Set the max size base don if there is a note
@@ -119,8 +139,8 @@ class Worker(QObject):
         # Show it on the epd
         for lesson in lessons_today:
             # Get the start and end time in datetime format
-            lesson_starttime = datetime.datetime.fromtimestamp(lesson['start'])
-            lesson_endtime = datetime.datetime.fromtimestamp(lesson['end'])
+            lesson_starttime = lesson['start']
+            lesson_endtime = lesson['end']
             
             # Set the colour
             # If cancelled: red (r), else: black (b)
@@ -134,8 +154,13 @@ class Worker(QObject):
             yendpos = round(((lesson_endtime.hour * 60) + lesson_endtime.minute - save_dict["begintijd"]) / (save_dict["eindtijd"] - save_dict["begintijd"]) * max_size) - 2
             ysize = yendpos - ystartpos
             
-            # If the startpos and size are greater than or equal to 0 draw a rect on the epd
+            # If the startpos and size are greater than or equal to 0 draw a rectangle on the epd
             if ystartpos >= 0 and ysize >= 0:
+                # Draw a white filled rectangle on the epd to overwrite possible previous data
+                recv = self.send_to_pico(f"rectw000{"0"*((ystartpos<100)+(ystartpos<10))}{ystartpos}152{"0"*((ysize<100)+(ysize<10))}{ysize}1")
+                self.ui_self.statusbar.showMessage(recv)
+                
+                # Draw a rectangle outline
                 recv = self.send_to_pico(f"rect{colour}000{"0"*((ystartpos<100)+(ystartpos<10))}{ystartpos}152{"0"*((ysize<100)+(ysize<10))}{ysize}0")
                 self.ui_self.statusbar.showMessage(recv)
             
@@ -175,9 +200,9 @@ class Worker(QObject):
             if len(lesson['subjects']) != 0:
                 for subject in enumerate(lesson['subjects']):
                     if subject[0] == 0:
-                        subjects = subject[1].upper()
+                        subjects = subject[1]
                     else:
-                        subjects += f",{subject[1].upper()}"
+                        subjects += f",{subject[1]}"
                 subject_ypos = ystartpos + 4
                 
                 # If the subject y pos is greater than or equal to 0 draw the subject on the epd
@@ -202,7 +227,7 @@ class Worker(QObject):
                     self.ui_self.statusbar.showMessage(recv)
             
             # Set the hour + position
-            hour : str = lesson['startTimeSlotName'].upper()
+            hour : str = lesson['startTimeSlotName']
             hour_ypos = ystartpos + 4
             hour_xpos = 149 - (len(hour) * 8)
             
@@ -345,6 +370,84 @@ class notitiesWindow(QDialog, Ui_Rooster_epd_notities):
         with open("rooster-epd.data", "wb") as save_file:
             dump(save_dict, save_file)
 
+class afspraakFrame(QFrame, Ui_Afspraak):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setupUi(self)
+        
+        self.verwijderButton.clicked.connect(lambda:self.deleteLater())
+        
+        # Set minimum date
+        today = datetime.date.today()
+        date = QDate()
+        date.setDate(today.year, today.month, today.day)
+        self.datum.setMinimumDate(date)
+        
+class afsprakenWindow(QDialog, Ui_Rooster_epd_afspraken):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setupUi(self)
+        
+        self.count = 0
+        self.afspraken = {}
+        
+        # Get the layout in the scroll area
+        self.scrolllayout = self.scrollAreaWidgetContents.layout()
+        
+        # Connect buttons to functions
+        self.nieuwButton.clicked.connect(self.addAfspraak)
+        self.buttonBox.accepted.connect(self.saveAfspraken)
+        
+        # Add afspraken if needed
+        if len(save_dict["afspraken"]) > 0:
+            for afspraak in save_dict["afspraken"]:
+                self.addAfspraak(afspraak)
+    
+    # Resize the ui if the window is resized
+    def resizeEvent(self, event):
+        QDialog.resizeEvent(self, event)
+        self.scrollArea.setGeometry(QRect(-1, 0, 402, event.size().height()-40))
+        self.buttonBox.setGeometry(QRect(0, event.size().height()-41, 401, 41))
+    
+    # Add an afspraak
+    def addAfspraak(self, afspraak = None):
+        afspraak_naam = f"afspraak{self.count}"
+        self.afspraken[afspraak_naam] = afspraakFrame(self.scrollAreaWidgetContents)
+        self.afspraken[afspraak_naam].setObjectName(afspraak_naam)
+        self.afspraken[afspraak_naam].verwijderButton.clicked.connect(lambda:self.afspraken.pop(afspraak_naam))
+        self.afspraken[afspraak_naam].verwijderButton.clicked.connect(lambda:self.scrolllayout.update())
+        
+        # Fill in the info if it was imported form the save
+        if type(afspraak) == dict:
+            self.afspraken[afspraak_naam].datum.setDate(afspraak["date"])
+            self.afspraken[afspraak_naam].startTime.setTime(afspraak["startTime"])
+            self.afspraken[afspraak_naam].endTime.setTime(afspraak["endTime"])
+            self.afspraken[afspraak_naam].onderwerpen.setText(afspraak["subjects"])
+            self.afspraken[afspraak_naam].locaties.setText(afspraak["locations"])
+            self.afspraken[afspraak_naam].lesuur.setText(afspraak["timeSlotName"])
+        
+        self.scrolllayout.insertWidget(self.scrolllayout.count() - 1, self.afspraken[afspraak_naam])
+        self.count += 1
+
+    # Save the afspraken
+    def saveAfspraken(self):
+        save_dict["afspraken"] = []
+        
+        for widget in self.scrollAreaWidgetContents.children():
+            if widget.objectName().startswith("afspraak"):
+                afspraak = {}
+                afspraak["date"] = widget.datum.date()
+                afspraak["startTime"] = widget.startTime.time()
+                afspraak["endTime"] = widget.endTime.time()
+                afspraak["subjects"] = widget.onderwerpen.text()
+                afspraak["locations"] = widget.locaties.text()
+                afspraak["timeSlotName"] = widget.lesuur.text()
+                
+                save_dict["afspraken"].append(deepcopy(afspraak))
+
+        with open("rooster-epd.data", "wb") as save_file:
+            dump(save_dict, save_file)
+
 class mainWindow(QMainWindow, Ui_Rooster_epd):
     def __init__(self, parent=None):
         global save_dict
@@ -375,6 +478,10 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
             # Add notities to save_dict if it isn't
             if "notities" not in save_dict.keys():
                 save_dict["notities"] = ("", "", "", "", "", "", "")
+                
+            # Add afspraken to save_dict if it isn't
+            if "afspraken" not in save_dict.keys():
+                save_dict["afspraken"] = []
             
         else:
             # First time setup
@@ -395,6 +502,7 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         self.actionZermelo_koppelen.triggered.connect(self.zermeloKoppelenClicked)
         self.actionTijden_instellen.triggered.connect(self.tijdenInstellenClicked)
         self.actionNotities_bewerken.triggered.connect(self.notitiesBewerkenClicked)
+        self.actionAfspraken_bewerken.triggered.connect(self.afsprakenBewerkenClicked)
         self.actionRefresh_ports.triggered.connect(self.refreshPorts)
         self.vandaag.clicked.connect(self.vandaagClicked)
         self.morgen.clicked.connect(self.morgenClicked)
@@ -418,6 +526,10 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
     
     def notitiesBewerkenClicked(self):
         dlg = notitiesWindow()
+        dlg.exec()
+    
+    def afsprakenBewerkenClicked(self):
+        dlg = afsprakenWindow()
         dlg.exec()
     
     def refreshPorts(self):
