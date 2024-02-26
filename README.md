@@ -64,12 +64,15 @@ Note: The order is important, otherwise the Raspberry Pi Pico won't be detected 
    ![Main window](/Images/main_window.png)
 
    Note: If you connected the Raspberry Pi Pico after running the software you need to click on "`Instellingen`->`Refresh ports`" before you can select the port
-4. If you want to add notes click on "`Notities`->`Notities bewerken`", add your notes and click on save
+4. If you want to add notes click on "`Bewerken`->`Notities bewerken`", add your notes and click on `Save`
 
    ![Main window](/Images/notities_window.png)
-5. Click on `Vandaag` or `Morgen` depending on which day you'd like to upload
-6. Wait until the led on the Raspberry Pi Pico turns off
-7. Unplug the Raspberry Pi Pico
+5. If you want to add appointments click on "`Bewerken`->`Afspraken bewerken`", add your appointments and click on `Save`
+
+   ![Main window](/Images/afspraken_window.png)
+6. Click on `Vandaag` or `Morgen` depending on which day you'd like to upload
+7. Wait until the led on the Raspberry Pi Pico turns off
+8. Unplug the Raspberry Pi Pico
 
 
 ## Useful links
