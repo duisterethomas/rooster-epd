@@ -1,18 +1,21 @@
-from serial import Serial, SerialException, PARITY_EVEN, STOPBITS_ONE
+from serial import Serial, SerialException
 from pickle import load, dump
 from zermelo import Client
 from os.path import exists
 from copy import deepcopy
-from time import sleep
-from math import floor
 from glob import glob
-import datetime
 import sys
 
-from PySide6.QtCore import QObject, Signal, QThread, QTime, QDate
-from PySide6.QtWidgets import QMainWindow, QApplication, QDialog, QDialogButtonBox
+from PySide6.QtCore import QThread
+from PySide6.QtWidgets import QMainWindow, QApplication
 
 from rooster_epd_ui import *
+from rooster_epd_worker import Worker
+
+from rooster_epd_setup import setupWindow
+from rooster_epd_tijden import tijdenWindow
+from rooster_epd_notities import notitiesWindow
+from rooster_epd_afspraken import afsprakenWindow
 
 # List available serial ports function
 def serial_ports():
@@ -43,511 +46,8 @@ def serial_ports():
             pass
     return result
 
-# Thread for updating the epd
-class Worker(QObject):
-    finished = Signal()
-    
-    def __init__(self, ui_self, morgen):
-        super(Worker, self).__init__()
-        self.ui_self = ui_self
-        self.morgen = morgen
-    
-    # Function to send commands to the pico
-    def send_to_pico(self, command):
-        self.pico.write(f"{command}\r".encode())
-        
-        recieved = self.pico.read_until().strip()
-        while not recieved:
-            sleep(0.1)
-            recieved = self.pico.read_until().strip()
-        
-        print(recieved.decode())
-        
-        return recieved.decode()
-    
-    def run(self):
-        # Disable the UI and show message
-        self.ui_self.centralwidget.setDisabled(True)
-        self.ui_self.menuBar.setDisabled(True)
-        
-        # Connect and initialize the pico epd
-        self.pico = Serial(port=save_dict["port"], parity=PARITY_EVEN, stopbits=STOPBITS_ONE, timeout=1)
-        self.pico.flush()
-        recv = self.send_to_pico("init")
-        self.ui_self.statusbar.showMessage(recv)
-
-        # Get the current week and day
-        today = datetime.date.today()
-        isocal = datetime.date.isocalendar(today)
-        year = isocal[0]
-        week = isocal[1]
-        weekday = today.isoweekday()
-        
-        # If morgen add 1 day
-        if self.morgen:
-            if weekday == 7:
-                weekday = 1
-                if week == 52:
-                    week == 1
-                    year += 1
-                else:
-                    week += 1
-            else:
-                weekday += 1
-        
-        # Get the usercode
-        usercode = cl.get_user(save_dict["token"])["response"]["data"][0]["code"]
-        
-        # Request: yyyyww
-        # yyyy = year: {isocal[0]}
-        # ww = weeknumber: {"0"*(isocal[1]<10)}{isocal[1]}
-        # If weeknum < 10 add zero: {"0"*isocal[1]<10}
-        enrollments = cl.get_liveschedule(save_dict["token"], f"{year}{"0"*(week<10)}{week}", usercode)
-
-        # Get the lessons of today
-        lessons : list = enrollments['response']['data'][0]['appointments']
-        lessons_today = []
-        for lesson in lessons:
-            # Preprocess some of the data
-            lesson['start'] = datetime.datetime.fromtimestamp(lesson['start'])
-            lesson['end'] = datetime.datetime.fromtimestamp(lesson['end'])
-            lesson['startTimeSlotName'] = lesson['startTimeSlotName'].upper()
-            for i in range(len(lesson["subjects"])):
-                lesson['subjects'][i] = lesson['subjects'][i].upper()
-            
-            # Check the day number: 1 = monday...
-            if lesson['start'].isoweekday() == weekday:
-                lessons_today.append(deepcopy(lesson))
-        
-        # Add the afspraken to lessons_today
-        for afspraak in save_dict["afspraken"]:
-            if datetime.date(afspraak["date"].year(), afspraak["date"].month(), afspraak["date"].day()).isoweekday() == weekday:
-                lesson = {}
-                lesson["start"] = datetime.time(afspraak["startTime"].hour(), afspraak["startTime"].minute(), 0, 0)
-                lesson["end"] = datetime.time(afspraak["endTime"].hour(), afspraak["endTime"].minute(), 0, 0)
-                lesson["cancelled"] = False
-                lesson["subjects"] = [afspraak["subjects"]]
-                lesson["locations"] = [afspraak["locations"]]
-                lesson['startTimeSlotName'] = afspraak["timeSlotName"]
-                
-                lessons_today.append(deepcopy(lesson))
-
-        # Set the max size base don if there is a note
-        if save_dict["notities"][weekday-1] == "": max_size = 298
-        else: max_size = 286
-        
-        # Show it on the epd
-        for lesson in lessons_today:
-            # Get the start and end time in datetime format
-            lesson_starttime = lesson['start']
-            lesson_endtime = lesson['end']
-            
-            # Set the colour
-            # If cancelled: red (r), else: black (b)
-            if lesson['cancelled']: colour = "r"
-            else: colour = "b"
-            
-            # Set the block position and size
-            # (Lesson starttime in minutes - first lesson starttime) / (Last lesson endtime - First lesson starttime) * max_size
-            # (Lesson endtime in minutes - first lesson starttime) / (Last lesson endtime - First lesson starttime) * max_size - 2
-            ystartpos = round(((lesson_starttime.hour * 60) + lesson_starttime.minute - save_dict["begintijd"]) / (save_dict["eindtijd"] - save_dict["begintijd"]) * max_size)
-            yendpos = round(((lesson_endtime.hour * 60) + lesson_endtime.minute - save_dict["begintijd"]) / (save_dict["eindtijd"] - save_dict["begintijd"]) * max_size) - 2
-            ysize = yendpos - ystartpos
-            
-            # If the startpos and size are greater than or equal to 0 draw a rectangle on the epd
-            if ystartpos >= 0 and ysize >= 0:
-                # Draw a white filled rectangle on the epd to overwrite possible previous data
-                recv = self.send_to_pico(f"rectw000{"0"*((ystartpos<100)+(ystartpos<10))}{ystartpos}152{"0"*((ysize<100)+(ysize<10))}{ysize}1")
-                self.ui_self.statusbar.showMessage(recv)
-                
-                # Draw a rectangle outline
-                recv = self.send_to_pico(f"rect{colour}000{"0"*((ystartpos<100)+(ystartpos<10))}{ystartpos}152{"0"*((ysize<100)+(ysize<10))}{ysize}0")
-                self.ui_self.statusbar.showMessage(recv)
-            
-            lineystartpos = ystartpos + 3
-            lineyendpos = yendpos - 4
-            
-            # If the startpos and endpos are greater than or equal to 0 draw a line on the epd
-            if lineystartpos >= 0 and lineyendpos >= 0:
-                recv = self.send_to_pico(f"line{colour}046{"0"*((lineystartpos<100)+(lineystartpos<10))}{lineystartpos}046{"0"*((lineyendpos<100)+(lineyendpos<10))}{lineyendpos}")
-                self.ui_self.statusbar.showMessage(recv)
-            
-            # Set the starttimestamp + position
-            starttimestamp = lesson_starttime.strftime('%H:%M').removeprefix("0")
-            
-            # Add a space if the hour is only one digit long
-            if len(starttimestamp) < 5: starttimestamp = " " + starttimestamp
-            starttimestamp_ypos = ystartpos + 4
-            
-            # If starttimestamp y pos is greater than or equal to 0 draw the start timestamp on the epd
-            if starttimestamp_ypos >= 0:
-                recv = self.send_to_pico(f"text{colour}003{"0"*((starttimestamp_ypos<100)+(starttimestamp_ypos<10))}{starttimestamp_ypos}{starttimestamp}")
-                self.ui_self.statusbar.showMessage(recv)
-            
-            # Set the endtimestamp + position
-            endtimestamp = lesson_endtime.strftime('%H:%M').removeprefix("0")
-            
-            # Add a space if the hour is only one digit long
-            if len(endtimestamp) < 5: endtimestamp = " " + endtimestamp
-            endtimestamp_ypos = yendpos - 11
-            
-            # If endtimestamp y pos is greater than or equal to 0 draw the end timestamp on the epd
-            if endtimestamp_ypos >= 0:
-                recv = self.send_to_pico(f"text{colour}003{"0"*((endtimestamp_ypos<100)+(endtimestamp_ypos<10))}{endtimestamp_ypos}{endtimestamp}")
-                self.ui_self.statusbar.showMessage(recv)
-            
-            # Set the subjects + position
-            if len(lesson['subjects']) != 0:
-                for subject in enumerate(lesson['subjects']):
-                    if subject[0] == 0:
-                        subjects = subject[1]
-                    else:
-                        subjects += f",{subject[1]}"
-                subject_ypos = ystartpos + 4
-                
-                # If the subject y pos is greater than or equal to 0 draw the subject on the epd
-                if subject_ypos >= 0:
-                    recv = self.send_to_pico(f"text{colour}050{"0"*((subject_ypos<100)+(subject_ypos<10))}{subject_ypos}{subjects}")
-                    self.ui_self.statusbar.showMessage(recv)
-            
-            # Set the locations + position
-            if len(lesson['locations']) != 0:
-                for location in enumerate(lesson['locations']):
-                    if location[0] == 0:
-                        locations = location[1]
-                    else:
-                        locations += f",{location[1]}"
-                
-                # Set the location_ypos to the endtimestamp_ypos if endtimestamp_ypos is smaller than ystartpos + 16
-                location_ypos = min(ystartpos + 16, endtimestamp_ypos)
-                
-                # If the location y pos is greater than or equal to 0 draw the location on the epd
-                if location_ypos >= 0:
-                    recv = self.send_to_pico(f"text{colour}050{"0"*((location_ypos<100)+(location_ypos<10))}{location_ypos}{locations}")
-                    self.ui_self.statusbar.showMessage(recv)
-            
-            # Set the hour + position
-            hour : str = lesson['startTimeSlotName']
-            hour_ypos = ystartpos + 4
-            hour_xpos = 149 - (len(hour) * 8)
-            
-            # if the hour position is greater than or equal to 0 draw the hour
-            if hour_ypos >= 0 and hour_xpos >= 0:
-                recv = self.send_to_pico(f"text{colour}{"0"*((hour_xpos<100)+(hour_xpos<10))}{hour_xpos}{"0"*((hour_ypos<100)+(hour_ypos<10))}{hour_ypos}{hour}")
-                self.ui_self.statusbar.showMessage(recv)
-
-        # Draw the note if it isn't empty
-        if save_dict["notities"][weekday-1] != "":
-            recv = self.send_to_pico(f"textb002288{save_dict["notities"][weekday-1]}")
-            self.ui_self.statusbar.showMessage(recv)
-        
-        # Show the result
-        recv = self.send_to_pico("show")
-        self.ui_self.statusbar.showMessage(recv)
-        self.pico.close()
-        
-        # Enable the UI and clear the message
-        self.ui_self.centralwidget.setDisabled(False)
-        self.ui_self.menuBar.setDisabled(False)
-        self.ui_self.statusbar.clearMessage()
-        
-        # Send finished signal
-        self.finished.emit()
-        
-class setupWindow(QDialog, Ui_Rooster_epd_setup):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setupUi(self)
-        
-        # Connect the buttons to functions
-        self.buttonBox.accepted.connect(self.saveClicked)
-        
-        # Connect the changes to check if save button must be disabled
-        self.koppelcode.textChanged.connect(self.checkSaveDisabled)
-        self.schoolnaam.textChanged.connect(self.checkSaveDisabled)
-        
-        # Disable the save button
-        self.buttonBox.button(QDialogButtonBox.Save).setDisabled(True)
-        
-        if "school" in save_dict.keys():
-            # Set the schoolnaam text
-            self.schoolnaam.setText(save_dict["school"])
-    
-    # Check if save button must be disabled
-    def checkSaveDisabled(self):
-        self.buttonBox.button(QDialogButtonBox.Save).setDisabled(len(self.koppelcode.text()) == 0 or len(self.schoolnaam.text()) == 0)
-    
-    def saveClicked(self):
-        # Get the schoolnaam
-        save_dict["school"] = self.schoolnaam.text()
-        
-        # Create the zermelo client
-        cl = Client(save_dict["school"])
-    
-        # Get and a new zermelo token
-        save_dict["token"] = cl.authenticate(self.koppelcode.text())["access_token"]
-    
-        # Save the save_dict
-        with open("rooster-epd.data", "wb") as save_file:
-            dump(save_dict, save_file)
-        
-        # Close the ui
-        self.close()
-
-class tijdenWindow(QDialog, Ui_Rooster_epd_tijden):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setupUi(self)
-        
-        # Connect buttons to functions
-        self.buttonBox.accepted.connect(self.saveTijden)
-        
-        # Connect the changes to check if save button must be disabled
-        self.beginTijd.timeChanged.connect(self.checkSaveDisabled)
-        self.eindTijd.timeChanged.connect(self.checkSaveDisabled)
-        
-        # Calculate the begin and eind hour and minute
-        begin_hour = int(floor(save_dict["begintijd"]/60))
-        begin_minute = int(save_dict["begintijd"] - (begin_hour * 60))
-        
-        eind_hour = int(floor(save_dict["eindtijd"]/60))
-        eind_minute = int(save_dict["eindtijd"] - (eind_hour * 60))
-        
-        # Set begin tijd
-        q_time = QTime()
-        q_time.setHMS(begin_hour, begin_minute, 0, 0)
-        self.beginTijd.setTime(q_time)
-        
-        # Set eind tijd
-        q_time = QTime()
-        q_time.setHMS(eind_hour, eind_minute, 0, 0)
-        self.eindTijd.setTime(q_time)
-        
-        # Check if save button must be disabled
-        self.begintijd = self.beginTijd.time().hour()*60 + self.beginTijd.time().minute()
-        self.eindtijd = self.eindTijd.time().hour()*60 + self.eindTijd.time().minute()
-        self.buttonBox.button(QDialogButtonBox.Save).setDisabled(self.begintijd >= self.eindtijd)
-    
-    # Check if save button must be disabled
-    def checkSaveDisabled(self):
-        self.begintijd = self.beginTijd.time().hour()*60 + self.beginTijd.time().minute()
-        self.eindtijd = self.eindTijd.time().hour()*60 + self.eindTijd.time().minute()
-        self.buttonBox.button(QDialogButtonBox.Save).setDisabled(self.begintijd >= self.eindtijd)
-
-    def saveTijden(self):
-        save_dict["begintijd"] = self.begintijd
-        save_dict["eindtijd"] = self.eindtijd
-        with open("rooster-epd.data", "wb") as save_file:
-            dump(save_dict, save_file)
-
-class notitiesWindow(QDialog, Ui_Rooster_epd_notities):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setupUi(self)
-        
-        # Connect buttons to functions
-        self.buttonBox.accepted.connect(self.saveNotities)
-        
-        # Set the previous notes in all the line edits
-        self.maandag.setText(save_dict["notities"][0])
-        self.dinsdag.setText(save_dict["notities"][1])
-        self.woensdag.setText(save_dict["notities"][2])
-        self.donderdag.setText(save_dict["notities"][3])
-        self.vrijdag.setText(save_dict["notities"][4])
-        self.zaterdag.setText(save_dict["notities"][5])
-        self.zondag.setText(save_dict["notities"][6])
-
-    # Save the notities
-    def saveNotities(self):
-        save_dict["notities"] = (self.maandag.text(),
-                                 self.dinsdag.text(),
-                                 self.woensdag.text(),
-                                 self.donderdag.text(),
-                                 self.vrijdag.text(),
-                                 self.zaterdag.text(),
-                                 self.zondag.text())
-
-        with open("rooster-epd.data", "wb") as save_file:
-            dump(save_dict, save_file)
-
-class sjabloonFrame(QFrame, Ui_Sjabloon):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setupUi(self)
-        
-        self.startTime.timeChanged.connect(self.setMinTime)
-        
-        self.verwijderButton.clicked.connect(lambda:self.deleteLater())
-    
-    def setMinTime(self):
-        self.endTime.setMinimumTime(self.startTime.time())
-        
-class sjablonenWindow(QDialog, Ui_Rooster_epd_sjablonen):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setupUi(self)
-        
-        self.count = 0
-        self.sjablonen = {}
-        
-        # Get the layout in the scroll area
-        self.scrolllayout = self.scrollAreaWidgetContents.layout()
-        
-        # Connect buttons to functions
-        self.nieuwButton.clicked.connect(self.addSjabloon)
-        self.buttonBox.accepted.connect(self.saveSjablonen)
-        
-        # Add sjablonen if needed
-        if len(save_dict["sjablonen"]) > 0:
-            for sjabloon in save_dict["sjablonen"]:
-                self.addSjabloon(sjabloon)
-    
-    # Resize the ui if the window is resized
-    def resizeEvent(self, event):
-        QDialog.resizeEvent(self, event)
-        self.scrollArea.setGeometry(QRect(-1, 0, 396, event.size().height()-40))
-        self.buttonBox.setGeometry(QRect(0, event.size().height()-41, 396, 41))
-    
-    # Add a sjabloon
-    def addSjabloon(self, sjabloon = None):
-        sjabloon_naam = f"sjabloon{self.count}"
-        self.sjablonen[sjabloon_naam] = sjabloonFrame(self.scrollAreaWidgetContents)
-        self.sjablonen[sjabloon_naam].setObjectName(sjabloon_naam)
-        self.sjablonen[sjabloon_naam].verwijderButton.clicked.connect(lambda:self.sjablonen.pop(sjabloon_naam))
-        self.sjablonen[sjabloon_naam].verwijderButton.clicked.connect(lambda:self.scrolllayout.update())
-        self.sjablonen[sjabloon_naam].naam.textChanged.connect(self.checkSaveDisable)
-        
-        # Fill in the info if it was imported form the save
-        if type(sjabloon) == dict:
-            self.sjablonen[sjabloon_naam].naam.setText(sjabloon["name"])
-            self.sjablonen[sjabloon_naam].startTime.setTime(sjabloon["startTime"])
-            self.sjablonen[sjabloon_naam].endTime.setTime(sjabloon["endTime"])
-            self.sjablonen[sjabloon_naam].onderwerpen.setText(sjabloon["subjects"])
-            self.sjablonen[sjabloon_naam].locaties.setText(sjabloon["locations"])
-            self.sjablonen[sjabloon_naam].lesuur.setText(sjabloon["timeSlotName"])
-        
-        self.scrolllayout.insertWidget(self.scrolllayout.count() - 1, self.sjablonen[sjabloon_naam])
-        self.count += 1
-    
-    def checkSaveDisable(self):
-        sjabloon_names = []
-        disable = False
-        for widget in self.scrollAreaWidgetContents.children():
-            if widget.objectName().startswith("sjabloon"):
-                if widget.naam.text() == "" or widget.naam.text() in sjabloon_names:
-                    disable = True
-                else:
-                    sjabloon_names.append(widget.naam.text())
-        
-        self.buttonBox.button(QDialogButtonBox.Save).setDisabled(disable)
-
-    # Save the sjablonen
-    def saveSjablonen(self):
-        save_dict["sjablonen"] = []
-        
-        for widget in self.scrollAreaWidgetContents.children():
-            if widget.objectName().startswith("sjabloon"):
-                sjabloon = {}
-                sjabloon["name"] = widget.naam.text()
-                sjabloon["startTime"] = widget.startTime.time()
-                sjabloon["endTime"] = widget.endTime.time()
-                sjabloon["subjects"] = widget.onderwerpen.text()
-                sjabloon["locations"] = widget.locaties.text()
-                sjabloon["timeSlotName"] = widget.lesuur.text()
-                
-                save_dict["sjablonen"].append(deepcopy(sjabloon))
-
-        with open("rooster-epd.data", "wb") as save_file:
-            dump(save_dict, save_file)
-
-class afspraakFrame(QFrame, Ui_Afspraak):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setupUi(self)
-        
-        self.startTime.timeChanged.connect(self.setMinTime)
-        
-        self.verwijderButton.clicked.connect(lambda:self.deleteLater())
-        
-        # Set minimum date
-        today = datetime.date.today()
-        date = QDate()
-        date.setDate(today.year, today.month, today.day)
-        self.datum.setMinimumDate(date)
-    
-    def setMinTime(self):
-        self.endTime.setMinimumTime(self.startTime.time())
-        
-class afsprakenWindow(QDialog, Ui_Rooster_epd_afspraken):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setupUi(self)
-        
-        self.count = 0
-        self.afspraken = {}
-        
-        # Get the layout in the scroll area
-        self.scrolllayout = self.scrollAreaWidgetContents.layout()
-        
-        # Connect buttons to functions
-        self.nieuwButton.clicked.connect(self.addAfspraak)
-        self.buttonBox.accepted.connect(self.saveAfspraken)
-        
-        # Add afspraken if needed
-        if len(save_dict["afspraken"]) > 0:
-            for afspraak in save_dict["afspraken"]:
-                self.addAfspraak(afspraak)
-    
-    # Resize the ui if the window is resized
-    def resizeEvent(self, event):
-        QDialog.resizeEvent(self, event)
-        self.scrollArea.setGeometry(QRect(-1, 0, 396, event.size().height()-40))
-        self.buttonBox.setGeometry(QRect(0, event.size().height()-41, 396, 41))
-    
-    # Add an afspraak
-    def addAfspraak(self, afspraak = None):
-        afspraak_naam = f"afspraak{self.count}"
-        self.afspraken[afspraak_naam] = afspraakFrame(self.scrollAreaWidgetContents)
-        self.afspraken[afspraak_naam].setObjectName(afspraak_naam)
-        self.afspraken[afspraak_naam].verwijderButton.clicked.connect(lambda:self.afspraken.pop(afspraak_naam))
-        self.afspraken[afspraak_naam].verwijderButton.clicked.connect(lambda:self.scrolllayout.update())
-        
-        # Fill in the info if it was imported form the save
-        if type(afspraak) == dict:
-            self.afspraken[afspraak_naam].datum.setDate(afspraak["date"])
-            self.afspraken[afspraak_naam].startTime.setTime(afspraak["startTime"])
-            self.afspraken[afspraak_naam].endTime.setTime(afspraak["endTime"])
-            self.afspraken[afspraak_naam].onderwerpen.setText(afspraak["subjects"])
-            self.afspraken[afspraak_naam].locaties.setText(afspraak["locations"])
-            self.afspraken[afspraak_naam].lesuur.setText(afspraak["timeSlotName"])
-        
-        self.scrolllayout.insertWidget(self.scrolllayout.count() - 1, self.afspraken[afspraak_naam])
-        self.count += 1
-
-    # Save the afspraken
-    def saveAfspraken(self):
-        save_dict["afspraken"] = []
-        
-        for widget in self.scrollAreaWidgetContents.children():
-            if widget.objectName().startswith("afspraak"):
-                afspraak = {}
-                afspraak["date"] = widget.datum.date()
-                afspraak["startTime"] = widget.startTime.time()
-                afspraak["endTime"] = widget.endTime.time()
-                afspraak["subjects"] = widget.onderwerpen.text()
-                afspraak["locations"] = widget.locaties.text()
-                afspraak["timeSlotName"] = widget.lesuur.text()
-                
-                save_dict["afspraken"].append(deepcopy(afspraak))
-
-        with open("rooster-epd.data", "wb") as save_file:
-            dump(save_dict, save_file)
-
 class mainWindow(QMainWindow, Ui_Rooster_epd):
     def __init__(self, parent=None):
-        global save_dict
-        global cl
-        
         super().__init__(parent)
         self.setupUi(self)
         
@@ -555,14 +55,11 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         if exists("rooster-epd.data"):
             # Open and load the save_dict
             with open("rooster-epd.data", "rb") as save_file:
-                save_dict = load(save_file)
-            
-            # Create the zermelo client
-            cl = Client(save_dict["school"])
+                self.save_dict : dict = load(save_file)
             
             try:
                 # Dummy request to check if token is active
-                cl.get_user(save_dict["token"])
+                Client(self.save_dict["school"]).get_user(self.save_dict["token"])
                 
             except ValueError:
                 # Generate new token if token inactive
@@ -571,29 +68,29 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
                 self.zermeloKoppelenClicked()
                 
             # Add notities to save_dict if it doesn't exist
-            if "notities" not in save_dict.keys():
-                save_dict["notities"] = ("", "", "", "", "", "", "")
+            if "notities" not in self.save_dict.keys():
+                self.save_dict["notities"] = ("", "", "", "", "", "", "")
                 
             # Add afspraken to save_dict if it doesn't exist
-            if "afspraken" not in save_dict.keys():
-                save_dict["afspraken"] = []
+            if "afspraken" not in self.save_dict.keys():
+                self.save_dict["afspraken"] = []
                 
             # Add afspraken to save_dict if it doesn't exist
-            if "sjablonen" not in save_dict.keys():
-                save_dict["sjablonen"] = []
+            if "sjablonen" not in self.save_dict.keys():
+                self.save_dict["sjablonen"] = []
             
         else:
             # First time setup
             
             # Create a new save_dict
-            save_dict = {"school": "",
-                         "token": "",
-                         "begintijd": 510,
-                         "eindtijd": 970,
-                         "port": "",
-                         "notities": ("", "", "", "", "", "", ""),
-                         "afspraken": [],
-                         "sjablonen": []}
+            self.save_dict = {"school": "",
+                              "token": "",
+                              "begintijd": 510,
+                              "eindtijd": 970,
+                              "port": "",
+                              "notities": ("", "", "", "", "", "", ""),
+                              "afspraken": [],
+                              "sjablonen": []}
             
             # Open the setup window
             self.zermeloKoppelenClicked()
@@ -612,25 +109,25 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         self.refreshPorts()
     
     def zermeloKoppelenClicked(self):
-        prev_token = deepcopy(save_dict)["token"]
-        dlg = setupWindow()
+        prev_token = deepcopy(self.save_dict)["token"]
+        dlg = setupWindow(self.save_dict)
         dlg.exec()
                 
-        if save_dict["token"] == "":
+        if self.save_dict["token"] == "":
             self.statusbar.showMessage("Koppel met zermelo om verder te gaan")
-        elif save_dict["token"] != prev_token:
+        elif self.save_dict["token"] != prev_token:
             self.statusbar.showMessage("Zermelo gekoppeld")
     
     def tijdenInstellenClicked(self):
-        dlg = tijdenWindow()
+        dlg = tijdenWindow(self.save_dict)
         dlg.exec()
     
     def notitiesBewerkenClicked(self):
-        dlg = notitiesWindow()
+        dlg = notitiesWindow(self.save_dict)
         dlg.exec()
     
     def afsprakenBewerkenClicked(self):
-        dlg = afsprakenWindow()
+        dlg = afsprakenWindow(self.save_dict)
         dlg.exec()
     
     def refreshPorts(self):
@@ -644,23 +141,23 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
             self.pico_port.addItem(available_port)
         
         # Check if there is a port selected
-        self.vandaag.setDisabled(self.pico_port.currentText() == "<select port>" or save_dict["token"] == "")
-        self.morgen.setDisabled(self.pico_port.currentText() == "<select port>" or save_dict["token"] == "")
+        self.vandaag.setDisabled(self.pico_port.currentText() == "<select port>" or self.save_dict["token"] == "")
+        self.morgen.setDisabled(self.pico_port.currentText() == "<select port>" or self.save_dict["token"] == "")
         
         # Set the selected port to the saved port if available
-        if save_dict["port"] in available_ports:
-            self.pico_port.setCurrentText(save_dict["port"])
+        if self.save_dict["port"] in available_ports:
+            self.pico_port.setCurrentText(self.save_dict["port"])
     
     def portSelected(self):
         # Check if there is a port selected
-        self.vandaag.setDisabled(self.pico_port.currentText() == "<select port>" or save_dict["token"] == "")
-        self.morgen.setDisabled(self.pico_port.currentText() == "<select port>" or save_dict["token"] == "")
+        self.vandaag.setDisabled(self.pico_port.currentText() == "<select port>" or self.save_dict["token"] == "")
+        self.morgen.setDisabled(self.pico_port.currentText() == "<select port>" or self.save_dict["token"] == "")
         
         # Save the port
         if self.pico_port.currentText() != "<select port>":
-            save_dict["port"] = self.pico_port.currentText()
+            self.save_dict["port"] = self.pico_port.currentText()
             with open("rooster-epd.data", "wb") as save_file:
-                dump(save_dict, save_file)
+                dump(self.save_dict, save_file)
     
     def vandaagClicked(self):
         self.updateEpd(False)
@@ -670,7 +167,7 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
     
     def updateEpd(self, morgen):
         self.thread = QThread()
-        self.worker = Worker(self, morgen)
+        self.worker = Worker(self, self.save_dict, morgen)
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.run)
         self.worker.finished.connect(self.thread.quit)
