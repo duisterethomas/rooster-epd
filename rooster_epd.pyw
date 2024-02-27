@@ -77,7 +77,7 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
                 
             # Add afspraken to save_dict if it doesn't exist
             if "sjablonen" not in self.save_dict.keys():
-                self.save_dict["sjablonen"] = []
+                self.save_dict["sjablonen"] = {}
             
         else:
             # First time setup
@@ -90,7 +90,7 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
                               "port": "",
                               "notities": ("", "", "", "", "", "", ""),
                               "afspraken": [],
-                              "sjablonen": []}
+                              "sjablonen": {}}
             
             # Open the setup window
             self.zermeloKoppelenClicked()
@@ -137,8 +137,7 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         # Add the available ports to the dropdown
         self.pico_port.clear()
         self.pico_port.addItem("<select port>")
-        for available_port in available_ports:
-            self.pico_port.addItem(available_port)
+        self.pico_port.addItems(available_ports)
         
         # Check if there is a port selected
         self.vandaag.setDisabled(self.pico_port.currentText() == "<select port>" or self.save_dict["token"] == "")

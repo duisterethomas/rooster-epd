@@ -76,42 +76,22 @@
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QWidget" name="widget" native="true">
+      <widget class="QToolButton" name="nieuwButton">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>24</height>
-        </size>
+       <property name="text">
+        <string>Nieuwe afspraak</string>
        </property>
-       <widget class="QPushButton" name="nieuwButton">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>343</width>
-          <height>24</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>Nieuwe afspraak</string>
-        </property>
-       </widget>
-       <widget class="QComboBox" name="sjablonen">
-        <property name="geometry">
-         <rect>
-          <x>342</x>
-          <y>1</y>
-          <width>18</width>
-          <height>22</height>
-         </rect>
-        </property>
-       </widget>
+       <property name="popupMode">
+        <enum>QToolButton::MenuButtonPopup</enum>
+       </property>
+       <property name="toolButtonStyle">
+        <enum>Qt::ToolButtonTextOnly</enum>
+       </property>
       </widget>
      </item>
      <item>

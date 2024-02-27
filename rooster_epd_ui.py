@@ -1,5 +1,5 @@
 from PySide6.QtCore import QCoreApplication, QMetaObject, QRect, QSize, Qt
-from PySide6.QtWidgets import QComboBox, QLabel, QLineEdit, QPushButton, QSizePolicy, QStatusBar, QWidget, QDialogButtonBox, QTimeEdit, QDateEdit, QMenu, QMenuBar, QScrollArea, QFrame, QVBoxLayout, QSpacerItem
+from PySide6.QtWidgets import QComboBox, QLabel, QLineEdit, QPushButton, QSizePolicy, QStatusBar, QWidget, QDialogButtonBox, QTimeEdit, QDateEdit, QMenu, QMenuBar, QScrollArea, QFrame, QVBoxLayout, QSpacerItem, QToolButton
 from PySide6.QtGui import QAction
 
 # The main UI
@@ -298,22 +298,17 @@ class Ui_Rooster_epd_afspraken(object):
         self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 379, 241))
         self.verticalLayout = QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.widget = QWidget(self.scrollAreaWidgetContents)
-        self.widget.setObjectName(u"widget")
-        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.nieuwButton = QToolButton(self.scrollAreaWidgetContents)
+        self.nieuwButton.setObjectName(u"nieuwButton")
+        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.widget.sizePolicy().hasHeightForWidth())
-        self.widget.setSizePolicy(sizePolicy)
-        self.widget.setMinimumSize(QSize(0, 24))
-        self.nieuwButton = QPushButton(self.widget)
-        self.nieuwButton.setObjectName(u"nieuwButton")
-        self.nieuwButton.setGeometry(QRect(0, 0, 343, 24))
-        self.sjablonen = QComboBox(self.widget)
-        self.sjablonen.setObjectName(u"sjablonen")
-        self.sjablonen.setGeometry(QRect(342, 1, 18, 22))
+        sizePolicy.setHeightForWidth(self.nieuwButton.sizePolicy().hasHeightForWidth())
+        self.nieuwButton.setSizePolicy(sizePolicy)
+        self.nieuwButton.setPopupMode(QToolButton.MenuButtonPopup)
+        self.nieuwButton.setToolButtonStyle(Qt.ToolButtonTextOnly)
 
-        self.verticalLayout.addWidget(self.widget)
+        self.verticalLayout.addWidget(self.nieuwButton)
 
         self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
