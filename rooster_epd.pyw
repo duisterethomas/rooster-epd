@@ -480,11 +480,11 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
                 self.morgen.setDisabled(True)
                 self.zermeloKoppelenClicked()
                 
-            # Add notities to save_dict if it isn't
+            # Add notities to save_dict if it doesn't exist
             if "notities" not in save_dict.keys():
                 save_dict["notities"] = ("", "", "", "", "", "", "")
                 
-            # Add afspraken to save_dict if it isn't
+            # Add afspraken to save_dict if it doesn't exist
             if "afspraken" not in save_dict.keys():
                 save_dict["afspraken"] = []
             
