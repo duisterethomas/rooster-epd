@@ -375,6 +375,8 @@ class afspraakFrame(QFrame, Ui_Afspraak):
         super().__init__(parent)
         self.setupUi(self)
         
+        self.startTime.timeChanged.connect(self.setMinTime)
+        
         self.verwijderButton.clicked.connect(lambda:self.deleteLater())
         
         # Set minimum date
@@ -382,6 +384,9 @@ class afspraakFrame(QFrame, Ui_Afspraak):
         date = QDate()
         date.setDate(today.year, today.month, today.day)
         self.datum.setMinimumDate(date)
+    
+    def setMinTime(self):
+        self.endTime.setMinimumTime(self.startTime.time())
         
 class afsprakenWindow(QDialog, Ui_Rooster_epd_afspraken):
     def __init__(self, parent=None):
@@ -492,7 +497,8 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
                          "begintijd": 510,
                          "eindtijd": 970,
                          "port": "",
-                         "notities": ("", "", "", "", "", "", "")}
+                         "notities": ("", "", "", "", "", "", ""),
+                         "afspraken": []}
             
             # Open the setup window
             self.zermeloKoppelenClicked()
