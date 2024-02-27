@@ -9,7 +9,7 @@ import sys
 from PySide6.QtCore import QThread
 from PySide6.QtWidgets import QMainWindow, QApplication
 
-from rooster_epd_ui import *
+from rooster_epd_ui import Ui_Rooster_epd
 from rooster_epd_worker import Worker
 
 from rooster_epd_setup import setupWindow
