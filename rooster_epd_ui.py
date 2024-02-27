@@ -298,10 +298,22 @@ class Ui_Rooster_epd_afspraken(object):
         self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 379, 241))
         self.verticalLayout = QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout.setObjectName(u"verticalLayout")
-        self.nieuwButton = QPushButton(self.scrollAreaWidgetContents)
+        self.widget = QWidget(self.scrollAreaWidgetContents)
+        self.widget.setObjectName(u"widget")
+        sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.widget.sizePolicy().hasHeightForWidth())
+        self.widget.setSizePolicy(sizePolicy)
+        self.widget.setMinimumSize(QSize(0, 24))
+        self.nieuwButton = QPushButton(self.widget)
         self.nieuwButton.setObjectName(u"nieuwButton")
+        self.nieuwButton.setGeometry(QRect(0, 0, 343, 24))
+        self.sjablonen = QComboBox(self.widget)
+        self.sjablonen.setObjectName(u"sjablonen")
+        self.sjablonen.setGeometry(QRect(342, 1, 18, 22))
 
-        self.verticalLayout.addWidget(self.nieuwButton)
+        self.verticalLayout.addWidget(self.widget)
 
         self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
@@ -373,4 +385,108 @@ class Ui_Afspraak(object):
         self.onderwerpen.setPlaceholderText(QCoreApplication.translate("Afspraak", u"Onderwerp(en)", None))
         self.locaties.setPlaceholderText(QCoreApplication.translate("Afspraak", u"Locatie(s)", None))
         self.verwijderButton.setText(QCoreApplication.translate("Afspraak", u"Verwijder", None))
+    # retranslateUi
+
+# The sjablonen ui
+class Ui_Rooster_epd_sjablonen(object):
+    def setupUi(self, Rooster_epd_afspraken):
+        if not Rooster_epd_afspraken.objectName():
+            Rooster_epd_afspraken.setObjectName(u"Rooster_epd_sjablonen")
+        Rooster_epd_afspraken.resize(396, 281)
+        Rooster_epd_afspraken.setMinimumSize(QSize(396, 171))
+        Rooster_epd_afspraken.setMaximumSize(QSize(396, 16777215))
+        self.buttonBox = QDialogButtonBox(Rooster_epd_afspraken)
+        self.buttonBox.setObjectName(u"buttonBox")
+        self.buttonBox.setGeometry(QRect(0, 240, 396, 41))
+        self.buttonBox.setOrientation(Qt.Horizontal)
+        self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Save)
+        self.buttonBox.setCenterButtons(True)
+        self.scrollArea = QScrollArea(Rooster_epd_afspraken)
+        self.scrollArea.setObjectName(u"scrollArea")
+        self.scrollArea.setGeometry(QRect(-1, 0, 396, 241))
+        self.scrollArea.setFrameShape(QFrame.NoFrame)
+        self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollAreaWidgetContents = QWidget()
+        self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 379, 241))
+        self.verticalLayout = QVBoxLayout(self.scrollAreaWidgetContents)
+        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.nieuwButton = QPushButton(self.scrollAreaWidgetContents)
+        self.nieuwButton.setObjectName(u"nieuwButton")
+
+        self.verticalLayout.addWidget(self.nieuwButton)
+
+        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+        self.verticalLayout.addItem(self.verticalSpacer)
+
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+
+        self.retranslateUi(Rooster_epd_afspraken)
+        self.buttonBox.accepted.connect(Rooster_epd_afspraken.accept)
+        self.buttonBox.rejected.connect(Rooster_epd_afspraken.reject)
+
+        QMetaObject.connectSlotsByName(Rooster_epd_afspraken)
+    # setupUi
+
+    def retranslateUi(self, Rooster_epd_afspraken):
+        Rooster_epd_afspraken.setWindowTitle(QCoreApplication.translate("Rooster_epd_afspraken", u"Sjablonen bewerken", None))
+        self.nieuwButton.setText(QCoreApplication.translate("Rooster_epd_afspraken", u"Nieuw sjabloon", None))
+    # retranslateUi
+
+# The sjabloon frame
+class Ui_Sjabloon(object):
+    def setupUi(self, Afspraak):
+        if not Afspraak.objectName():
+            Afspraak.setObjectName(u"Sjabloon")
+        Afspraak.resize(361, 71)
+        Afspraak.setMinimumSize(QSize(361, 71))
+        Afspraak.setMaximumSize(QSize(361, 71))
+        Afspraak.setFrameShape(QFrame.StyledPanel)
+        self.lesuur = QLineEdit(Afspraak)
+        self.lesuur.setObjectName(u"lesuur")
+        self.lesuur.setGeometry(QRect(210, 10, 41, 22))
+        self.line = QFrame(Afspraak)
+        self.line.setObjectName(u"line")
+        self.line.setGeometry(QRect(60, 10, 21, 51))
+        self.line.setFrameShadow(QFrame.Plain)
+        self.line.setFrameShape(QFrame.VLine)
+        self.onderwerpen = QLineEdit(Afspraak)
+        self.onderwerpen.setObjectName(u"onderwerpen")
+        self.onderwerpen.setGeometry(QRect(80, 10, 121, 22))
+        self.locaties = QLineEdit(Afspraak)
+        self.locaties.setObjectName(u"locaties")
+        self.locaties.setGeometry(QRect(80, 40, 121, 22))
+        self.verwijderButton = QPushButton(Afspraak)
+        self.verwijderButton.setObjectName(u"verwijderButton")
+        self.verwijderButton.setGeometry(QRect(271, 39, 81, 24))
+        self.startTime = QTimeEdit(Afspraak)
+        self.startTime.setObjectName(u"startTime")
+        self.startTime.setGeometry(QRect(10, 10, 51, 22))
+        self.endTime = QTimeEdit(Afspraak)
+        self.endTime.setObjectName(u"endTime")
+        self.endTime.setGeometry(QRect(10, 40, 51, 22))
+        self.line_2 = QFrame(Afspraak)
+        self.line_2.setObjectName(u"line_2")
+        self.line_2.setGeometry(QRect(250, 0, 21, 71))
+        self.line_2.setFrameShadow(QFrame.Plain)
+        self.line_2.setFrameShape(QFrame.VLine)
+        self.naam = QLineEdit(Afspraak)
+        self.naam.setObjectName(u"naam")
+        self.naam.setGeometry(QRect(272, 10, 81, 22))
+
+        self.retranslateUi(Afspraak)
+
+        QMetaObject.connectSlotsByName(Afspraak)
+    # setupUi
+
+    def retranslateUi(self, Afspraak):
+        Afspraak.setWindowTitle(QCoreApplication.translate("Afspraak", u"Frame", None))
+        self.lesuur.setPlaceholderText(QCoreApplication.translate("Afspraak", u"Lesuur", None))
+        self.onderwerpen.setPlaceholderText(QCoreApplication.translate("Afspraak", u"Onderwerp(en)", None))
+        self.locaties.setPlaceholderText(QCoreApplication.translate("Afspraak", u"Locatie(s)", None))
+        self.verwijderButton.setText(QCoreApplication.translate("Afspraak", u"Verwijder", None))
+        self.naam.setPlaceholderText(QCoreApplication.translate("Afspraak", u"Naam", None))
     # retranslateUi
