@@ -143,6 +143,15 @@
    </property>
   </widget>
  </widget>
+ <tabstops>
+  <tabstop>startTime</tabstop>
+  <tabstop>endTime</tabstop>
+  <tabstop>onderwerpen</tabstop>
+  <tabstop>locaties</tabstop>
+  <tabstop>lesuur</tabstop>
+  <tabstop>datum</tabstop>
+  <tabstop>verwijderButton</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
