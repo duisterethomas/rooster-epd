@@ -127,8 +127,17 @@
     <addaction name="actionNotities_bewerken"/>
     <addaction name="actionAfspraken_bewerken"/>
    </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionGithub_repository"/>
+    <addaction name="separator"/>
+    <addaction name="actionOver_Rooster_epd"/>
+   </widget>
    <addaction name="menuBewerken"/>
    <addaction name="menuSettings"/>
+   <addaction name="menuHelp"/>
   </widget>
   <action name="actionTijden_instellen">
    <property name="text">
@@ -153,6 +162,16 @@
   <action name="actionAfspraken_bewerken">
    <property name="text">
     <string>Afspraken bewerken</string>
+   </property>
+  </action>
+  <action name="actionOver_Rooster_epd">
+   <property name="text">
+    <string>Over Rooster epd</string>
+   </property>
+  </action>
+  <action name="actionGithub_repository">
+   <property name="text">
+    <string>Github repository</string>
    </property>
   </action>
  </widget>

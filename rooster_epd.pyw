@@ -1,4 +1,5 @@
 from serial import Serial, SerialException
+from webbrowser import open_new_tab
 from pickle import load, dump
 from zermelo import Client
 from os.path import exists
@@ -7,9 +8,9 @@ from glob import glob
 import sys
 
 from PySide6.QtCore import QThread
-from PySide6.QtWidgets import QMainWindow, QApplication
+from PySide6.QtWidgets import QMainWindow, QApplication, QDialog
 
-from rooster_epd_ui import Ui_Rooster_epd
+from rooster_epd_ui import Ui_Rooster_epd, Ui_Rooster_epd_over
 from rooster_epd_worker import Worker
 
 from rooster_epd_setup import setupWindow
@@ -97,6 +98,8 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
             self.tijdenInstellenClicked()
             
         # Connect the buttons to functions
+        self.actionGithub_repository.triggered.connect(lambda:open_new_tab("https://github.com/duisterethomas/rooster-epd"))
+        self.actionOver_Rooster_epd.triggered.connect(self.overClicked)
         self.actionZermelo_koppelen.triggered.connect(self.zermeloKoppelenClicked)
         self.actionTijden_instellen.triggered.connect(self.tijdenInstellenClicked)
         self.actionNotities_bewerken.triggered.connect(self.notitiesBewerkenClicked)
@@ -107,6 +110,10 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         self.pico_port.currentTextChanged.connect(self.portSelected)
 
         self.refreshPorts()
+    
+    def overClicked(self):
+        dlg = overWindow()
+        dlg.exec()
     
     def zermeloKoppelenClicked(self):
         prev_token = deepcopy(self.save_dict)["token"]
@@ -173,6 +180,15 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         self.worker.finished.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.thread.deleteLater)
         self.thread.start()
+
+# The about screen
+class overWindow(QDialog, Ui_Rooster_epd_over):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        
+        # Put the version number on the about screen
+        self.version.setText("V1.3.1")
 
 # Create a QApplication
 app = QApplication(sys.argv)
