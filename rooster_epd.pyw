@@ -86,10 +86,10 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
                         afspraken_new.append(afspraak)
                 self.save_dict["afspraken"] = deepcopy(afspraken_new)
             else:
-                # Add afspraken to save_dict if it doesn't exist
+                # Add afspraken to save_dict
                 self.save_dict["afspraken"] = []
                 
-            # Add afspraken to save_dict if it doesn't exist
+            # Add sjablonen to save_dict if it doesn't exist
             if "sjablonen" not in self.save_dict.keys():
                 self.save_dict["sjablonen"] = {}
             
