@@ -56,7 +56,7 @@ class sjablonenWindow(QDialog, Ui_Rooster_epd_sjablonen):
         sjabloon_naam = f"sjabloon{self.count}"
         self.sjablonen[sjabloon_naam] = sjabloonFrame(self.scrollAreaWidgetContents)
         self.sjablonen[sjabloon_naam].setObjectName(sjabloon_naam)
-        self.sjablonen[sjabloon_naam].verwijderButton.clicked.connect(lambda:self.sjablonen.pop(sjabloon_naam))
+        self.sjablonen[sjabloon_naam].verwijderButton.clicked.connect(lambda _ = None, sjab_naam = sjabloon_naam: self.sjablonen.pop(sjab_naam))
         self.sjablonen[sjabloon_naam].verwijderButton.clicked.connect(lambda:self.scrolllayout.update())
         self.sjablonen[sjabloon_naam].naam.textChanged.connect(self.checkSaveDisable)
         

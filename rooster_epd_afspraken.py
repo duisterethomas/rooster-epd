@@ -82,18 +82,17 @@ class afsprakenWindow(QDialog, Ui_Rooster_epd_afspraken):
         
         for sjabloon in self.save_dict["sjablonen"].keys():
             self.sjablonen.append(QAction(text=sjabloon, parent=self.nieuwButton))
-            self.sjablonen[-1].triggered.connect(lambda:self.addAfspraak(self.save_dict["sjablonen"][sjabloon]))
+            self.sjablonen[-1].triggered.connect(lambda _ = None, sjab = sjabloon: self.addAfspraak(self.save_dict["sjablonen"][sjab]))
         
         self.nieuwButton.addActions(self.sjablonen)
-        
     
     # Add an afspraak
     def addAfspraak(self, afspraak = None):
         afspraak_naam = f"afspraak{self.count}"
         self.afspraken[afspraak_naam] = afspraakFrame(self.scrollAreaWidgetContents)
         self.afspraken[afspraak_naam].setObjectName(afspraak_naam)
-        self.afspraken[afspraak_naam].verwijderButton.clicked.connect(lambda:self.afspraken.pop(afspraak_naam))
-        self.afspraken[afspraak_naam].verwijderButton.clicked.connect(lambda:self.scrolllayout.update())
+        self.afspraken[afspraak_naam].verwijderButton.clicked.connect(lambda _ = None, afspr_naam = afspraak_naam: self.afspraken.pop(afspr_naam))
+        self.afspraken[afspraak_naam].verwijderButton.clicked.connect(lambda: self.scrolllayout.update())
         
         # Fill in the info if it was imported form the save
         if type(afspraak) == dict:
