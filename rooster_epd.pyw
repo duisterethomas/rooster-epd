@@ -1,4 +1,5 @@
 from serial import Serial, SerialException
+from datetime import datetime, date
 from webbrowser import open_new_tab
 from pickle import load, dump
 from zermelo import Client
@@ -58,6 +59,9 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
             with open("rooster-epd.data", "rb") as save_file:
                 self.save_dict : dict = load(save_file)
             
+            # Copy save_dict to detect changes
+            old_save_dict = deepcopy(self.save_dict)
+            
             try:
                 # Dummy request to check if token is active
                 Client(self.save_dict["school"]).get_user(self.save_dict["token"])
@@ -71,14 +75,28 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
             # Add notities to save_dict if it doesn't exist
             if "notities" not in self.save_dict.keys():
                 self.save_dict["notities"] = ("", "", "", "", "", "", "")
-                
-            # Add afspraken to save_dict if it doesn't exist
-            if "afspraken" not in self.save_dict.keys():
+            
+            # Check if afspraken are in save_dict
+            if "afspraken" in self.save_dict.keys():
+                # Remove old apppointments
+                today = date.today()
+                afspraken_new = []
+                for afspraak in self.save_dict["afspraken"]:
+                    if date(afspraak["date"].year(), afspraak["date"].month(), afspraak["date"].day()) >= today:
+                        afspraken_new.append(afspraak)
+                self.save_dict["afspraken"] = deepcopy(afspraken_new)
+            else:
+                # Add afspraken to save_dict if it doesn't exist
                 self.save_dict["afspraken"] = []
                 
             # Add afspraken to save_dict if it doesn't exist
             if "sjablonen" not in self.save_dict.keys():
                 self.save_dict["sjablonen"] = {}
+            
+            # Save the new save_dict if there are changes
+            if self.save_dict != old_save_dict:
+                with open("rooster-epd.data", "wb") as save_file:
+                    dump(self.save_dict, save_file)
             
         else:
             # First time setup
