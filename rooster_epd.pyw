@@ -206,7 +206,7 @@ class overWindow(QDialog, Ui_Rooster_epd_over):
         self.setupUi(self)
         
         # Put the version number on the about screen
-        self.version.setText("V1.3.1")
+        self.version.setText("V1.3.2")
 
 # Create a QApplication
 app = QApplication(sys.argv)
