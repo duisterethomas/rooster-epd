@@ -7,8 +7,8 @@ from rooster_epd_ui import Ui_Rooster_epd_setup
 
 # The functionality of the setup window
 class setupWindow(QDialog, Ui_Rooster_epd_setup):
-    def __init__(self, save_dict : dict):
-        super().__init__()
+    def __init__(self, parent = None, save_dict : dict = None):
+        super().__init__(parent)
         self.setupUi(self)
         
         self.save_dict = save_dict

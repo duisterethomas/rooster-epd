@@ -20,8 +20,8 @@ class sjabloonFrame(QFrame, Ui_Sjabloon):
         self.verwijderButton.clicked.connect(lambda:self.deleteLater())
         
 class sjablonenWindow(QDialog, Ui_Rooster_epd_sjablonen):
-    def __init__(self, save_dict : dict):
-        super().__init__()
+    def __init__(self, parent = None, save_dict : dict = None):
+        super().__init__(parent)
         self.setupUi(self)
         
         self.save_dict = save_dict

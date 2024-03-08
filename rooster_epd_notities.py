@@ -6,8 +6,8 @@ from PySide6.QtWidgets import QDialog, QDialogButtonBox
 from rooster_epd_ui import Ui_Rooster_epd_notities
 
 class notitiesWindow(QDialog, Ui_Rooster_epd_notities):
-    def __init__(self, save_dict : dict):
-        super().__init__()
+    def __init__(self, parent = None, save_dict : dict = None):
+        super().__init__(parent)
         self.setupUi(self)
         
         self.save_dict = save_dict

@@ -31,8 +31,8 @@ class afspraakFrame(QFrame, Ui_Afspraak):
         self.datum.setMinimumDate(min_date)
         
 class afsprakenWindow(QDialog, Ui_Rooster_epd_afspraken):
-    def __init__(self, save_dict : dict):
-        super().__init__()
+    def __init__(self, parent = None, save_dict : dict = None):
+        super().__init__(parent)
         self.setupUi(self)
         
         # Copy the save_dict to self.save_dict
@@ -66,7 +66,7 @@ class afsprakenWindow(QDialog, Ui_Rooster_epd_afspraken):
     
     # Open the sjablonen bewerken ui
     def openSjablonenBewerken(self):
-        dlg = sjablonenWindow(self.save_dict)
+        dlg = sjablonenWindow(self, self.save_dict)
         dlg.exec()
         
         # Refresh the template list

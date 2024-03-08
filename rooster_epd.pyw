@@ -49,7 +49,7 @@ def serial_ports():
     return result
 
 class mainWindow(QMainWindow, Ui_Rooster_epd):
-    def __init__(self, parent=None):
+    def __init__(self, parent = None):
         super().__init__(parent)
         self.setupUi(self)
         
@@ -130,12 +130,12 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         self.refreshPorts()
     
     def overClicked(self):
-        dlg = overWindow()
+        dlg = overWindow(self)
         dlg.exec()
     
     def zermeloKoppelenClicked(self):
         prev_token = deepcopy(self.save_dict)["token"]
-        dlg = setupWindow(self.save_dict)
+        dlg = setupWindow(self, self.save_dict)
         dlg.exec()
                 
         if self.save_dict["token"] == "":
@@ -144,15 +144,15 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
             self.statusbar.showMessage("Zermelo gekoppeld")
     
     def tijdenInstellenClicked(self):
-        dlg = tijdenWindow(self.save_dict)
+        dlg = tijdenWindow(self, self.save_dict)
         dlg.exec()
     
     def notitiesBewerkenClicked(self):
-        dlg = notitiesWindow(self.save_dict)
+        dlg = notitiesWindow(self, self.save_dict)
         dlg.exec()
     
     def afsprakenBewerkenClicked(self):
-        dlg = afsprakenWindow(self.save_dict)
+        dlg = afsprakenWindow(self, self.save_dict)
         dlg.exec()
     
     def refreshPorts(self):
@@ -201,8 +201,8 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
 
 # The about screen
 class overWindow(QDialog, Ui_Rooster_epd_over):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent = None):
+        super().__init__(parent)
         self.setupUi(self)
         
         # Put the version number on the about screen
