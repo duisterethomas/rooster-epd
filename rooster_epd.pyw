@@ -137,8 +137,12 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         self.vandaag.clicked.connect(self.vandaagClicked)
         self.morgen.clicked.connect(self.morgenClicked)
         self.pico_port.currentTextChanged.connect(self.portSelected)
-
+    	
+        # Put all the available ports in the ports dropdown
         self.refreshPorts()
+        
+        # Put the focus on the window
+        self.activateWindow()
     
     def checkUploadButtonsDisable(self):
         self.vandaag.setDisabled(self.pico_port.currentText() == "<select port>" or self.save_dict["token"] == "")
