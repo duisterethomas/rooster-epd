@@ -62,15 +62,27 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
             # Copy save_dict to detect changes
             old_save_dict = deepcopy(self.save_dict)
             
-            try:
-                # Dummy request to check if token is active
-                Client(self.save_dict["school"]).get_user(self.save_dict["token"])
-                
-            except ValueError:
-                # Generate new token if token inactive
-                self.vandaag.setDisabled(True)
-                self.morgen.setDisabled(True)
-                self.zermeloKoppelenClicked()
+            # Set token to "" if token is "ERROR"
+            if self.save_dict["token"] == "ERROR": self.save_dict["token"] = ""
+            
+            # If there is no token generate a new token
+            if self.save_dict["token"] == "":
+                self.zermeloKoppelenClicked(firstTimeSetup = True)
+            else:
+                try:
+                    # Dummy request to check if token is active
+                    Client(self.save_dict["school"]).get_user(self.save_dict["token"])
+                    
+                except ValueError:
+                    # Disable the upload buttons
+                    self.vandaag.setDisabled(True)
+                    self.morgen.setDisabled(True)
+                    
+                    # Generate a new token
+                    self.zermeloKoppelenClicked(firstTimeSetup = True)
+                    
+                    # Re-enable the upload buttons if a port is selected
+                    self.checkUploadButtonsDisable()
                 
             # Add notities to save_dict if it doesn't exist
             if "notities" not in self.save_dict.keys():
@@ -111,12 +123,14 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
                               "afspraken": [],
                               "sjablonen": {}}
             
-            # Open the setup window
-            self.zermeloKoppelenClicked()
-            self.tijdenInstellenClicked()
+            # Generate a token
+            self.zermeloKoppelenClicked(firstTimeSetup = True)
+            
+            # Open the tijden instellen window with first time setup enabled
+            self.tijdenInstellenClicked(firstTimeSetup = True)
             
         # Connect the buttons to functions
-        self.actionGithub_repository.triggered.connect(lambda:open_new_tab("https://github.com/duisterethomas/rooster-epd"))
+        self.actionGithub_repository.triggered.connect(lambda: open_new_tab("https://github.com/duisterethomas/rooster-epd"))
         self.actionOver_Rooster_epd.triggered.connect(self.overClicked)
         self.actionZermelo_koppelen.triggered.connect(self.zermeloKoppelenClicked)
         self.actionTijden_instellen.triggered.connect(self.tijdenInstellenClicked)
@@ -129,22 +143,33 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
 
         self.refreshPorts()
     
+    def checkUploadButtonsDisable(self):
+        self.vandaag.setDisabled(self.pico_port.currentText() == "<select port>" or self.save_dict["token"] == "")
+        self.morgen.setDisabled(self.pico_port.currentText() == "<select port>" or self.save_dict["token"] == "")
+    
     def overClicked(self):
         dlg = overWindow(self)
         dlg.exec()
     
-    def zermeloKoppelenClicked(self):
+    def zermeloKoppelenClicked(self, _ = None, firstTimeSetup = False):
         prev_token = deepcopy(self.save_dict)["token"]
-        dlg = setupWindow(self, self.save_dict)
+        dlg = setupWindow(self, self.save_dict, firstTimeSetup)
         dlg.exec()
-                
+        
+        # Close the program when the close button was pressed
         if self.save_dict["token"] == "":
-            self.statusbar.showMessage("Koppel met zermelo om verder te gaan")
-        elif self.save_dict["token"] != prev_token:
+            sys.exit()
+        
+        # Open the window again if an error occured while generating a token
+        while self.save_dict["token"] == "ERROR":
+            self.zermeloKoppelenClicked(firstTimeSetup = True)
+        
+        # If the token has changed show "Zermelo gekoppeld" in the status bar
+        if self.save_dict["token"] != prev_token:
             self.statusbar.showMessage("Zermelo gekoppeld")
     
-    def tijdenInstellenClicked(self):
-        dlg = tijdenWindow(self, self.save_dict)
+    def tijdenInstellenClicked(self, _ = None, firstTimeSetup = False):
+        dlg = tijdenWindow(self, self.save_dict, firstTimeSetup)
         dlg.exec()
     
     def notitiesBewerkenClicked(self):
@@ -164,18 +189,16 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         self.pico_port.addItem("<select port>")
         self.pico_port.addItems(available_ports)
         
-        # Check if there is a port selected
-        self.vandaag.setDisabled(self.pico_port.currentText() == "<select port>" or self.save_dict["token"] == "")
-        self.morgen.setDisabled(self.pico_port.currentText() == "<select port>" or self.save_dict["token"] == "")
+        # Check if the upload buttons should be disabled
+        self.checkUploadButtonsDisable()
         
         # Set the selected port to the saved port if available
         if self.save_dict["port"] in available_ports:
             self.pico_port.setCurrentText(self.save_dict["port"])
     
     def portSelected(self):
-        # Check if there is a port selected
-        self.vandaag.setDisabled(self.pico_port.currentText() == "<select port>" or self.save_dict["token"] == "")
-        self.morgen.setDisabled(self.pico_port.currentText() == "<select port>" or self.save_dict["token"] == "")
+        # Check if the upload buttons should be disabled
+        self.checkUploadButtonsDisable()
         
         # Save the port
         if self.pico_port.currentText() != "<select port>":
