@@ -13,6 +13,9 @@ class setupWindow(QDialog, Ui_Rooster_epd_setup):
         
         self.save_dict = save_dict
         
+        # Reset the token if token is "ERROR"
+        if self.save_dict["token"] == "ERROR": self.save_dict["token"] = ""
+        
         # Connect the buttons to functions
         self.buttonBox.accepted.connect(self.saveClicked)
         

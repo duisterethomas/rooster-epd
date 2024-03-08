@@ -62,11 +62,8 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
             # Copy save_dict to detect changes
             old_save_dict = deepcopy(self.save_dict)
             
-            # Set token to "" if token is "ERROR"
-            if self.save_dict["token"] == "ERROR": self.save_dict["token"] = ""
-            
             # If there is no token generate a new token
-            if self.save_dict["token"] == "":
+            if self.save_dict["token"] in ("", "ERROR"):
                 self.zermeloKoppelenClicked(firstTimeSetup = True)
             else:
                 try:
