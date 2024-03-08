@@ -1,10 +1,10 @@
 from serial import Serial, SerialException
-from datetime import datetime, date
 from webbrowser import open_new_tab
 from pickle import load, dump
 from zermelo import Client
 from os.path import exists
 from copy import deepcopy
+from datetime import date
 from glob import glob
 import sys
 
