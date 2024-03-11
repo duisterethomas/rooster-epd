@@ -1,3 +1,4 @@
+from copy import deepcopy
 from pickle import dump
 
 from PySide6.QtCore import QRect
@@ -62,6 +63,12 @@ class sjablonenWindow(QDialog, Ui_Rooster_epd_sjablonen):
         self.sjablonen[sjabloon_naam].setObjectName(sjabloon_naam)
         self.sjablonen[sjabloon_naam].verwijderButton.clicked.connect(lambda _ = None, sjab_naam = sjabloon_naam: self.sjablonen.pop(sjab_naam))
         self.sjablonen[sjabloon_naam].verwijderButton.clicked.connect(lambda:self.scrolllayout.update())
+        self.sjablonen[sjabloon_naam].verwijderButton.clicked.connect(self.checkSaveDisable)
+        self.sjablonen[sjabloon_naam].startTime.timeChanged.connect(self.checkSaveDisable)
+        self.sjablonen[sjabloon_naam].endTime.timeChanged.connect(self.checkSaveDisable)
+        self.sjablonen[sjabloon_naam].onderwerpen.textChanged.connect(self.checkSaveDisable)
+        self.sjablonen[sjabloon_naam].locaties.textChanged.connect(self.checkSaveDisable)
+        self.sjablonen[sjabloon_naam].lesuur.textChanged.connect(self.checkSaveDisable)
         self.sjablonen[sjabloon_naam].naam.textChanged.connect(self.checkSaveDisable)
         
         # Fill in the info if it was imported form the save
@@ -79,31 +86,31 @@ class sjablonenWindow(QDialog, Ui_Rooster_epd_sjablonen):
         # Check if save button should be disabled
         self.checkSaveDisable()
     
-    # Check if every template has a name, if not disable the save button
+    # Check if every template has a name and if there are changes
     def checkSaveDisable(self):
         sjabloon_names = []
         disable = False
+        self.new_sjablonen = {}
+        
         for widget in self.scrollAreaWidgetContents.children():
             if widget.objectName().startswith("sjabloon"):
                 if widget.naam.text() == "" or widget.naam.text() in sjabloon_names:
                     disable = True
                 else:
                     sjabloon_names.append(widget.naam.text())
+                
+                self.new_sjablonen[widget.naam.text()] = {"name": widget.naam.text(),
+                                                          "startTime": widget.startTime.time(),
+                                                          "endTime": widget.endTime.time(),
+                                                          "subjects": widget.onderwerpen.text(),
+                                                          "locations": widget.locaties.text(),
+                                                          "timeSlotName": widget.lesuur.text()}
         
-        self.buttonBox.button(QDialogButtonBox.Save).setDisabled(disable)
+        self.buttonBox.button(QDialogButtonBox.Save).setDisabled(disable or self.new_sjablonen == self.save_dict["sjablonen"])
 
     # Save the sjablonen
     def saveSjablonen(self):
-        self.save_dict["sjablonen"] = {}
-        
-        for widget in self.scrollAreaWidgetContents.children():
-            if widget.objectName().startswith("sjabloon"):
-                self.save_dict["sjablonen"][widget.naam.text()] = {"name": widget.naam.text(),
-                                                                   "startTime": widget.startTime.time(),
-                                                                   "endTime": widget.endTime.time(),
-                                                                   "subjects": widget.onderwerpen.text(),
-                                                                   "locations": widget.locaties.text(),
-                                                                   "timeSlotName": widget.lesuur.text()}
+        self.save_dict["sjablonen"] = deepcopy(self.new_sjablonen)
 
         with open("rooster-epd.data", "wb") as save_file:
             dump(self.save_dict, save_file)

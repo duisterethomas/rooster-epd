@@ -97,6 +97,13 @@ class afsprakenWindow(QDialog, Ui_Rooster_epd_afspraken):
         self.afspraken[afspraak_naam].setObjectName(afspraak_naam)
         self.afspraken[afspraak_naam].verwijderButton.clicked.connect(lambda _ = None, afspr_naam = afspraak_naam: self.afspraken.pop(afspr_naam))
         self.afspraken[afspraak_naam].verwijderButton.clicked.connect(lambda: self.scrolllayout.update())
+        self.afspraken[afspraak_naam].verwijderButton.clicked.connect(self.checkSaveDisable)
+        self.afspraken[afspraak_naam].startTime.timeChanged.connect(self.checkSaveDisable)
+        self.afspraken[afspraak_naam].endTime.timeChanged.connect(self.checkSaveDisable)
+        self.afspraken[afspraak_naam].onderwerpen.textChanged.connect(self.checkSaveDisable)
+        self.afspraken[afspraak_naam].locaties.textChanged.connect(self.checkSaveDisable)
+        self.afspraken[afspraak_naam].lesuur.textChanged.connect(self.checkSaveDisable)
+        self.afspraken[afspraak_naam].datum.dateChanged.connect(self.checkSaveDisable)
         
         # Fill in the info if it was imported form the save
         if type(afspraak) == dict:
@@ -110,10 +117,13 @@ class afsprakenWindow(QDialog, Ui_Rooster_epd_afspraken):
         
         self.scrolllayout.insertWidget(self.scrolllayout.count() - 1, self.afspraken[afspraak_naam])
         self.count += 1
-
-    # Save the afspraken
-    def saveAfspraken(self):
-        self.save_dict["afspraken"] = []
+        
+        # Check if save button should be disabled
+        self.checkSaveDisable()
+    
+    # Check if every template has a name and if there are changes
+    def checkSaveDisable(self):
+        self.new_afspraken = []
         
         for widget in self.scrollAreaWidgetContents.children():
             if widget.objectName().startswith("afspraak"):
@@ -125,7 +135,13 @@ class afsprakenWindow(QDialog, Ui_Rooster_epd_afspraken):
                 afspraak["locations"] = widget.locaties.text()
                 afspraak["timeSlotName"] = widget.lesuur.text()
                 
-                self.save_dict["afspraken"].append(deepcopy(afspraak))
+                self.new_afspraken.append(deepcopy(afspraak))
+        
+        self.buttonBox.button(QDialogButtonBox.Save).setDisabled(self.new_afspraken == self.save_dict["afspraken"])
+
+    # Save the afspraken
+    def saveAfspraken(self):
+        self.save_dict["afspraken"] = deepcopy(self.new_afspraken)
 
         with open("rooster-epd.data", "wb") as save_file:
             dump(self.save_dict, save_file)
