@@ -3,7 +3,7 @@ from datetime import date
 from pickle import dump
 
 from PySide6.QtCore import QRect, QDate
-from PySide6.QtWidgets import QFrame, QDialog
+from PySide6.QtWidgets import QFrame, QDialog, QDialogButtonBox
 from PySide6.QtGui import QAction
 
 from rooster_epd_ui import Ui_Afspraak, Ui_Rooster_epd_afspraken
@@ -34,6 +34,10 @@ class afsprakenWindow(QDialog, Ui_Rooster_epd_afspraken):
     def __init__(self, parent = None, save_dict : dict = None):
         super().__init__(parent)
         self.setupUi(self)
+        
+        # Set the text of the buttonbox buttons
+        self.buttonBox.button(QDialogButtonBox.Save).setText("Opslaan")
+        self.buttonBox.button(QDialogButtonBox.Cancel).setText("Annuleren")
         
         # Copy the save_dict to self.save_dict
         self.save_dict = save_dict

@@ -11,6 +11,10 @@ class tijdenWindow(QDialog, Ui_Rooster_epd_tijden):
         super().__init__(parent)
         self.setupUi(self)
         
+        # Set the text of the buttonbox buttons
+        self.buttonBox.button(QDialogButtonBox.Save).setText("Opslaan")
+        self.buttonBox.button(QDialogButtonBox.Cancel).setText("Annuleren")
+        
         self.save_dict = save_dict
         
         # Connect buttons to functions
