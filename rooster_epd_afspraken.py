@@ -16,13 +16,14 @@ class afspraakFrame(QFrame, Ui_Afspraak):
         self.setupUi(self)
         
         # Add a minimum time check
-        self.startTime.timeChanged.connect(lambda:self.endTime.setMinimumTime(self.startTime.time()))
+        self.startTime.timeChanged.connect(lambda: self.endTime.setMinimumTime(self.startTime.time()))
         
         # Add a max length check
-        self.lesuur.textChanged.connect(lambda:self.onderwerpen.setMaxLength(12-len(self.lesuur.text())))
+        self.lesuur.textChanged.connect(lambda: self.onderwerpen.setMaxLength(12-len(self.lesuur.text())))
         
         # Delete the sjabloon when verwijder is clicked
-        self.verwijderButton.clicked.connect(lambda:self.deleteLater())
+        self.verwijderButton.clicked.connect(lambda: self.setParent(None))
+        self.verwijderButton.clicked.connect(lambda: self.deleteLater())
         
         # Set minimum date
         today = date.today()
