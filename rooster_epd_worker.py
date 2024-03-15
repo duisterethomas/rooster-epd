@@ -10,11 +10,12 @@ from PySide6.QtCore import QObject, Signal
 class Worker(QObject):
     finished = Signal()
     
-    def __init__(self, ui_self, save_dict : dict, morgen : bool):
+    def __init__(self, ui_self, save_dict : dict, morgen : bool, offline : bool):
         super(Worker, self).__init__()
         self.ui_self = ui_self
         self.save_dict = save_dict
         self.morgen = morgen
+        self.offline = offline
     
     # Function to send commands to the pico
     def send_to_pico(self, command):
@@ -59,32 +60,34 @@ class Worker(QObject):
             else:
                 weekday += 1
         
-        # Get the zermelo client
-        cl = Client(self.save_dict["school"])
-        
-        # Get the usercode
-        usercode = cl.get_user(self.save_dict["token"])["response"]["data"][0]["code"]
-        
-        # Request: yyyyww
-        # yyyy = year: {isocal[0]}
-        # ww = weeknumber: {"0"*(isocal[1]<10)}{isocal[1]}
-        # If weeknum < 10 add zero: {"0"*isocal[1]<10}
-        enrollments = cl.get_liveschedule(self.save_dict["token"], f"{year}{"0"*(week<10)}{week}", usercode)
-
-        # Get the lessons of today
-        lessons : list = enrollments['response']['data'][0]['appointments']
         lessons_today = []
-        for lesson in lessons:
-            # Preprocess some of the data
-            lesson['start'] = datetime.fromtimestamp(lesson['start'])
-            lesson['end'] = datetime.fromtimestamp(lesson['end'])
-            lesson['startTimeSlotName'] = lesson['startTimeSlotName'].upper()
-            for i in range(len(lesson["subjects"])):
-                lesson['subjects'][i] = lesson['subjects'][i].upper()
+        
+        if not self.offline:
+            # Get the zermelo client
+            cl = Client(self.save_dict["school"])
             
-            # Check the day number: 1 = monday...
-            if lesson['start'].isoweekday() == weekday:
-                lessons_today.append(deepcopy(lesson))
+            # Get the usercode
+            usercode = cl.get_user(self.save_dict["token"])["response"]["data"][0]["code"]
+            
+            # Request: yyyyww
+            # yyyy = year: {isocal[0]}
+            # ww = weeknumber: {"0"*(isocal[1]<10)}{isocal[1]}
+            # If weeknum < 10 add zero: {"0"*isocal[1]<10}
+            enrollments = cl.get_liveschedule(self.save_dict["token"], f"{year}{"0"*(week<10)}{week}", usercode)
+
+            # Get the lessons of today
+            lessons : list = enrollments['response']['data'][0]['appointments']
+            for lesson in lessons:
+                # Preprocess some of the data
+                lesson['start'] = datetime.fromtimestamp(lesson['start'])
+                lesson['end'] = datetime.fromtimestamp(lesson['end'])
+                lesson['startTimeSlotName'] = lesson['startTimeSlotName'].upper()
+                for i in range(len(lesson["subjects"])):
+                    lesson['subjects'][i] = lesson['subjects'][i].upper()
+                
+                # Check the day number: 1 = monday...
+                if lesson['start'].isoweekday() == weekday:
+                    lessons_today.append(deepcopy(lesson))
         
         # Add the afspraken to lessons_today
         for afspraak in self.save_dict["afspraken"]:

@@ -9,7 +9,7 @@ from glob import glob
 import sys
 
 from PySide6.QtCore import QThread
-from PySide6.QtWidgets import QMainWindow, QApplication, QDialog
+from PySide6.QtWidgets import QMainWindow, QApplication, QDialog, QMessageBox
 
 from rooster_epd_ui import Ui_Rooster_epd, Ui_Rooster_epd_over
 from rooster_epd_worker import Worker
@@ -18,6 +18,8 @@ from rooster_epd_setup import setupWindow
 from rooster_epd_tijden import tijdenWindow
 from rooster_epd_notities import notitiesWindow
 from rooster_epd_afspraken import afsprakenWindow
+
+from requests.exceptions import ConnectionError
 
 # List available serial ports function
 def serial_ports():
@@ -69,7 +71,14 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
                 try:
                     # Dummy request to check if token is active
                     Client(self.save_dict["school"]).get_user(self.save_dict["token"])
+                    self.offline_mode = False
                     
+                except ConnectionError:
+                    # Enable offline mode
+                    self.offline_mode = True
+                    QMessageBox.warning(None,'Geen internet',"Je hebt geen verbinding met internet, dit betekent dat alleen je notities en/of eigen afsrpaken op het E-Paper Display gezet kunnen worden. Maak verbinding met internet en start het programma opnieuw op om je Zermelo rooster te kunnen uploaden.", QMessageBox.Close)
+                    self.actionZermelo_koppelen.setDisabled(True)
+                
                 except ValueError:
                     # Disable the upload buttons
                     self.vandaag.setDisabled(True)
@@ -215,7 +224,7 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
     
     def updateEpd(self, morgen):
         self.thread = QThread()
-        self.worker = Worker(self, self.save_dict, morgen)
+        self.worker = Worker(self, self.save_dict, morgen, self.offline_mode)
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.run)
         self.worker.finished.connect(self.thread.quit)
