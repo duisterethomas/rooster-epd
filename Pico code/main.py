@@ -1,118 +1,83 @@
-from epd_2in9_b import EPD_2in9_B
+from zermelo_api import Client
+from ntp import set_time
+
+from math import ceil
+import network
+import json
+import time
 
 from machine import Pin
-import select
-import sys
 
+# Set led pin
+led = Pin("LED", Pin.OUT)
 
-# Set up the poll object
-poll_obj = select.poll()
-poll_obj.register(sys.stdin, select.POLLIN)
+# Turn on led
+led.on()
 
-# Init EPD and led pin
-epd = EPD_2in9_B()
-led = Pin(25, Pin.OUT)
+# Load the save file
+try:
+    with open("save.json", "r") as file:
+        save = json.load(file)
+except OSError:  # open failed
+    save = {"wlan": {},
+            "school": "",
+            "token": "",
+            "starttime": 510,
+            "endtime": 970,
+            "notes": ("", "", "", "", "", "", ""),
+            "appointments": []}
+    
+    with open("save.json", "w") as file:
+        json.dump(save, file)
 
+# Get a list of all available networks
+wlan = network.WLAN(network.STA_IF)
+wlan.active(True)
+networks = wlan.scan() # list with tupples with 6 fields ssid, bssid, channel, RSSI, security, hidden
 
-while True:
-    # Wait for input on stdin
-    poll_results = poll_obj.poll()
-    if poll_results:
-        # Read the data from stdin (read data coming from PC)
-        data = sys.stdin.readline().strip()
-        # data[0] = colour
-        # data[1:4] = text X position
-        # data[4:7] = text Y position
-        # data[7:] = text
+networks.sort(key=lambda x:x[3], reverse=True) # sorted on RSSI (3)
+
+# Connect to network if in list
+for w in networks:
+    ssid = w[0].decode()
+    
+    if ssid in save["wlan"].keys():
+        wlan.connect(ssid, save["wlan"][ssid])
         
-        if len(data) > 4:
-            # Get the colour
-            if data[4] == "r":
-                colour = "Red"
-                imagered_colour = 0x00
-                imageblack_colour = 0x00
-            elif data[4] == "b":
-                colour = "Black"
-                imagered_colour = 0xff
-                imageblack_colour = 0xff
-            elif data[4] == "w":
-                colour = "White"
-                imagered_colour = 0xff
-                imageblack_colour = 0x00
+        print(f'Connecting to {ssid}')
         
-        if data == "init":
-            print('Initializing display...')
-            # Turn the display on
-            led.on()
+        timeout = 10
+        while not wlan.isconnected() and timeout != 0:
+            time.sleep(1)
+            timeout -= 1
             
-            # Clear the display
-            epd.Clear(0xff, 0xff)
-            
-            # Init the layers
-            epd.imageblack.fill(0x00)
-            epd.imagered.fill(0xff)
-        
-        # Draw a line command
-        elif data[0:4] == "line":
-            if len(data) == 17:
-                # Draw the line
-                print(f'{colour} line X{int(data[5:8])} Y{int(data[8:11])} W{int(data[11:14])} H{int(data[14:17])}')
-                epd.imagered.line(int(data[5:8]),
-                                    int(data[8:11]),
-                                    int(data[11:14]),
-                                    int(data[14:17]),
-                                    imagered_colour)
-                epd.imageblack.line(int(data[5:8]),
-                                    int(data[8:11]),
-                                    int(data[11:14]),
-                                    int(data[14:17]),
-                                    imageblack_colour)
-            else:
-                print("Invalid parameters")
-            
-        # Draw a rectangle command
-        elif data[0:4] == "rect":
-            if len(data) == 18:
-                # Draw the rectangle
-                print(f'{colour}{" filled" * int(data[17])} rectangle X{int(data[5:8])} Y{int(data[8:11])} W{int(data[11:14])} H{int(data[14:17])}')
-                epd.imagered.rect(int(data[5:8]),
-                                int(data[8:11]),
-                                int(data[11:14]),
-                                int(data[14:17]),
-                                imagered_colour, int(data[17]))
-                epd.imageblack.rect(int(data[5:8]),
-                                    int(data[8:11]),
-                                    int(data[11:14]),
-                                    int(data[14:17]),
-                                    imageblack_colour, int(data[17]))
-            else:
-                print("Invalid parameters")
-        
-        # Draw text command
-        elif data[0:4] == "text":
-            if len(data) > 11:
-                # Draw the text
-                print(f'{colour} text X{int(data[5:8])} Y{int(data[8:11])}: {data[11:]}')
-                epd.imagered.text(data[11:], int(data[5:8]), int(data[8:11]), imagered_colour)
-                epd.imageblack.text(data[11:], int(data[5:8]), int(data[8:11]), imageblack_colour)
-            else:
-                print("Invalid parameters")
-        
-        # Show the result command
-        elif data == "show":
-            print("Showing final result...")
-            # Display it
-            epd.display()
-            
-            # Turn led off
-            led.off()
-        
-        # Exit/cancel command
-        elif data == "exit":
-            print("Exit")
-            # Turn led off
-            led.off()
-        
-        # Unknown command recieved
+        if wlan.isconnected():
+            print("Connected!")
+            break
         else:
-            print(f"Unknown command: {data}")
+            print("Connection failed")
+
+# Test if token is valid
+if not save["token"]:
+    print("Zermelo nog niet gekoppeld")
+else:
+    try:
+        # Dummy request to check if token is active
+        Client(save["school"]).get_user(save["token"])
+    except ValueError:
+        print("Token invalid: koppel zermelo opnieuw")
+
+# Set the time
+set_time()
+
+# Get the appointments
+local_time = time.localtime()
+starttimestamp = round(time.time() - (local_time[3] * 60 * 60) - (local_time[4] * 60) - local_time[5])
+endtimestamp = round(time.time() + ((24 - local_time[3]) * 60 * 60) + ((60 - local_time[4]) * 60) + (60 - local_time[5]))
+
+appointments = Client(save["school"]).get_appointments(save["token"], str(starttimestamp), str(endtimestamp))
+
+print(appointments)
+
+# Turn off led
+led.off()
