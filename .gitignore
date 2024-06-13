@@ -2,5 +2,5 @@
 /__pycache__
 /Pico code/.vscode
 /Pico code/.micropico
-rooster-epd.data
+prev_port.txt
 auto-py-to-exe_config.json

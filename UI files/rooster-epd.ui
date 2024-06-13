@@ -32,19 +32,6 @@
    <string>Rooster epd</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QPushButton" name="morgen">
-    <property name="geometry">
-     <rect>
-      <x>160</x>
-      <y>40</y>
-      <width>81</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Morgen</string>
-    </property>
-   </widget>
    <widget class="QComboBox" name="pico_port">
     <property name="geometry">
      <rect>
@@ -71,7 +58,20 @@
      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
     </property>
    </widget>
-   <widget class="QPushButton" name="vandaag">
+   <widget class="QPushButton" name="sync">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>40</y>
+      <width>81</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Sync</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="connect_button">
     <property name="geometry">
      <rect>
       <x>70</x>
@@ -81,23 +81,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Vandaag</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_pico_port_2">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>40</y>
-      <width>51</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Upload:</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     <string>Connect</string>
     </property>
    </widget>
   </widget>
