@@ -1,5 +1,6 @@
 from serial import Serial, SerialException, PARITY_EVEN, STOPBITS_ONE
 from webbrowser import open_new_tab
+from json import loads, dumps
 from zermelo import Client
 from os.path import exists
 from copy import deepcopy
@@ -83,6 +84,8 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         self.pico.flush()
         
         self.sync.setDisabled(False)
+        
+        self.save = loads(self.send_to_pico("load"))
     
     # Function to send commands to the pico
     def send_to_pico(self, command):
@@ -93,8 +96,11 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
             sleep(0.1)
             recieved = self.pico.read_until().strip().decode()
 
-            if recieved:
+            if recieved and recieved != "done":
                 print(recieved)
+                last_recieved = recieved
+        
+        return last_recieved
     
     def checkConnectButtonDisable(self):
         self.connect_button.setDisabled(self.pico_port.currentText() == "<select port>")
