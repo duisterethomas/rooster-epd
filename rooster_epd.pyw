@@ -8,9 +8,11 @@ from time import sleep
 from glob import glob
 import sys
 
-from PySide6.QtWidgets import QMainWindow, QApplication, QDialog, QMessageBox
+from PySide6.QtCore import QThread
+from PySide6.QtWidgets import QMainWindow, QApplication, QDialog
 
 from rooster_epd_ui import Ui_Rooster_epd, Ui_Rooster_epd_over
+from rooster_epd_worker import Worker
 
 from rooster_epd_setup import setupWindow
 from rooster_epd_tijden import tijdenWindow
@@ -44,12 +46,16 @@ def serial_ports():
             result.append(port)
         except (OSError, SerialException):
             pass
+    
     return result
 
 class mainWindow(QMainWindow, Ui_Rooster_epd):
     def __init__(self, parent = None):
         super().__init__(parent)
         self.setupUi(self)
+        
+        # Init save
+        self.save = None
         
         # Check if previous port is saved
         if exists("prev_port.txt"):
@@ -78,29 +84,55 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         # Put the focus on the window
         self.activateWindow()
     
+    # Function to send a command to the pico with threading
+    def sendToPico(self, command):
+        self.menuBewerken.setDisabled(True)
+        self.menuSettings.setDisabled(True)
+        self.pico_port.setDisabled(True)
+        self.connect_button.setDisabled(True)
+        self.sync.setDisabled(True)
+        
+        self.thread = QThread()
+        self.worker = Worker(self.pico, command)
+        self.worker.moveToThread(self.thread)
+        self.thread.started.connect(self.worker.run)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
+        
+        self.thread.finished.connect(lambda: self.menuBewerken.setDisabled(False))
+        self.thread.finished.connect(lambda: self.menuSettings.setDisabled(False))
+        self.thread.finished.connect(lambda: self.pico_port.setDisabled(False))
+        self.thread.finished.connect(lambda: self.connect_button.setDisabled(False))
+        self.thread.finished.connect(lambda: self.sync.setDisabled(False))
+        
+        self.thread.finished.connect(lambda: self.statusbar.showMessage(""))
+        
+        self.thread.start()
+    
     def connectClicked(self):
         # Connect to the pico
         self.pico = Serial(port=self.selected_port, parity=PARITY_EVEN, stopbits=STOPBITS_ONE, timeout=1)
         self.pico.flush()
         
+        self.menuBewerken.setDisabled(False)
+        self.actionZermelo_koppelen.setDisabled(False)
+        self.actionTijden_instellen.setDisabled(False)
         self.sync.setDisabled(False)
         
-        self.save = loads(self.send_to_pico("load"))
-    
-    # Function to send commands to the pico
-    def send_to_pico(self, command):
-        self.pico.write(f"{command}\r".encode())
+        # Load the save data from the pico
+        self.pico.write("load\r".encode())
         
         recieved = self.pico.read_until().strip().decode()
         while recieved != "done":
-            sleep(0.1)
-            recieved = self.pico.read_until().strip().decode()
-
-            if recieved and recieved != "done":
+            if recieved:
                 print(recieved)
                 last_recieved = recieved
+            
+            sleep(0.1)
+            recieved = self.pico.read_until().strip().decode()
         
-        return last_recieved
+        self.save = loads(last_recieved)
     
     def checkConnectButtonDisable(self):
         self.connect_button.setDisabled(self.pico_port.currentText() == "<select port>")
@@ -111,7 +143,7 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
     
     def zermeloKoppelenClicked(self, _ = None, firstTimeSetup = False):
         prev_token = deepcopy(self.save)["token"]
-        dlg = setupWindow(self, self.save, firstTimeSetup)
+        dlg = setupWindow(self, self.save, self.pico, firstTimeSetup)
         dlg.exec()
         
         # Close the program when the close button was pressed
@@ -127,15 +159,15 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
             self.statusbar.showMessage("Zermelo gekoppeld")
     
     def tijdenInstellenClicked(self, _ = None, firstTimeSetup = False):
-        dlg = tijdenWindow(self, self.save, firstTimeSetup)
+        dlg = tijdenWindow(self, self.save, self.pico, firstTimeSetup)
         dlg.exec()
     
     def notitiesBewerkenClicked(self):
-        dlg = notitiesWindow(self, self.save)
+        dlg = notitiesWindow(self, self.save, self.pico)
         dlg.exec()
     
     def afsprakenBewerkenClicked(self):
-        dlg = afsprakenWindow(self, self.save)
+        dlg = afsprakenWindow(self, self.save, self.pico)
         dlg.exec()
     
     def refreshPorts(self):
@@ -158,6 +190,9 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
             self.connectClicked()
         
         else:
+            self.menuBewerken.setDisabled(True)
+            self.actionZermelo_koppelen.setDisabled(True)
+            self.actionTijden_instellen.setDisabled(True)
             self.sync.setDisabled(True)
     
     def portSelected(self):
@@ -172,7 +207,8 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
                 file.write(self.selected_port)
     
     def syncClicked(self):
-        self.send_to_pico("sync")
+        self.statusbar.showMessage("Syncing...", -1)
+        self.sendToPico("sync")
         
 # The about screen
 class overWindow(QDialog, Ui_Rooster_epd_over):

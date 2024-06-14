@@ -1,4 +1,5 @@
-from pickle import dump
+from json import dumps
+from time import sleep
 from math import floor
 
 from PySide6.QtCore import QTime
@@ -7,7 +8,7 @@ from PySide6.QtWidgets import QDialog, QDialogButtonBox
 from rooster_epd_ui import Ui_Rooster_epd_tijden
 
 class tijdenWindow(QDialog, Ui_Rooster_epd_tijden):
-    def __init__(self, parent = None, save_dict : dict = None, firstTimeSetup = False):
+    def __init__(self, parent = None, save : dict = None, pico = None, firstTimeSetup = False):
         super().__init__(parent)
         self.setupUi(self)
         
@@ -15,7 +16,8 @@ class tijdenWindow(QDialog, Ui_Rooster_epd_tijden):
         self.buttonBox.button(QDialogButtonBox.Save).setText("Opslaan")
         self.buttonBox.button(QDialogButtonBox.Cancel).setText("Annuleren")
         
-        self.save_dict = save_dict
+        self.save = save
+        self.pico = pico
         
         # Connect buttons to functions
         self.buttonBox.accepted.connect(self.saveTijden)
@@ -35,11 +37,11 @@ class tijdenWindow(QDialog, Ui_Rooster_epd_tijden):
             self.buttonBox.button(QDialogButtonBox.Save).setDisabled(True)
         
         # Calculate the begin and eind hour and minute
-        begin_hour = int(floor(save_dict["begintijd"]/60))
-        begin_minute = int(save_dict["begintijd"] - (begin_hour * 60))
+        begin_hour = int(floor(save["starttime"]/60))
+        begin_minute = int(save["starttime"] - (begin_hour * 60))
         
-        eind_hour = int(floor(save_dict["eindtijd"]/60))
-        eind_minute = int(save_dict["eindtijd"] - (eind_hour * 60))
+        eind_hour = int(floor(save["endtime"]/60))
+        eind_minute = int(save["endtime"] - (eind_hour * 60))
         
         # Set begin tijd
         q_time = QTime()
@@ -51,14 +53,27 @@ class tijdenWindow(QDialog, Ui_Rooster_epd_tijden):
         q_time.setHMS(eind_hour, eind_minute, 0, 0)
         self.eindTijd.setTime(q_time)
     
+    # Function to send a command to the pico
+    def sendToPico(self, command):
+        self.pico.write(f"{command}\r".encode())
+        
+        recieved = self.pico.read_until().strip().decode()
+        while recieved != "done":
+            if recieved:
+                print(recieved)
+            
+            sleep(0.1)
+            recieved = self.pico.read_until().strip().decode()
+    
     # Check if the save button must be disabled
     def checkSaveDisabled(self):
         self.begintijd = self.beginTijd.time().hour()*60 + self.beginTijd.time().minute()
         self.eindtijd = self.eindTijd.time().hour()*60 + self.eindTijd.time().minute()
-        self.buttonBox.button(QDialogButtonBox.Save).setDisabled(self.begintijd == self.save_dict["begintijd"] and self.eindtijd == self.save_dict["eindtijd"])
+        self.buttonBox.button(QDialogButtonBox.Save).setDisabled(self.begintijd == self.save["starttime"] and self.eindtijd == self.save["endtime"])
 
     def saveTijden(self):
-        self.save_dict["begintijd"] = self.beginTijd.time().hour()*60 + self.beginTijd.time().minute()
-        self.save_dict["eindtijd"] = self.eindTijd.time().hour()*60 + self.eindTijd.time().minute()
-        with open("rooster-epd.data", "wb") as save_file:
-            dump(self.save_dict, save_file)
+        self.save["starttime"] = self.beginTijd.time().hour()*60 + self.beginTijd.time().minute()
+        self.save["endtime"] = self.eindTijd.time().hour()*60 + self.eindTijd.time().minute()
+        
+        # Save the save
+        self.sendToPico(f"dump {dumps(self.save)}")
