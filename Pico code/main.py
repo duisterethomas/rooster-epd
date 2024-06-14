@@ -217,7 +217,8 @@ except OSError:  # open failed
             "starttime": 510,
             "endtime": 970,
             "notes": ("", "", "", "", "", "", ""),
-            "appointments": []}
+            "appointments": [],
+            "templates": []}
     
     with open("save.json", "w") as file:
         json.dump(save, file)
