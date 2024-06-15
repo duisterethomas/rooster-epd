@@ -52,6 +52,10 @@ def connect():
         set_time()
 
 def sync():
+    # Connect to wifi if not already
+    if not wlan.isconnected():
+        connect()
+    
     # Get the appointments
     print("Get the appointments")
     local_time = time.localtime()
@@ -63,20 +67,19 @@ def sync():
     lessons_today = []
 
     # Get the lessons of today
-    if wlan.isconnected():
-        appointments = Client(save["school"]).get_appointments(save["token"], str(starttimestamp), str(endtimestamp))
+    appointments = Client(save["school"]).get_appointments(save["token"], str(starttimestamp), str(endtimestamp))
 
-        lessons : list = appointments['response']['data']
-        for lesson in lessons:
-            # Preprocess some of the data
-            lesson['start'] = time.localtime(lesson['start'] + (save["time_offset"] * 60 * 60))
-            lesson['end'] = time.localtime(lesson['end'] + (save["time_offset"] * 60 * 60))
-            lesson['startTimeSlotName'] = lesson['startTimeSlotName'].upper()
-            
-            for i in range(len(lesson["subjects"])):
-                lesson['subjects'][i] = lesson['subjects'][i].upper()
-            
-            lessons_today.append(lesson.copy())
+    lessons : list = appointments['response']['data']
+    for lesson in lessons:
+        # Preprocess some of the data
+        lesson['start'] = time.localtime(lesson['start'] + (save["time_offset"] * 60 * 60))
+        lesson['end'] = time.localtime(lesson['end'] + (save["time_offset"] * 60 * 60))
+        lesson['startTimeSlotName'] = lesson['startTimeSlotName'].upper()
+        
+        for i in range(len(lesson["subjects"])):
+            lesson['subjects'][i] = lesson['subjects'][i].upper()
+        
+        lessons_today.append(lesson.copy())
 
     # Add the afspraken to lessons_today
     #for afspraak in save["afspraken"]:
