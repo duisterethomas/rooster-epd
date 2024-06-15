@@ -1,25 +1,24 @@
-from serial import Serial, SerialException
+from serial import Serial, SerialException, PARITY_EVEN, STOPBITS_ONE
 from webbrowser import open_new_tab
-from pickle import load, dump
+from time import sleep, localtime
+from json import loads, dumps
 from zermelo import Client
 from os.path import exists
 from copy import deepcopy
-from datetime import date
 from glob import glob
 import sys
 
 from PySide6.QtCore import QThread
-from PySide6.QtWidgets import QMainWindow, QApplication, QDialog, QMessageBox
+from PySide6.QtWidgets import QMainWindow, QApplication, QDialog
 
 from rooster_epd_ui import Ui_Rooster_epd, Ui_Rooster_epd_over
 from rooster_epd_worker import Worker
 
 from rooster_epd_setup import setupWindow
 from rooster_epd_tijden import tijdenWindow
+from rooster_epd_wifi import wifiWindow
 from rooster_epd_notities import notitiesWindow
 from rooster_epd_afspraken import afsprakenWindow
-
-from requests.exceptions import ConnectionError
 
 # List available serial ports function
 def serial_ports():
@@ -48,6 +47,7 @@ def serial_ports():
             result.append(port)
         except (OSError, SerialException):
             pass
+    
     return result
 
 class mainWindow(QMainWindow, Ui_Rooster_epd):
@@ -55,96 +55,29 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         super().__init__(parent)
         self.setupUi(self)
         
-        # Check if save data exist
-        if exists("rooster-epd.data"):
-            # Open and load the save_dict
-            with open("rooster-epd.data", "rb") as save_file:
-                self.save_dict : dict = load(save_file)
-            
-            # Copy save_dict to detect changes
-            old_save_dict = deepcopy(self.save_dict)
-            
-            # If there is no token generate a new token
-            if self.save_dict["token"] in ("", "ERROR"):
-                self.zermeloKoppelenClicked(firstTimeSetup = True)
-            else:
-                try:
-                    # Dummy request to check if token is active
-                    Client(self.save_dict["school"]).get_user(self.save_dict["token"])
-                    self.offline_mode = False
-                    
-                except ConnectionError:
-                    # Enable offline mode
-                    self.offline_mode = True
-                    QMessageBox.warning(None,'Geen internet',"Je hebt geen verbinding met internet, dit betekent dat alleen je notities en/of eigen afsrpaken op het E-Paper Display gezet kunnen worden. Maak verbinding met internet en start het programma opnieuw op om je Zermelo rooster te kunnen uploaden.", QMessageBox.Close)
-                    self.actionZermelo_koppelen.setDisabled(True)
-                
-                except ValueError:
-                    # Disable the upload buttons
-                    self.vandaag.setDisabled(True)
-                    self.morgen.setDisabled(True)
-                    
-                    # Generate a new token
-                    self.zermeloKoppelenClicked(firstTimeSetup = True)
-                    
-                    # Re-enable the upload buttons if a port is selected
-                    self.checkUploadButtonsDisable()
-                
-            # Add notities to save_dict if it doesn't exist
-            if "notities" not in self.save_dict.keys():
-                self.save_dict["notities"] = ("", "", "", "", "", "", "")
-            
-            # Check if afspraken are in save_dict
-            if "afspraken" in self.save_dict.keys():
-                # Remove old apppointments
-                today = date.today()
-                afspraken_new = []
-                for afspraak in self.save_dict["afspraken"]:
-                    if date(afspraak["date"].year(), afspraak["date"].month(), afspraak["date"].day()) >= today:
-                        afspraken_new.append(afspraak)
-                self.save_dict["afspraken"] = deepcopy(afspraken_new)
-            else:
-                # Add afspraken to save_dict
-                self.save_dict["afspraken"] = []
-                
-            # Add sjablonen to save_dict if it doesn't exist
-            if "sjablonen" not in self.save_dict.keys():
-                self.save_dict["sjablonen"] = {}
-            
-            # Save the new save_dict if there are changes
-            if self.save_dict != old_save_dict:
-                with open("rooster-epd.data", "wb") as save_file:
-                    dump(self.save_dict, save_file)
-            
+        # Init save
+        self.save = None
+        
+        # Check if previous port is saved
+        if exists("prev_port.txt"):
+            with open("prev_port.txt", "r") as file:
+                self.selected_port = file.read()
         else:
-            # First time setup
-            
-            # Create a new save_dict
-            self.save_dict = {"school": "",
-                              "token": "",
-                              "begintijd": 510,
-                              "eindtijd": 970,
-                              "port": "",
-                              "notities": ("", "", "", "", "", "", ""),
-                              "afspraken": [],
-                              "sjablonen": {}}
-            
-            # Generate a token
-            self.zermeloKoppelenClicked(firstTimeSetup = True)
-            
-            # Open the tijden instellen window with first time setup enabled
-            self.tijdenInstellenClicked(firstTimeSetup = True)
-            
+            self.selected_port = ""
+            with open("prev_port.txt", "w") as file:
+                file.write(self.selected_port)
+        
         # Connect the buttons to functions
         self.actionGithub_repository.triggered.connect(lambda: open_new_tab("https://github.com/duisterethomas/rooster-epd"))
         self.actionOver_Rooster_epd.triggered.connect(self.overClicked)
         self.actionZermelo_koppelen.triggered.connect(self.zermeloKoppelenClicked)
         self.actionTijden_instellen.triggered.connect(self.tijdenInstellenClicked)
+        self.actionWiFi_netwerken.triggered.connect(self.wifiNetwerkenClicked)
         self.actionNotities_bewerken.triggered.connect(self.notitiesBewerkenClicked)
         self.actionAfspraken_bewerken.triggered.connect(self.afsprakenBewerkenClicked)
         self.actionRefresh_ports.triggered.connect(self.refreshPorts)
-        self.vandaag.clicked.connect(self.vandaagClicked)
-        self.morgen.clicked.connect(self.morgenClicked)
+        self.connect_button.clicked.connect(self.connectClicked)
+        self.sync.clicked.connect(self.syncClicked)
         self.pico_port.currentTextChanged.connect(self.portSelected)
     	
         # Put all the available ports in the ports dropdown
@@ -153,41 +86,103 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         # Put the focus on the window
         self.activateWindow()
     
-    def checkUploadButtonsDisable(self):
-        self.vandaag.setDisabled(self.pico_port.currentText() == "<select port>" or self.save_dict["token"] == "")
-        self.morgen.setDisabled(self.pico_port.currentText() == "<select port>" or self.save_dict["token"] == "")
+    # Function to send a command to the pico with threading
+    def sendToPicoThreaded(self, command):
+        self.menuBewerken.setDisabled(True)
+        self.menuSettings.setDisabled(True)
+        self.pico_port.setDisabled(True)
+        self.connect_button.setDisabled(True)
+        self.sync.setDisabled(True)
+        
+        self.thread = QThread()
+        self.worker = Worker(self.pico, command)
+        self.worker.moveToThread(self.thread)
+        self.thread.started.connect(self.worker.run)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
+        
+        self.thread.finished.connect(lambda: self.menuBewerken.setDisabled(False))
+        self.thread.finished.connect(lambda: self.menuSettings.setDisabled(False))
+        self.thread.finished.connect(lambda: self.pico_port.setDisabled(False))
+        self.thread.finished.connect(lambda: self.connect_button.setDisabled(False))
+        self.thread.finished.connect(lambda: self.sync.setDisabled(False))
+        
+        self.thread.finished.connect(lambda: self.statusbar.showMessage(""))
+        
+        self.thread.start()
+    
+    def connectClicked(self):
+        # Connect to the pico
+        self.pico = Serial(port=self.selected_port, parity=PARITY_EVEN, stopbits=STOPBITS_ONE, timeout=1)
+        self.pico.flush()
+        
+        self.menuBewerken.setDisabled(False)
+        self.actionZermelo_koppelen.setDisabled(False)
+        self.actionWiFi_netwerken.setDisabled(False)
+        self.actionTijden_instellen.setDisabled(False)
+        self.sync.setDisabled(False)
+        
+        # Load the save data from the pico
+        self.pico.write("load\r".encode())
+        
+        recieved = self.pico.read_until().strip().decode()
+        while recieved != "done":
+            if recieved:
+                print(recieved)
+                last_recieved = recieved
+            
+            sleep(0.1)
+            recieved = self.pico.read_until().strip().decode()
+        
+        self.save = loads(last_recieved)
+        
+        # Automatically set the time zone offset
+        self.save["time_offset"] = localtime().tm_gmtoff
+        
+        # Save the save
+        self.sendToPicoThreaded(f"dump {dumps(self.save)}")
+        
+        # Detect if the Zermelo token is still active
+        try:
+            Client(self.save["school"]).get_user(self.save["token"])
+        except ValueError:
+            self.zermeloKoppelenClicked()
+    
+    def checkConnectButtonDisable(self):
+        self.connect_button.setDisabled(self.pico_port.currentText() == "<select port>")
     
     def overClicked(self):
         dlg = overWindow(self)
         dlg.exec()
     
-    def zermeloKoppelenClicked(self, _ = None, firstTimeSetup = False):
-        prev_token = deepcopy(self.save_dict)["token"]
-        dlg = setupWindow(self, self.save_dict, firstTimeSetup)
+    def zermeloKoppelenClicked(self):
+        prev_token = deepcopy(self.save)["token"]
+        dlg = setupWindow(self, self.save, self.pico)
         dlg.exec()
         
-        # Close the program when the close button was pressed
-        if self.save_dict["token"] == "":
-            sys.exit()
-        
         # Open the window again if an error occured while generating a token
-        while self.save_dict["token"] == "ERROR":
-            self.zermeloKoppelenClicked(firstTimeSetup = True)
+        while self.save["token"] == "ERROR":
+            self.zermeloKoppelenClicked()
         
         # If the token has changed show "Zermelo gekoppeld" in the status bar
-        if self.save_dict["token"] != prev_token:
+        if self.save["token"] != prev_token:
             self.statusbar.showMessage("Zermelo gekoppeld")
     
-    def tijdenInstellenClicked(self, _ = None, firstTimeSetup = False):
-        dlg = tijdenWindow(self, self.save_dict, firstTimeSetup)
+    def wifiNetwerkenClicked(self):
+        dlg = wifiWindow(self, self.save, self.pico)
+        dlg.exec()
+    
+    def tijdenInstellenClicked(self):
+        dlg = tijdenWindow(self, self.save, self.pico)
         dlg.exec()
     
     def notitiesBewerkenClicked(self):
-        dlg = notitiesWindow(self, self.save_dict)
+        dlg = notitiesWindow(self, self.save, self.pico)
         dlg.exec()
     
     def afsprakenBewerkenClicked(self):
-        dlg = afsprakenWindow(self, self.save_dict)
+        dlg = afsprakenWindow(self, self.save, self.pico)
         dlg.exec()
     
     def refreshPorts(self):
@@ -200,38 +195,37 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         self.pico_port.addItems(available_ports)
         
         # Check if the upload buttons should be disabled
-        self.checkUploadButtonsDisable()
+        self.checkConnectButtonDisable()
         
         # Set the selected port to the saved port if available
-        if self.save_dict["port"] in available_ports:
-            self.pico_port.setCurrentText(self.save_dict["port"])
+        if self.selected_port in available_ports:
+            self.pico_port.setCurrentText(self.selected_port)
+            self.pico_port.update()
+            
+            self.connectClicked()
+        
+        else:
+            self.menuBewerken.setDisabled(True)
+            self.actionZermelo_koppelen.setDisabled(True)
+            self.actionWiFi_netwerken.setDisabled(True)
+            self.actionTijden_instellen.setDisabled(True)
+            self.sync.setDisabled(True)
     
     def portSelected(self):
         # Check if the upload buttons should be disabled
-        self.checkUploadButtonsDisable()
+        self.checkConnectButtonDisable()
         
         # Save the port
         if self.pico_port.currentText() != "<select port>":
-            self.save_dict["port"] = self.pico_port.currentText()
-            with open("rooster-epd.data", "wb") as save_file:
-                dump(self.save_dict, save_file)
+            self.selected_port = self.pico_port.currentText()
+            
+            with open("prev_port.txt", "w") as file:
+                file.write(self.selected_port)
     
-    def vandaagClicked(self):
-        self.updateEpd(False)
+    def syncClicked(self):
+        self.statusbar.showMessage("Syncing...", -1)
+        self.sendToPicoThreaded("sync")
         
-    def morgenClicked(self):
-        self.updateEpd(True)
-    
-    def updateEpd(self, morgen):
-        self.thread = QThread()
-        self.worker = Worker(self, self.save_dict, morgen, self.offline_mode)
-        self.worker.moveToThread(self.thread)
-        self.thread.started.connect(self.worker.run)
-        self.worker.finished.connect(self.thread.quit)
-        self.worker.finished.connect(self.worker.deleteLater)
-        self.thread.finished.connect(self.thread.deleteLater)
-        self.thread.start()
-
 # The about screen
 class overWindow(QDialog, Ui_Rooster_epd_over):
     def __init__(self, parent = None):
@@ -239,7 +233,7 @@ class overWindow(QDialog, Ui_Rooster_epd_over):
         self.setupUi(self)
         
         # Put the version number on the about screen
-        self.version.setText("V1.3.3")
+        self.version.setText("V2.0.0")
 
 # Create a QApplication
 app = QApplication(sys.argv)

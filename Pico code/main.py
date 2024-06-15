@@ -1,297 +1,310 @@
+from epd_2in9_b import EPD_2in9_B
+from zermelo_api import Client
+from ntp import set_time
+
+import network
 import select
+import json
+import time
 import sys
-from machine import Pin, SPI
-import framebuf
-import utime
-      
-# Display resolution
-EPD_WIDTH       = 152
-EPD_HEIGHT      = 296
 
-RST_PIN         = 12
-DC_PIN          = 8
-CS_PIN          = 9
-BUSY_PIN        = 13
+from machine import Pin, mem32
 
-WF_PARTIAL_2IN66 =[
-0x00,0x40,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x80,0x80,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x40,0x40,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x80,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x0A,0x00,0x00,0x00,0x00,0x00,0x02,0x01,0x00,0x00,
-0x00,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-0x00,0x00,0x00,0x00,0x22,0x22,0x22,0x22,0x22,0x22,
-0x00,0x00,0x00,0x22,0x17,0x41,0xB0,0x32,0x36,
-]
+def connect():
+    # Get a list of all available networks
+    networks = wlan.scan() # list with tupples with 6 fields ssid, bssid, channel, RSSI, security, hidden
 
-class EPD_2in9_B:
-    def __init__(self):
-        self.reset_pin = Pin(RST_PIN, Pin.OUT)
-        
-        self.busy_pin = Pin(BUSY_PIN, Pin.IN, Pin.PULL_UP)
-        self.cs_pin = Pin(CS_PIN, Pin.OUT)
-        self.width = EPD_WIDTH
-        self.height = EPD_HEIGHT
-        self.lut = WF_PARTIAL_2IN66
-        
-        self.spi = SPI(1)
-        self.spi.init(baudrate=4000_000) # type: ignore
-        self.dc_pin = Pin(DC_PIN, Pin.OUT)
-        
-        self.buffer_black = bytearray(self.height * self.width // 8)
-        self.buffer_red = bytearray(self.height * self.width // 8)
-        self.imageblack = framebuf.FrameBuffer(self.buffer_black, self.width, self.height, framebuf.MONO_HLSB)
-        self.imagered = framebuf.FrameBuffer(self.buffer_red, self.width, self.height, framebuf.MONO_HLSB)
-        self.init()
+    networks.sort(key=lambda x:x[3], reverse=True) # sorted on RSSI (3)
 
-    def digital_write(self, pin, value):
-        pin.value(value)
-
-    def digital_read(self, pin):
-        return pin.value()
-
-    def delay_ms(self, delaytime):
-        utime.sleep(delaytime / 1000.0)
-
-    def spi_writebyte(self, data):
-        self.spi.write(bytearray(data))
-
-    def module_exit(self):
-        self.digital_write(self.reset_pin, 0)
-
-    # Hardware reset
-    def reset(self):
-        self.digital_write(self.reset_pin, 1)
-        self.delay_ms(50)
-        self.digital_write(self.reset_pin, 0)
-        self.delay_ms(2)
-        self.digital_write(self.reset_pin, 1)
-        self.delay_ms(50)
-
-
-    def send_command(self, command):
-        self.digital_write(self.dc_pin, 0)
-        self.digital_write(self.cs_pin, 0)
-        self.spi_writebyte([command])
-        self.digital_write(self.cs_pin, 1)
-
-    def send_data(self, data):
-        self.digital_write(self.dc_pin, 1)
-        self.digital_write(self.cs_pin, 0)
-        self.spi_writebyte([data])
-        self.digital_write(self.cs_pin, 1)
+    # Connect to network if in list
+    for w in networks:
+        ssid = w[0].decode()
         
-    def send_data1(self, buf):
-        self.digital_write(self.dc_pin, 1)
-        self.digital_write(self.cs_pin, 0)
-        self.spi.write(bytearray(buf))
-        self.digital_write(self.cs_pin, 1)
-        
-    def SetWindow(self, x_start, y_start, x_end, y_end):
-        self.send_command(0x44)
-        self.send_data((x_start>>3) & 0x1f)
-        self.send_data((x_end>>3) & 0x1f)
-        
-        self.send_command(0x45)
-        self.send_data(y_start&0xff)
-        self.send_data((y_start&0x100)>>8)
-        self.send_data((y_end&0xff))
-        self.send_data((y_end&0x100)>>8)
-        
-    def SetCursor(self, x_start, y_start):
-        self.send_command(0x4E)
-        self.send_data(x_start & 0x1f)
-        
-        self.send_command(0x4f)
-        self.send_data(y_start&0xff)
-        self.send_data((y_start&0x100)>>8)
-        
-    def ReadBusy(self):
-        utime.sleep_ms(50)
-        while(self.busy_pin.value() == 1):  # 0: idle, 1: busy
-            utime.sleep_ms(10)
-        utime.sleep_ms(50)
-        
-    def TurnOnDisplay(self):
-        self.send_command(0x20)
-        self.ReadBusy()
-        
-    def init(self):
-        self.reset()
-        self.ReadBusy()
-        self.send_command(0x12)
-        self.ReadBusy() #waiting for the electronic paper IC to release the idle signal
-
-        self.send_command(0x11)
-        self.send_data(0x03)
-
-        self.SetWindow(0, 0, self.width-1, self.height-1)
-        
-        self.send_command(0x21) #resolution setting
-        self.send_data (0x00)
-        self.send_data (0x80)
-        
-        
-        self.SetCursor(0,0)
-        self.ReadBusy()
+        if ssid in save["wlan"].keys():
+            wlan.connect(ssid, save["wlan"][ssid])
+            
+            print(f'Connecting to {ssid}')
+            
+            timeout = 20
+            while not wlan.isconnected() and timeout != 0:
+                time.sleep(1)
+                timeout -= 1
+                
+            if wlan.isconnected():
+                print("Connected!")
+                break
+            else:
+                print("Connection failed")
     
-        
-    def display(self):
-        high = self.height
-        if( self.width % 8 == 0) :
-            wide =  self.width // 8
-        else :
-            wide =  self.width // 8 + 1
-            
-        self.send_command(0x24)
-        for j in range(0, high):
-            for i in range(0, wide):
-                self.send_data(~self.buffer_black[i + j * wide])  
-        
-        self.send_command(0x26)
-        for j in range(0, high):
-            for i in range(0, wide):
-                self.send_data(~self.buffer_red[i + j * wide])  
-
-        self.TurnOnDisplay()
-
-    
-    def Clear(self, colorblack, colorred):
-        high = self.height
-        if( self.width % 8 == 0) :
-            wide =  self.width // 8
-        else :
-            wide =  self.width // 8 + 1
-            
-        self.send_command(0x24)
-        self.send_data1([colorblack] * high * wide)
-        
-        self.send_command(0x26)
-        self.send_data1([~colorred] * high * wide)
-                                
-        self.TurnOnDisplay()
-
-    def sleep(self):
-        self.send_command(0X10) # deep sleep
-        self.send_data(0x01)
-
-
-# Set up the poll object
-poll_obj = select.poll()
-poll_obj.register(sys.stdin, select.POLLIN)
-
-# Init EPD and led pin
-epd = EPD_2in9_B()
-led = Pin(25, Pin.OUT)
-
-
-while True:
-    # Wait for input on stdin
-    poll_results = poll_obj.poll()
-    if poll_results:
-        # Read the data from stdin (read data coming from PC)
-        data = sys.stdin.readline().strip()
-        # data[0] = colour
-        # data[1:4] = text X position
-        # data[4:7] = text Y position
-        # data[7:] = text
-        
-        if len(data) > 4:
-            # Get the colour
-            if data[4] == "r":
-                colour = "Red"
-                imagered_colour = 0x00
-                imageblack_colour = 0x00
-            elif data[4] == "b":
-                colour = "Black"
-                imagered_colour = 0xff
-                imageblack_colour = 0xff
-            elif data[4] == "w":
-                colour = "White"
-                imagered_colour = 0xff
-                imageblack_colour = 0x00
-        
-        if data == "init":
-            print('Initializing display...')
-            # Turn the display on
-            led.on()
-            
-            # Clear the display
-            epd.Clear(0xff, 0xff)
-            
-            # Init the layers
-            epd.imageblack.fill(0x00)
-            epd.imagered.fill(0xff)
-        
-        # Draw a line command
-        elif data[0:4] == "line":
-            if len(data) == 17:
-                # Draw the line
-                print(f'{colour} line X{int(data[5:8])} Y{int(data[8:11])} W{int(data[11:14])} H{int(data[14:17])}')
-                epd.imagered.line(int(data[5:8]),
-                                    int(data[8:11]),
-                                    int(data[11:14]),
-                                    int(data[14:17]),
-                                    imagered_colour)
-                epd.imageblack.line(int(data[5:8]),
-                                    int(data[8:11]),
-                                    int(data[11:14]),
-                                    int(data[14:17]),
-                                    imageblack_colour)
-            else:
-                print("Invalid parameters")
-            
-        # Draw a rectangle command
-        elif data[0:4] == "rect":
-            if len(data) == 18:
-                # Draw the rectangle
-                print(f'{colour}{" filled" * int(data[17])} rectangle X{int(data[5:8])} Y{int(data[8:11])} W{int(data[11:14])} H{int(data[14:17])}')
-                epd.imagered.rect(int(data[5:8]),
-                                int(data[8:11]),
-                                int(data[11:14]),
-                                int(data[14:17]),
-                                imagered_colour, int(data[17]))
-                epd.imageblack.rect(int(data[5:8]),
-                                    int(data[8:11]),
-                                    int(data[11:14]),
-                                    int(data[14:17]),
-                                    imageblack_colour, int(data[17]))
-            else:
-                print("Invalid parameters")
-        
-        # Draw text command
-        elif data[0:4] == "text":
-            if len(data) > 11:
-                # Draw the text
-                print(f'{colour} text X{int(data[5:8])} Y{int(data[8:11])}: {data[11:]}')
-                epd.imagered.text(data[11:], int(data[5:8]), int(data[8:11]), imagered_colour)
-                epd.imageblack.text(data[11:], int(data[5:8]), int(data[8:11]), imageblack_colour)
-            else:
-                print("Invalid parameters")
-        
-        # Show the result command
-        elif data == "show":
-            print("Showing final result...")
-            # Display it
-            epd.display()
-            
-            # Turn led off
-            led.off()
-        
-        # Exit/cancel command
-        elif data == "exit":
-            print("Exit")
-            # Turn led off
-            led.off()
-        
-        # Unknown command recieved
+    if wlan.isconnected():
+        # Test if token is valid
+        if not save["token"]:
+            print("Zermelo nog niet gekoppeld")
         else:
-            print(f"Unknown command: {data}")
+            try:
+                # Dummy request to check if token is active
+                Client(save["school"]).get_user(save["token"])
+            except ValueError:
+                print("Token invalid: koppel zermelo opnieuw")
+
+        # Set the time
+        print("Get the current time with NTP")
+        set_time()
+
+def sync():
+    # Turn on led
+    led.on()
+    
+    # Connect to wifi if not already
+    if not wlan.isconnected():
+        connect()
+    
+    if wlan.isconnected():
+        # Get the appointments
+        print("Get the appointments")
+        local_time = time.localtime()
+
+        starttimestamp = round(time.time() - (local_time[3] * 3600) - (local_time[4] * 60) - local_time[5])
+        endtimestamp = round(time.time() + ((24 - local_time[3]) * 3600) + ((60 - local_time[4]) * 60) + (60 - local_time[5]))
+        weekday = local_time[6]
+
+        lessons_today = []
+
+        # Get the lessons of today
+        appointments = Client(save["school"]).get_appointments(save["token"], str(starttimestamp), str(endtimestamp))
+
+        lessons : list = appointments['response']['data']
+        for lesson in lessons:
+            # Preprocess some of the data
+            lesson['start'] = time.localtime(lesson['start'] + save["time_offset"])
+            lesson['end'] = time.localtime(lesson['end'] + save["time_offset"])
+            lesson['startTimeSlotName'] = lesson['startTimeSlotName'].upper()
+            
+            for i in range(len(lesson["subjects"])):
+                lesson['subjects'][i] = lesson['subjects'][i].upper()
+            
+            lessons_today.append(lesson.copy())
+
+        # Add the appointments to lessons_today
+        for appointment in save["appointments"]:
+            if starttimestamp <= time.mktime((appointment["date"][0], appointment["date"][1], appointment["date"][2], 0, 0, 0, 0, 0)) <= endtimestamp:
+                lesson = {}
+                lesson["start"] = time.localtime((appointment["startTime"][0] * 3600) + (appointment["startTime"][1] * 60))
+                lesson["end"] = time.localtime((appointment["endTime"][0] * 3600) + (appointment["endTime"][1] * 60))
+                lesson["cancelled"] = False
+                lesson["subjects"] = [appointment["subjects"]]
+                lesson["locations"] = [appointment["locations"]]
+                lesson['startTimeSlotName'] = appointment["timeSlotName"]
+                
+                lessons_today.append(lesson.copy())
+
+        # Set the max size based on if there is a note
+        if save["notes"][weekday] == "": max_size = 298
+        else: max_size = 286
+
+        # Init the layers
+        epd.imageblack.fill(0x00)
+        epd.imagered.fill(0xff)
+
+        # Show it on the epd
+        for lesson in lessons_today:
+            # Get the start and end time in datetime format
+            lesson_starttime = lesson['start']
+            lesson_endtime = lesson['end']
+            
+            # Set the appointment colour
+            if lesson['cancelled']: colour = 0x00
+            else: colour = 0xff
+            
+            # Set the block position and size
+            # (Lesson starttime in minutes - first lesson starttime) / (Last lesson endtime - First lesson starttime) * max_size
+            # (Lesson endtime in minutes - first lesson starttime) / (Last lesson endtime - First lesson starttime) * max_size - 2
+            ystartpos = round(((lesson_starttime[3] * 60) + lesson_starttime[4] - save["starttime"]) / (save["endtime"] - save["starttime"]) * max_size)
+            yendpos = round(((lesson_endtime[3] * 60) + lesson_endtime[4] - save["starttime"]) / (save["endtime"] - save["starttime"]) * max_size) - 2
+            ysize = yendpos - ystartpos
+            
+            # If the startpos and size are greater than or equal to 0 draw a rectangle on the epd
+            if ystartpos >= 0 and ysize >= 0:
+                # Draw a white filled rectangle on the epd to overwrite possible previous data
+                epd.imagered.rect(0, ystartpos, 152, ysize, 0xff, 1)
+                epd.imageblack.rect(0, ystartpos, 152, ysize, 0x00, 1)
+                
+                # Draw a rectangle outline
+                epd.imagered.rect(0, ystartpos, 152, ysize, colour, 0)
+                epd.imageblack.rect(0, ystartpos, 152, ysize, colour, 0)
+            
+            lineystartpos = ystartpos + 3
+            lineyendpos = yendpos - 4
+            
+            # If the startpos and endpos are greater than or equal to 0 draw a line on the epd
+            if lineystartpos >= 0 and lineyendpos >= 0:
+                epd.imagered.line(46, lineystartpos, 46, lineyendpos, colour)
+                epd.imageblack.line(46, lineystartpos, 46, lineyendpos, colour)
+            
+            # Set the starttimestamp + position
+            starttimestamp = f"{" " if lesson_starttime[3] < 10 else ""}{lesson_starttime[3]}:{"0" if lesson_starttime[4] < 10 else ""}{lesson_starttime[4]}"
+            
+            # Set the ypos
+            starttimestamp_ypos = ystartpos + 4
+            
+            # If starttimestamp y pos is greater than or equal to 0 draw the start timestamp on the epd
+            if starttimestamp_ypos >= 0:
+                epd.imagered.text(starttimestamp, 3, starttimestamp_ypos, colour)
+                epd.imageblack.text(starttimestamp, 3, starttimestamp_ypos, colour)
+            
+            # Set the endtimestamp + position
+            endtimestamp = f"{" " if lesson_endtime[3] < 10 else ""}{lesson_endtime[3]}:{"0" if lesson_endtime[4] < 10 else ""}{lesson_endtime[4]}"
+            
+            # Set the ypos
+            endtimestamp_ypos = yendpos - 11
+            
+            # If endtimestamp y pos is greater than or equal to 0 draw the end timestamp on the epd
+            if endtimestamp_ypos >= 0:
+                epd.imagered.text(endtimestamp, 3, endtimestamp_ypos, colour)
+                epd.imageblack.text(endtimestamp, 3, endtimestamp_ypos, colour)
+            
+            # Set the subjects + position
+            if len(lesson['subjects']) != 0:
+                for subject in enumerate(lesson['subjects']):
+                    if subject[0] == 0:
+                        subjects = subject[1]
+                    else:
+                        subjects += f",{subject[1]}"
+                subject_ypos = ystartpos + 4
+                
+                # If the subject y pos is greater than or equal to 0 draw the subject on the epd
+                if subject_ypos >= 0:
+                    epd.imagered.text(subjects, 50, subject_ypos, colour)
+                    epd.imageblack.text(subjects, 50, subject_ypos, colour)
+            
+            # Set the locations + position
+            if len(lesson['locations']) != 0:
+                for location in enumerate(lesson['locations']):
+                    if location[0] == 0:
+                        locations = location[1]
+                    else:
+                        locations += f",{location[1]}"
+                
+                # Set the location_ypos to the endtimestamp_ypos if endtimestamp_ypos is smaller than ystartpos + 16
+                location_ypos = min(ystartpos + 16, endtimestamp_ypos)
+                
+                # If the location y pos is greater than or equal to 0 draw the location on the epd
+                if location_ypos >= 0:
+                    epd.imagered.text(locations, 50, location_ypos, colour)
+                    epd.imageblack.text(locations, 50, location_ypos, colour)
+            
+            # Set the hour + position
+            hour : str = lesson['startTimeSlotName']
+            hour_ypos = ystartpos + 4
+            hour_xpos = 149 - (len(hour) * 8)
+            
+            # if the hour position is greater than or equal to 0 draw the hour
+            if hour_ypos >= 0 and hour_xpos >= 0:
+                epd.imagered.text(hour, hour_xpos, hour_ypos, colour)
+                epd.imageblack.text(hour, hour_xpos, hour_ypos, colour)
+
+        # Draw the note if it isn't empty
+        if save["notes"][weekday] != "":
+            epd.imagered.text(save["notes"][weekday], 2, 288, 0xff)
+            epd.imageblack.text(save["notes"][weekday], 2, 288, 0xff)
+
+        # Display it
+        epd.display()
+
+    # Turn off led
+    led.off()
+
+# Set led pin
+led = Pin("LED", Pin.OUT)
+
+# Init the epd
+epd = EPD_2in9_B()
+
+# Activate wlan
+wlan = network.WLAN(network.STA_IF)
+wlan.active(True)
+
+# Turn on led
+led.on()
+
+# Load the save file
+try:
+    with open("save.json", "r") as file:
+        save = json.load(file)
+except OSError:  # open failed
+    save = {"wlan": {},
+            "time_offset": 3600,
+            "school": "",
+            "token": "",
+            "starttime": 510,
+            "endtime": 970,
+            "notes": ("", "", "", "", "", "", ""),
+            "appointments": [],
+            "templates": {}}
+    
+    with open("save.json", "w") as file:
+        json.dump(save, file)
+
+# Check if connected to pc
+SIE_STATUS = const(0x50110000+0x50)
+CONNECTED = const(1<<16)
+SUSPENDED = const(1<<4)
+if (mem32[SIE_STATUS] & (CONNECTED | SUSPENDED)) == CONNECTED:
+    led.off()
+    
+    # Set up the poll object
+    poll_obj = select.poll()
+    poll_obj.register(sys.stdin, select.POLLIN)
+    
+    while True:
+        # Wait for input on stdin
+        poll_results = poll_obj.poll()
+        if poll_results:
+            # Read the data from stdin (read data coming from PC)
+            data = sys.stdin.readline().strip()
+            
+            # Load data command
+            if data == "load":
+                print(json.dumps(save))
+                
+                print("done")
+            
+            # Dump data command
+            elif data[0:4] == "dump":
+                save = json.loads(data[5:])
+                
+                with open("save.json", "w") as file:
+                    json.dump(save, file)
+                
+                print("done")
+            
+            elif data == "conn":
+                connect()
+                
+                print("done")
+            
+            # Connect to wlan command
+            elif data == "conn":
+                connect()
+                
+                print("done")
+            
+            # Sync command
+            elif data == "sync":
+                sync()
+                
+                print("done")
+            
+            # Unknown command recieved
+            else:
+                print(f"Unknown command: {data}")
+                
+                print("done")
+
+# Else run normal code
+else:
+    # Connect wlan
+    connect()
+    
+    # Sync with zermelo
+    sync()

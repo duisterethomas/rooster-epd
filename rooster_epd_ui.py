@@ -29,11 +29,10 @@ class Ui_Rooster_epd(object):
         self.actionOver_Rooster_epd.setObjectName(u"actionOver_Rooster_epd")
         self.actionGithub_repository = QAction(Rooster_epd)
         self.actionGithub_repository.setObjectName(u"actionGithub_repository")
+        self.actionWiFi_netwerken = QAction(Rooster_epd)
+        self.actionWiFi_netwerken.setObjectName(u"actionWiFi_netwerken")
         self.centralwidget = QWidget(Rooster_epd)
         self.centralwidget.setObjectName(u"centralwidget")
-        self.morgen = QPushButton(self.centralwidget)
-        self.morgen.setObjectName(u"morgen")
-        self.morgen.setGeometry(QRect(160, 40, 81, 24))
         self.pico_port = QComboBox(self.centralwidget)
         self.pico_port.setObjectName(u"pico_port")
         self.pico_port.setGeometry(QRect(70, 10, 171, 22))
@@ -41,13 +40,12 @@ class Ui_Rooster_epd(object):
         self.label_pico_port.setObjectName(u"label_pico_port")
         self.label_pico_port.setGeometry(QRect(10, 10, 51, 21))
         self.label_pico_port.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
-        self.vandaag = QPushButton(self.centralwidget)
-        self.vandaag.setObjectName(u"vandaag")
-        self.vandaag.setGeometry(QRect(70, 40, 81, 24))
-        self.label_pico_port_2 = QLabel(self.centralwidget)
-        self.label_pico_port_2.setObjectName(u"label_pico_port_2")
-        self.label_pico_port_2.setGeometry(QRect(10, 40, 51, 21))
-        self.label_pico_port_2.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        self.sync = QPushButton(self.centralwidget)
+        self.sync.setObjectName(u"sync")
+        self.sync.setGeometry(QRect(160, 40, 81, 24))
+        self.connect_button = QPushButton(self.centralwidget)
+        self.connect_button.setObjectName(u"connect_button")
+        self.connect_button.setGeometry(QRect(70, 40, 81, 24))
         Rooster_epd.setCentralWidget(self.centralwidget)
         self.statusbar = QStatusBar(Rooster_epd)
         self.statusbar.setObjectName(u"statusbar")
@@ -67,6 +65,7 @@ class Ui_Rooster_epd(object):
         self.menuBar.addAction(self.menuSettings.menuAction())
         self.menuBar.addAction(self.menuHelp.menuAction())
         self.menuSettings.addAction(self.actionZermelo_koppelen)
+        self.menuSettings.addAction(self.actionWiFi_netwerken)
         self.menuSettings.addAction(self.actionTijden_instellen)
         self.menuSettings.addSeparator()
         self.menuSettings.addAction(self.actionRefresh_ports)
@@ -90,10 +89,10 @@ class Ui_Rooster_epd(object):
         self.actionAfspraken_bewerken.setText(QCoreApplication.translate("Rooster_epd", u"Afspraken bewerken", None))
         self.actionOver_Rooster_epd.setText(QCoreApplication.translate("Rooster_epd", u"Over Rooster epd", None))
         self.actionGithub_repository.setText(QCoreApplication.translate("Rooster_epd", u"Github repository", None))
-        self.morgen.setText(QCoreApplication.translate("Rooster_epd", u"Morgen", None))
+        self.actionWiFi_netwerken.setText(QCoreApplication.translate("Rooster_epd", u"Wi-Fi netwerken", None))
         self.label_pico_port.setText(QCoreApplication.translate("Rooster_epd", u"Pico port:", None))
-        self.vandaag.setText(QCoreApplication.translate("Rooster_epd", u"Vandaag", None))
-        self.label_pico_port_2.setText(QCoreApplication.translate("Rooster_epd", u"Upload:", None))
+        self.sync.setText(QCoreApplication.translate("Rooster_epd", u"Sync", None))
+        self.connect_button.setText(QCoreApplication.translate("Rooster_epd", u"Connect", None))
         self.menuSettings.setTitle(QCoreApplication.translate("Rooster_epd", u"Instellingen", None))
         self.menuBewerken.setTitle(QCoreApplication.translate("Rooster_epd", u"Bewerken", None))
         self.menuHelp.setTitle(QCoreApplication.translate("Rooster_epd", u"Help", None))
@@ -179,6 +178,89 @@ class Ui_Rooster_epd_setup(object):
         self.label_koppelcode.setText(QCoreApplication.translate("Rooster_epd_setup", u"Koppelcode:", None))
     # retranslateUi
 
+# The wifi UI
+class Ui_Rooster_epd_wifi(object):
+    def setupUi(self, Rooster_epd_wifi):
+        if not Rooster_epd_wifi.objectName():
+            Rooster_epd_wifi.setObjectName(u"Rooster_epd_wifi")
+        Rooster_epd_wifi.resize(396, 281)
+        Rooster_epd_wifi.setMinimumSize(QSize(396, 171))
+        Rooster_epd_wifi.setMaximumSize(QSize(396, 16777215))
+        self.buttonBox = QDialogButtonBox(Rooster_epd_wifi)
+        self.buttonBox.setObjectName(u"buttonBox")
+        self.buttonBox.setGeometry(QRect(0, 240, 396, 41))
+        self.buttonBox.setOrientation(Qt.Horizontal)
+        self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Save)
+        self.buttonBox.setCenterButtons(True)
+        self.scrollArea = QScrollArea(Rooster_epd_wifi)
+        self.scrollArea.setObjectName(u"scrollArea")
+        self.scrollArea.setGeometry(QRect(-1, 0, 396, 241))
+        self.scrollArea.setFrameShape(QFrame.NoFrame)
+        self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollAreaWidgetContents = QWidget()
+        self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 379, 241))
+        self.verticalLayout = QVBoxLayout(self.scrollAreaWidgetContents)
+        self.verticalLayout.setObjectName(u"verticalLayout")
+        self.nieuwButton = QPushButton(self.scrollAreaWidgetContents)
+        self.nieuwButton.setObjectName(u"nieuwButton")
+
+        self.verticalLayout.addWidget(self.nieuwButton)
+
+        self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
+
+        self.verticalLayout.addItem(self.verticalSpacer)
+
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+
+        self.retranslateUi(Rooster_epd_wifi)
+        self.buttonBox.accepted.connect(Rooster_epd_wifi.accept)
+        self.buttonBox.rejected.connect(Rooster_epd_wifi.reject)
+
+        QMetaObject.connectSlotsByName(Rooster_epd_wifi)
+    # setupUi
+
+    def retranslateUi(self, Rooster_epd_wifi):
+        Rooster_epd_wifi.setWindowTitle(QCoreApplication.translate("Rooster_epd_wifi", u"Wi-Fi netwerken", None))
+        self.nieuwButton.setText(QCoreApplication.translate("Rooster_epd_wifi", u"Nieuw Wi-Fi netwerk", None))
+    # retranslateUi
+
+# The wifi frame
+class Ui_Wifi(object):
+    def setupUi(self, Wifi):
+        if not Wifi.objectName():
+            Wifi.setObjectName(u"Wifi")
+        Wifi.resize(361, 41)
+        Wifi.setMinimumSize(QSize(361, 41))
+        Wifi.setMaximumSize(QSize(361, 41))
+        Wifi.setFrameShape(QFrame.StyledPanel)
+        self.ssid = QLineEdit(Wifi)
+        self.ssid.setObjectName(u"ssid")
+        self.ssid.setGeometry(QRect(10, 10, 121, 22))
+        self.password = QLineEdit(Wifi)
+        self.password.setObjectName(u"password")
+        self.password.setGeometry(QRect(140, 10, 121, 22))
+        self.password.setEchoMode(QLineEdit.Password)
+        self.verwijderButton = QPushButton(Wifi)
+        self.verwijderButton.setObjectName(u"verwijderButton")
+        self.verwijderButton.setGeometry(QRect(270, 10, 81, 24))
+        QWidget.setTabOrder(self.ssid, self.password)
+        QWidget.setTabOrder(self.password, self.verwijderButton)
+
+        self.retranslateUi(Wifi)
+
+        QMetaObject.connectSlotsByName(Wifi)
+    # setupUi
+
+    def retranslateUi(self, Wifi):
+        Wifi.setWindowTitle(QCoreApplication.translate("Wifi", u"Frame", None))
+        self.ssid.setPlaceholderText(QCoreApplication.translate("Wifi", u"SSID", None))
+        self.password.setPlaceholderText(QCoreApplication.translate("Wifi", u"Wachtwoord", None))
+        self.verwijderButton.setText(QCoreApplication.translate("Wifi", u"Verwijder", None))
+    # retranslateUi
+
 # The tijden UI
 class Ui_Rooster_epd_tijden(object):
     def setupUi(self, Tijden):
@@ -221,7 +303,7 @@ class Ui_Rooster_epd_tijden(object):
         self.label.setText(QCoreApplication.translate("Tijden", u"Begin eerste uur:", None))
         self.label_2.setText(QCoreApplication.translate("Tijden", u"Eind laatste uur:", None))
     # retranslateUi
-    
+
 # The notities UI
 class Ui_Rooster_epd_notities(object):
     def setupUi(self, Rooster_epd_notities):

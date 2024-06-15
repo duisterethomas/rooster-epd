@@ -1,5 +1,6 @@
 from zermelo import Client
-from pickle import dump
+from time import sleep
+from json import dumps
 
 from PySide6.QtWidgets import QDialog, QDialogButtonBox
 
@@ -7,7 +8,7 @@ from rooster_epd_ui import Ui_Rooster_epd_setup
 
 # The functionality of the setup window
 class setupWindow(QDialog, Ui_Rooster_epd_setup):
-    def __init__(self, parent = None, save_dict : dict = None, firstTimeSetup = False):
+    def __init__(self, parent = None, save : dict = None, pico = None):
         super().__init__(parent)
         self.setupUi(self)
         
@@ -15,10 +16,11 @@ class setupWindow(QDialog, Ui_Rooster_epd_setup):
         self.buttonBox.button(QDialogButtonBox.Save).setText("Opslaan")
         self.buttonBox.button(QDialogButtonBox.Cancel).setText("Annuleren")
         
-        self.save_dict = save_dict
+        self.save = save
+        self.pico = pico
         
         # Reset the token if token is "ERROR"
-        if self.save_dict["token"] == "ERROR": self.save_dict["token"] = ""
+        if self.save["token"] == "ERROR": self.save["token"] = ""
         
         # Connect the buttons to functions
         self.buttonBox.accepted.connect(self.saveClicked)
@@ -30,12 +32,21 @@ class setupWindow(QDialog, Ui_Rooster_epd_setup):
         # Disable the save button
         self.buttonBox.button(QDialogButtonBox.Save).setDisabled(True)
         
-        # Disable the cancel button if first time setup
-        self.buttonBox.button(QDialogButtonBox.Cancel).setDisabled(firstTimeSetup)
-        
-        if "school" in save_dict.keys():
+        if "school" in save.keys():
             # Set the schoolnaam text
-            self.schoolnaam.setText(save_dict["school"])
+            self.schoolnaam.setText(save["school"])
+    
+    # Function to send a command to the pico
+    def sendToPico(self, command):
+        self.pico.write(f"{command}\r".encode())
+        
+        recieved = self.pico.read_until().strip().decode()
+        while recieved != "done":
+            if recieved:
+                print(recieved)
+            
+            sleep(0.1)
+            recieved = self.pico.read_until().strip().decode()
     
     # Check if the save button must be disabled
     def checkSaveDisabled(self):
@@ -43,17 +54,16 @@ class setupWindow(QDialog, Ui_Rooster_epd_setup):
     
     def saveClicked(self):
         # Get the schoolnaam
-        self.save_dict["school"] = self.schoolnaam.text()
+        self.save["school"] = self.schoolnaam.text()
     
         # Get and save a new zermelo token
         try:
-            self.save_dict["token"] = Client(self.save_dict["school"]).authenticate(self.koppelcode.text())["access_token"]
+            self.save["token"] = Client(self.save["school"]).authenticate(self.koppelcode.text())["access_token"]
         except ValueError:
-            self.save_dict["token"] = "ERROR"
+            self.save["token"] = "ERROR"
         
-        # Save the save_dict
-        with open("rooster-epd.data", "wb") as save_file:
-            dump(self.save_dict, save_file)
+        # Save the save
+        self.sendToPico(f"dump {dumps(self.save)}")
         
         # Close the ui
         self.close()
