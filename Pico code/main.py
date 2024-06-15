@@ -10,7 +10,7 @@ import sys
 
 from machine import Pin, mem32
 
-def connect():
+def connect(timeout : int):
     # Get a list of all available networks
     networks = wlan.scan() # list with tupples with 6 fields ssid, bssid, channel, RSSI, security, hidden
 
@@ -25,7 +25,6 @@ def connect():
             
             print(f'Connecting to {ssid}')
             
-            timeout = 20
             while not wlan.isconnected() and timeout != 0:
                 time.sleep(1)
                 timeout -= 1
@@ -55,23 +54,19 @@ def sync():
     # Turn on led
     led.on()
     
-    # Connect to wifi if not already
-    if not wlan.isconnected():
-        connect()
-    
     if wlan.isconnected():
         # Get the appointments
         print("Get the appointments")
-        local_time = time.localtime()
+        local_time = time.localtime(time.time() + save["time_offset"])
 
-        starttimestamp = round(time.time() - (local_time[3] * 3600) - (local_time[4] * 60) - local_time[5]) + save["time_offset"]
-        endtimestamp = round(time.time() + ((24 - local_time[3]) * 3600) + ((60 - local_time[4]) * 60) + (60 - local_time[5])) + save["time_offset"]
+        starttimestamp = round(time.time() + save["time_offset"] - (local_time[3] * 3600) - (local_time[4] * 60) - local_time[5])
+        endtimestamp = starttimestamp + 86400
         weekday = local_time[6]
 
         lessons_today = []
 
         # Get the lessons of today
-        appointments = Client(save["school"]).get_appointments(save["token"], str(starttimestamp), str(endtimestamp))
+        appointments = Client(save["school"]).get_appointments(save["token"], str(starttimestamp - save["time_offset"]), str(endtimestamp - save["time_offset"]))
 
         lessons : list = appointments['response']['data']
         for lesson in lessons:
@@ -87,7 +82,9 @@ def sync():
 
         # Add the appointments to lessons_today
         for appointment in save["appointments"]:
-            if starttimestamp <= time.mktime((appointment["date"][0], appointment["date"][1], appointment["date"][2], 0, 0, 0, 0, 0)) <= endtimestamp:
+            appointmenttimestamp = time.mktime((appointment["date"][0], appointment["date"][1], appointment["date"][2], appointment["startTime"][0], appointment["startTime"][1], 0, 0, 0))
+            
+            if starttimestamp <= appointmenttimestamp < endtimestamp:
                 lesson = {}
                 lesson["start"] = time.localtime((appointment["startTime"][0] * 3600) + (appointment["startTime"][1] * 60))
                 lesson["end"] = time.localtime((appointment["endTime"][0] * 3600) + (appointment["endTime"][1] * 60))
@@ -97,6 +94,13 @@ def sync():
                 lesson['startTimeSlotName'] = appointment["timeSlotName"]
                 
                 lessons_today.append(lesson.copy())
+            
+            # Automatically remove old appointments
+            elif appointmenttimestamp < starttimestamp:
+                save["appointments"].remove(appointment)
+                
+                with open("save.json", "w") as file:
+                    json.dump(save, file)
 
         # Set the max size based on if there is a note
         if save["notes"][weekday] == "": max_size = 298
@@ -278,19 +282,13 @@ if (mem32[SIE_STATUS] & (CONNECTED | SUSPENDED)) == CONNECTED:
                 
                 print("done")
             
-            elif data == "conn":
-                connect()
-                
-                print("done")
-            
-            # Connect to wlan command
-            elif data == "conn":
-                connect()
-                
-                print("done")
-            
             # Sync command
             elif data == "sync":
+                # Connect to wifi if not already
+                if not wlan.isconnected():
+                    connect(30)
+                
+                # Sync the display
                 sync()
                 
                 print("done")
@@ -304,7 +302,7 @@ if (mem32[SIE_STATUS] & (CONNECTED | SUSPENDED)) == CONNECTED:
 # Else run normal code
 else:
     # Connect wlan
-    connect()
+    connect(60)
     
     # Sync with zermelo
     sync()
