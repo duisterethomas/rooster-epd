@@ -101,6 +101,7 @@
     </property>
     <addaction name="actionZermelo_koppelen"/>
     <addaction name="actionTijden_instellen"/>
+    <addaction name="actionWiFi_netwerken"/>
     <addaction name="separator"/>
     <addaction name="actionRefresh_ports"/>
    </widget>
@@ -156,6 +157,11 @@
   <action name="actionGithub_repository">
    <property name="text">
     <string>Github repository</string>
+   </property>
+  </action>
+  <action name="actionWiFi_netwerken">
+   <property name="text">
+    <string>Wi-Fi netwerken</string>
    </property>
   </action>
  </widget>

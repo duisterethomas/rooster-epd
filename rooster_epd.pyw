@@ -1,10 +1,9 @@
 from serial import Serial, SerialException, PARITY_EVEN, STOPBITS_ONE
 from webbrowser import open_new_tab
-from json import loads, dumps
-from zermelo import Client
 from os.path import exists
 from copy import deepcopy
 from time import sleep
+from json import loads
 from glob import glob
 import sys
 
@@ -16,6 +15,7 @@ from rooster_epd_worker import Worker
 
 from rooster_epd_setup import setupWindow
 from rooster_epd_tijden import tijdenWindow
+from rooster_epd_wifi import wifiWindow
 from rooster_epd_notities import notitiesWindow
 from rooster_epd_afspraken import afsprakenWindow
 
@@ -71,6 +71,7 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         self.actionOver_Rooster_epd.triggered.connect(self.overClicked)
         self.actionZermelo_koppelen.triggered.connect(self.zermeloKoppelenClicked)
         self.actionTijden_instellen.triggered.connect(self.tijdenInstellenClicked)
+        self.actionWiFi_netwerken.triggered.connect(self.wifiNetwerkenClicked)
         self.actionNotities_bewerken.triggered.connect(self.notitiesBewerkenClicked)
         self.actionAfspraken_bewerken.triggered.connect(self.afsprakenBewerkenClicked)
         self.actionRefresh_ports.triggered.connect(self.refreshPorts)
@@ -160,6 +161,10 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
     
     def tijdenInstellenClicked(self, _ = None, firstTimeSetup = False):
         dlg = tijdenWindow(self, self.save, self.pico, firstTimeSetup)
+        dlg.exec()
+    
+    def wifiNetwerkenClicked(self):
+        dlg = wifiWindow(self, self.save, self.pico)
         dlg.exec()
     
     def notitiesBewerkenClicked(self):
