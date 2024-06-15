@@ -41,13 +41,13 @@ class sjablonenWindow(QDialog, Ui_Rooster_epd_sjablonen):
         self.scrolllayout = self.scrollAreaWidgetContents.layout()
         
         # Connect buttons to functions
-        self.nieuwButton.clicked.connect(self.addtemplate)
+        self.nieuwButton.clicked.connect(self.addTemplate)
         self.buttonBox.accepted.connect(self.saveTemplates)
         
         # Add templates if needed
         if len(save["templates"]) > 0:
             for template in self.save["templates"].keys():
-                self.addtemplate(self.save["templates"][template])
+                self.addTemplate(self.save["templates"][template])
         
         # Check if save button should be disabled
         self.checkSaveDisable()
@@ -71,7 +71,7 @@ class sjablonenWindow(QDialog, Ui_Rooster_epd_sjablonen):
         self.buttonBox.setGeometry(QRect(0, event.size().height()-41, 396, 41))
     
     # Add a template
-    def addtemplate(self, template):
+    def addTemplate(self, template):
         # Add the new template
         template_name = f"template{self.count}"
         self.templates[template_name] = sjabloonFrame(self.scrollAreaWidgetContents)
