@@ -39,14 +39,22 @@ First you need to connect to Zermelo
 4. Make note of the "Schoolnaam" and "Koppelcode" as shown in the image
    
    ![](/Images/zermelo_koppel_externe_app.png)
-5. Run `Rooster_epd.exe` or `rooster_epd.pyw`
-6. Click on "`Instellingen`->`Zermelo koppelen`"
-7. Enter the "Schoolnaam" and "Koppelcode" into their respective fields
-8. Click on `Opslaan`
-   
-   ![](/Images/setup_window.png)
+5. Connect the Raspberry Pi Pico with the E-Paper display to the computer
+6. Run `Rooster_epd.exe` or `rooster_epd.pyw`
+7. Select the port that the Rapsberry Pi Pico is connected to
 
-   _Note: This screen can popup again when running this software after some time, this means that Zermelo has logged you out on all of your devices. This is normal, Zermelo does that each year I think. If it happens you only have to enter a new "Koppelcode", the "Schoolnaam" is saved for your convenience._
+   ![](/Images/main_window.png)
+
+   _Note: If you connected the Raspberry Pi Pico after running the software you need to click on "`Instellingen`->`Refresh ports`" before you can select the port_
+8. Click on `Connect`
+9. Click on "`Instellingen`->`Zermelo koppelen`"
+10. Enter the "Schoolnaam" and "Koppelcode" into their respective fields
+    
+    ![](/Images/setup_window.png)
+
+    _Note: This screen can popup again when running this software after some time, this means that Zermelo has logged you out on all of your devices. This is normal, Zermelo does that each year I think. If it happens you only have to enter a new "Koppelcode", the "Schoolnaam" is saved for your convenience._
+
+11. Click on `Opslaan`
 
 Now it's time to add your Wi-Fi networks
 1. Click on "`Instellingen`->`Wi-Fi netwerken`"
@@ -68,6 +76,8 @@ Then you need to set up the lesson times
 
 ## Basic usage
 To sync the display with your Zermelo schedule connect the Pico to any usb power source like a usb charger or powerbank and wait for the light to turn off. When the light turns off you can safely disconnect the power again. Note that when you connect it to a computer it won't sync automatically, you will need to sync it via `Rooster_epd.exe` or `rooster_epd.pyw` with the `Sync` button.
+
+If it doesn't work when plugging into a usb power source like a usb charger or powerbank, try plugging it in again, sometimes the WiFi connection fails. If that doesn't work plug Pico into a computer and run `Rooster_epd.exe` or `rooster_epd.pyw`. If the `Zermelo koppelen` window pops up, the Zermelo token has expired so you need to get a new "Koppelcode". If nothing pops up check the wifi settings under "`Instellingen`->`Wi-Fi netwerken`".
 
 ## Changing setings
 To change any settings, add appointments or add notes you need to first follow the following steps
