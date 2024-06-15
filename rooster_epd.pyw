@@ -1,9 +1,9 @@
 from serial import Serial, SerialException, PARITY_EVEN, STOPBITS_ONE
 from webbrowser import open_new_tab
+from time import sleep, localtime
+from json import loads, dumps
 from os.path import exists
 from copy import deepcopy
-from time import sleep
-from json import loads
 from glob import glob
 import sys
 
@@ -86,7 +86,7 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         self.activateWindow()
     
     # Function to send a command to the pico with threading
-    def sendToPico(self, command):
+    def sendToPicoThreaded(self, command):
         self.menuBewerken.setDisabled(True)
         self.menuSettings.setDisabled(True)
         self.pico_port.setDisabled(True)
@@ -134,6 +134,12 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
             recieved = self.pico.read_until().strip().decode()
         
         self.save = loads(last_recieved)
+        
+        # Automatically set the time zone offset
+        self.save["time_offset"] = localtime().tm_gmtoff
+        
+        # Save the save
+        self.sendToPicoThreaded(f"dump {dumps(self.save)}")
     
     def checkConnectButtonDisable(self):
         self.connect_button.setDisabled(self.pico_port.currentText() == "<select port>")
@@ -213,7 +219,7 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
     
     def syncClicked(self):
         self.statusbar.showMessage("Syncing...", -1)
-        self.sendToPico("sync")
+        self.sendToPicoThreaded("sync")
         
 # The about screen
 class overWindow(QDialog, Ui_Rooster_epd_over):

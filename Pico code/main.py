@@ -73,8 +73,8 @@ def sync():
         lessons : list = appointments['response']['data']
         for lesson in lessons:
             # Preprocess some of the data
-            lesson['start'] = time.localtime(lesson['start'] + (save["time_offset"] * 3600))
-            lesson['end'] = time.localtime(lesson['end'] + (save["time_offset"] * 3600))
+            lesson['start'] = time.localtime(lesson['start'] + save["time_offset"])
+            lesson['end'] = time.localtime(lesson['end'] + save["time_offset"])
             lesson['startTimeSlotName'] = lesson['startTimeSlotName'].upper()
             
             for i in range(len(lesson["subjects"])):
@@ -230,7 +230,7 @@ try:
         save = json.load(file)
 except OSError:  # open failed
     save = {"wlan": {},
-            "time_offset": 2,
+            "time_offset": 3600,
             "school": "",
             "token": "",
             "starttime": 510,
