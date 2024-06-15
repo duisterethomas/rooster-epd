@@ -52,6 +52,9 @@ def connect():
         set_time()
 
 def sync():
+    # Turn on led
+    led.on()
+    
     # Connect to wifi if not already
     if not wlan.isconnected():
         connect()
@@ -208,8 +211,8 @@ def sync():
         # Display it
         epd.display()
 
-        # Turn off led
-        led.off()
+    # Turn off led
+    led.off()
 
 # Set led pin
 led = Pin("LED", Pin.OUT)
