@@ -2,6 +2,7 @@ from serial import Serial, SerialException, PARITY_EVEN, STOPBITS_ONE
 from webbrowser import open_new_tab
 from time import sleep, localtime
 from json import loads, dumps
+from zermelo import Client
 from os.path import exists
 from copy import deepcopy
 from glob import glob
@@ -140,6 +141,12 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         
         # Save the save
         self.sendToPicoThreaded(f"dump {dumps(self.save)}")
+        
+        # Detect if the Zermelo token is still active
+        try:
+            Client(self.save["school"]).get_user(self.save["token"])
+        except ValueError:
+            self.zermeloKoppelenClicked()
     
     def checkConnectButtonDisable(self):
         self.connect_button.setDisabled(self.pico_port.currentText() == "<select port>")
@@ -161,12 +168,12 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         if self.save["token"] != prev_token:
             self.statusbar.showMessage("Zermelo gekoppeld")
     
-    def tijdenInstellenClicked(self):
-        dlg = tijdenWindow(self, self.save, self.pico)
-        dlg.exec()
-    
     def wifiNetwerkenClicked(self):
         dlg = wifiWindow(self, self.save, self.pico)
+        dlg.exec()
+    
+    def tijdenInstellenClicked(self):
+        dlg = tijdenWindow(self, self.save, self.pico)
         dlg.exec()
     
     def notitiesBewerkenClicked(self):

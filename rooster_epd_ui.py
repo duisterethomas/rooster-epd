@@ -65,8 +65,8 @@ class Ui_Rooster_epd(object):
         self.menuBar.addAction(self.menuSettings.menuAction())
         self.menuBar.addAction(self.menuHelp.menuAction())
         self.menuSettings.addAction(self.actionZermelo_koppelen)
-        self.menuSettings.addAction(self.actionTijden_instellen)
         self.menuSettings.addAction(self.actionWiFi_netwerken)
+        self.menuSettings.addAction(self.actionTijden_instellen)
         self.menuSettings.addSeparator()
         self.menuSettings.addAction(self.actionRefresh_ports)
         self.menuBewerken.addAction(self.actionNotities_bewerken)
@@ -178,49 +178,6 @@ class Ui_Rooster_epd_setup(object):
         self.label_koppelcode.setText(QCoreApplication.translate("Rooster_epd_setup", u"Koppelcode:", None))
     # retranslateUi
 
-# The tijden UI
-class Ui_Rooster_epd_tijden(object):
-    def setupUi(self, Tijden):
-        if not Tijden.objectName():
-            Tijden.setObjectName(u"Tijden")
-        Tijden.resize(201, 111)
-        Tijden.setMinimumSize(QSize(201, 111))
-        Tijden.setMaximumSize(QSize(201, 111))
-        Tijden.setLayoutDirection(Qt.LeftToRight)
-        self.buttonBox = QDialogButtonBox(Tijden)
-        self.buttonBox.setObjectName(u"buttonBox")
-        self.buttonBox.setGeometry(QRect(10, 70, 181, 32))
-        self.buttonBox.setOrientation(Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Save)
-        self.buttonBox.setCenterButtons(True)
-        self.beginTijd = QTimeEdit(Tijden)
-        self.beginTijd.setObjectName(u"beginTijd")
-        self.beginTijd.setGeometry(QRect(120, 10, 61, 22))
-        self.eindTijd = QTimeEdit(Tijden)
-        self.eindTijd.setObjectName(u"eindTijd")
-        self.eindTijd.setGeometry(QRect(120, 40, 61, 22))
-        self.label = QLabel(Tijden)
-        self.label.setObjectName(u"label")
-        self.label.setGeometry(QRect(10, 10, 101, 21))
-        self.label.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
-        self.label_2 = QLabel(Tijden)
-        self.label_2.setObjectName(u"label_2")
-        self.label_2.setGeometry(QRect(10, 40, 101, 21))
-        self.label_2.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
-
-        self.retranslateUi(Tijden)
-        self.buttonBox.accepted.connect(Tijden.accept)
-        self.buttonBox.rejected.connect(Tijden.reject)
-
-        QMetaObject.connectSlotsByName(Tijden)
-    # setupUi
-
-    def retranslateUi(self, Tijden):
-        Tijden.setWindowTitle(QCoreApplication.translate("Tijden", u"Tijden instellen", None))
-        self.label.setText(QCoreApplication.translate("Tijden", u"Begin eerste uur:", None))
-        self.label_2.setText(QCoreApplication.translate("Tijden", u"Eind laatste uur:", None))
-    # retranslateUi
-
 # The wifi UI
 class Ui_Rooster_epd_wifi(object):
     def setupUi(self, Rooster_epd_wifi):
@@ -302,6 +259,49 @@ class Ui_Wifi(object):
         self.ssid.setPlaceholderText(QCoreApplication.translate("Wifi", u"SSID", None))
         self.password.setPlaceholderText(QCoreApplication.translate("Wifi", u"Wachtwoord", None))
         self.verwijderButton.setText(QCoreApplication.translate("Wifi", u"Verwijder", None))
+    # retranslateUi
+
+# The tijden UI
+class Ui_Rooster_epd_tijden(object):
+    def setupUi(self, Tijden):
+        if not Tijden.objectName():
+            Tijden.setObjectName(u"Tijden")
+        Tijden.resize(201, 111)
+        Tijden.setMinimumSize(QSize(201, 111))
+        Tijden.setMaximumSize(QSize(201, 111))
+        Tijden.setLayoutDirection(Qt.LeftToRight)
+        self.buttonBox = QDialogButtonBox(Tijden)
+        self.buttonBox.setObjectName(u"buttonBox")
+        self.buttonBox.setGeometry(QRect(10, 70, 181, 32))
+        self.buttonBox.setOrientation(Qt.Horizontal)
+        self.buttonBox.setStandardButtons(QDialogButtonBox.Cancel|QDialogButtonBox.Save)
+        self.buttonBox.setCenterButtons(True)
+        self.beginTijd = QTimeEdit(Tijden)
+        self.beginTijd.setObjectName(u"beginTijd")
+        self.beginTijd.setGeometry(QRect(120, 10, 61, 22))
+        self.eindTijd = QTimeEdit(Tijden)
+        self.eindTijd.setObjectName(u"eindTijd")
+        self.eindTijd.setGeometry(QRect(120, 40, 61, 22))
+        self.label = QLabel(Tijden)
+        self.label.setObjectName(u"label")
+        self.label.setGeometry(QRect(10, 10, 101, 21))
+        self.label.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+        self.label_2 = QLabel(Tijden)
+        self.label_2.setObjectName(u"label_2")
+        self.label_2.setGeometry(QRect(10, 40, 101, 21))
+        self.label_2.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
+
+        self.retranslateUi(Tijden)
+        self.buttonBox.accepted.connect(Tijden.accept)
+        self.buttonBox.rejected.connect(Tijden.reject)
+
+        QMetaObject.connectSlotsByName(Tijden)
+    # setupUi
+
+    def retranslateUi(self, Tijden):
+        Tijden.setWindowTitle(QCoreApplication.translate("Tijden", u"Tijden instellen", None))
+        self.label.setText(QCoreApplication.translate("Tijden", u"Begin eerste uur:", None))
+        self.label_2.setText(QCoreApplication.translate("Tijden", u"Eind laatste uur:", None))
     # retranslateUi
 
 # The notities UI

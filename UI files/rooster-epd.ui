@@ -100,8 +100,8 @@
      <string>Instellingen</string>
     </property>
     <addaction name="actionZermelo_koppelen"/>
-    <addaction name="actionTijden_instellen"/>
     <addaction name="actionWiFi_netwerken"/>
+    <addaction name="actionTijden_instellen"/>
     <addaction name="separator"/>
     <addaction name="actionRefresh_ports"/>
    </widget>
