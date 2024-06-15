@@ -35,6 +35,21 @@ def connect():
                 break
             else:
                 print("Connection failed")
+    
+    if wlan.isconnected():
+        # Test if token is valid
+        if not save["token"]:
+            print("Zermelo nog niet gekoppeld")
+        else:
+            try:
+                # Dummy request to check if token is active
+                Client(save["school"]).get_user(save["token"])
+            except ValueError:
+                print("Token invalid: koppel zermelo opnieuw")
+
+        # Set the time
+        print("Get the current time with NTP")
+        set_time()
 
 def sync():
     # Get the appointments
@@ -218,27 +233,10 @@ except OSError:  # open failed
             "endtime": 970,
             "notes": ("", "", "", "", "", "", ""),
             "appointments": [],
-            "templates": []}
+            "templates": {}}
     
     with open("save.json", "w") as file:
         json.dump(save, file)
-
-# Connect wlan
-connect()
-
-# Test if token is valid
-if not save["token"]:
-    print("Zermelo nog niet gekoppeld")
-else:
-    try:
-        # Dummy request to check if token is active
-        Client(save["school"]).get_user(save["token"])
-    except ValueError:
-        print("Token invalid: koppel zermelo opnieuw")
-
-# Set the time
-print("Get the current time with NTP")
-set_time()
 
 # Check if connected to pc
 SIE_STATUS = const(0x50110000+0x50)
@@ -278,6 +276,12 @@ if (mem32[SIE_STATUS] & (CONNECTED | SUSPENDED)) == CONNECTED:
                 
                 print("done")
             
+            # Connect to wlan command
+            elif data == "conn":
+                connect()
+                
+                print("done")
+            
             # Sync command
             elif data == "sync":
                 sync()
@@ -292,4 +296,8 @@ if (mem32[SIE_STATUS] & (CONNECTED | SUSPENDED)) == CONNECTED:
 
 # Else run normal code
 else:
+    # Connect wlan
+    connect()
+    
+    # Sync with zermelo
     sync()
