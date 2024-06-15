@@ -88,7 +88,7 @@ class afsprakenWindow(QDialog, Ui_Rooster_epd_afspraken):
     
     # Open the sjablonen bewerken ui
     def openSjablonenBewerken(self):
-        dlg = sjablonenWindow(self, self.save)
+        dlg = sjablonenWindow(self, self.save, self.pico)
         dlg.exec()
         
         # Refresh the template list
