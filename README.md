@@ -28,7 +28,7 @@ First download the [latest release](https://github.com/duisterethomas/rooster-ep
    ![](/Images/epaper_display.png)
 
 ### Setting up the computer side
-First we need to connect to Zermelo
+First you need to connect to Zermelo
 1. Go to the Zermelo zportal of your school
 2. Click on `Instellingen`
    
@@ -56,7 +56,7 @@ Now it's time to add your Wi-Fi networks
   
 3. Click on `Opslaan`
 
-Then we need to set up the lesson times
+Then you need to set up the lesson times
 1. Click on "`Instellingen`->`Tijden bewerken`"
 2. Enter the start time of your first possible lesson and the end time of your last possible lesson into their respective fields
 
