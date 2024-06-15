@@ -8,7 +8,7 @@ from PySide6.QtWidgets import QDialog, QDialogButtonBox
 from rooster_epd_ui import Ui_Rooster_epd_tijden
 
 class tijdenWindow(QDialog, Ui_Rooster_epd_tijden):
-    def __init__(self, parent = None, save : dict = None, pico = None, firstTimeSetup = False):
+    def __init__(self, parent = None, save : dict = None, pico = None):
         super().__init__(parent)
         self.setupUi(self)
         
@@ -25,16 +25,12 @@ class tijdenWindow(QDialog, Ui_Rooster_epd_tijden):
         # Change the minimum time of the eindTijd when beginTijd is changed
         self.beginTijd.timeChanged.connect(lambda: self.eindTijd.setMinimumTime(self.beginTijd.time().addSecs(60)))
         
-        if firstTimeSetup:
-            # Disable the cancel button if first time setup
-            self.buttonBox.button(QDialogButtonBox.Cancel).setDisabled(True)
-        else:
-            # Connect the changes to check if the save button must be disabled
-            self.beginTijd.timeChanged.connect(self.checkSaveDisabled)
-            self.eindTijd.timeChanged.connect(self.checkSaveDisabled)
-        
-            # Disable the save button
-            self.buttonBox.button(QDialogButtonBox.Save).setDisabled(True)
+        # Connect the changes to check if the save button must be disabled
+        self.beginTijd.timeChanged.connect(self.checkSaveDisabled)
+        self.eindTijd.timeChanged.connect(self.checkSaveDisabled)
+    
+        # Disable the save button
+        self.buttonBox.button(QDialogButtonBox.Save).setDisabled(True)
         
         # Calculate the begin and eind hour and minute
         begin_hour = int(floor(save["starttime"]/60))

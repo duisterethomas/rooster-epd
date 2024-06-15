@@ -8,7 +8,7 @@ from rooster_epd_ui import Ui_Rooster_epd_setup
 
 # The functionality of the setup window
 class setupWindow(QDialog, Ui_Rooster_epd_setup):
-    def __init__(self, parent = None, save : dict = None, pico = None, firstTimeSetup = False):
+    def __init__(self, parent = None, save : dict = None, pico = None):
         super().__init__(parent)
         self.setupUi(self)
         
@@ -31,9 +31,6 @@ class setupWindow(QDialog, Ui_Rooster_epd_setup):
         
         # Disable the save button
         self.buttonBox.button(QDialogButtonBox.Save).setDisabled(True)
-        
-        # Disable the cancel button if first time setup
-        self.buttonBox.button(QDialogButtonBox.Cancel).setDisabled(firstTimeSetup)
         
         if "school" in save.keys():
             # Set the schoolnaam text

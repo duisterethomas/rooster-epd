@@ -148,25 +148,21 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         dlg = overWindow(self)
         dlg.exec()
     
-    def zermeloKoppelenClicked(self, _ = None, firstTimeSetup = False):
+    def zermeloKoppelenClicked(self):
         prev_token = deepcopy(self.save)["token"]
-        dlg = setupWindow(self, self.save, self.pico, firstTimeSetup)
+        dlg = setupWindow(self, self.save, self.pico)
         dlg.exec()
-        
-        # Close the program when the close button was pressed
-        if self.save["token"] == "":
-            sys.exit()
         
         # Open the window again if an error occured while generating a token
         while self.save["token"] == "ERROR":
-            self.zermeloKoppelenClicked(firstTimeSetup = True)
+            self.zermeloKoppelenClicked()
         
         # If the token has changed show "Zermelo gekoppeld" in the status bar
         if self.save["token"] != prev_token:
             self.statusbar.showMessage("Zermelo gekoppeld")
     
-    def tijdenInstellenClicked(self, _ = None, firstTimeSetup = False):
-        dlg = tijdenWindow(self, self.save, self.pico, firstTimeSetup)
+    def tijdenInstellenClicked(self):
+        dlg = tijdenWindow(self, self.save, self.pico)
         dlg.exec()
     
     def wifiNetwerkenClicked(self):
