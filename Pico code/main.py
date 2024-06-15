@@ -64,8 +64,8 @@ def sync():
         print("Get the appointments")
         local_time = time.localtime()
 
-        starttimestamp = round(time.time() - (local_time[3] * 3600) - (local_time[4] * 60) - local_time[5])
-        endtimestamp = round(time.time() + ((24 - local_time[3]) * 3600) + ((60 - local_time[4]) * 60) + (60 - local_time[5]))
+        starttimestamp = round(time.time() - (local_time[3] * 3600) - (local_time[4] * 60) - local_time[5]) + save["time_offset"]
+        endtimestamp = round(time.time() + ((24 - local_time[3]) * 3600) + ((60 - local_time[4]) * 60) + (60 - local_time[5])) + save["time_offset"]
         weekday = local_time[6]
 
         lessons_today = []
