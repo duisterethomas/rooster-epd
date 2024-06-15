@@ -5,7 +5,7 @@ Front | Back | USB port
 ![](/Images/epd_front.png) | ![](/Images/epd_back.png) | ![](/Images/epd_usb.png)
 
 ## Required materials
-- [Raspberry Pi Pico with headers](https://www.raspberrystore.nl/PrestaShop/nl/raspberry-pi-pico/471-raspberry-pi-pico-h.html)
+- [Raspberry Pi Pico with wifi and headers](https://www.raspberrystore.nl/PrestaShop/nl/raspberry-pi-pico/486-raspberry-pi-pico-wh-5056561800196.html)
 - [Waveshare 2.66inch E-Paper E-Ink Display Module (B) for Raspberry Pi Pico](https://www.waveshare.com/pico-epaper-2.66-b.htm)
 - Micro USB cable
 ### Optional
@@ -17,22 +17,18 @@ Front | Back | USB port
 ## First time setup
 First download the [latest release](https://github.com/duisterethomas/rooster-epd/releases) or clone the source code
    
-### Setting up your Raspberry Pi  Pico
+### Setting up your Raspberry Pi Pico
 1. Follow [this article](https://projects.raspberrypi.org/en/projects/getting-started-with-the-pico/0) to install Thonny onto your computer and install MicroPython onto your Raspberry Pi Pico
-2. Open `main.py` with Thonny
-3. Click on "`File`->`Save as`"
-4. On the "Where to save to?" prompt click on `MicroPython device`
-
-   ![](/Images/thonny_save.png)
-
-5. Unplug the Raspberry Pi Pico
-6. Plug the Raspberry Pi Pico into the E-Paper display and make sure it is facing the right way
+2. Follow [this article](https://www.freva.com/transfer-files-between-computer-and-raspberry-pi-pico/) to copy all files in `Pico code` to your Raspberry Pi Pico
+3. Unplug the Raspberry Pi Pico
+4. Plug the Raspberry Pi Pico into the E-Paper display and make sure it is facing the right way
 
    _Tip: The E-Paper display has a "USB" marking_
 
    ![](/Images/epaper_display.png)
 
 ### Setting up the computer side
+First we need to connect to Zermelo
 1. Go to the Zermelo zportal of your school
 2. Click on `Instellingen`
    
@@ -44,19 +40,37 @@ First download the [latest release](https://github.com/duisterethomas/rooster-ep
    
    ![](/Images/zermelo_koppel_externe_app.png)
 5. Run `Rooster_epd.exe` or `rooster_epd.pyw`
-6. Enter the "Schoolnaam" and "Koppelcode" into their respective fields and click on `Save`
+6. Click on "`Instellingen`->`Zermelo koppelen`"
+7. Enter the "Schoolnaam" and "Koppelcode" into their respective fields
+8. Click on `Opslaan`
    
    ![](/Images/setup_window.png)
 
    _Note: This screen can popup again when running this software after some time, this means that Zermelo has logged you out on all of your devices. This is normal, Zermelo does that each year I think. If it happens you only have to enter a new "Koppelcode", the "Schoolnaam" is saved for your convenience._
-7. Enter the start time of your first possible lesson and the end time of your last possible lesson into their respective fields and click on `Save`
+
+Now it's time to add your Wi-Fi networks
+1. Click on "`Instellingen`->`Wi-Fi netwerken`"
+2. Add all of your Wi-Fi networks that you want to use by clicking on `Nieuw Wi-Fi netwerk` and filling in the wifi credentials
+
+    ![](/Images/wifi_window.png)
+  
+3. Click on `Opslaan`
+
+Then we need to set up the lesson times
+1. Click on "`Instellingen`->`Tijden bewerken`"
+2. Enter the start time of your first possible lesson and the end time of your last possible lesson into their respective fields
 
     ![](/Images/tijden_window.png)
 
    _Note: In the example above the first possible lesson (u1) starts at 8:30 and the last possible lesson (u9) ends at 16:10_
 
-## Usage
-### Basic usage
+3. Click on `Opslaan`
+
+## Basic usage
+To sync the display with your Zermelo schedule connect the Pico to any usb power source like a usb charger or powerbank and wait for the light to turn off. When the light turns off you can safely disconnect the power again. Note that when you connect it to a computer it won't sync automatically, you will need to sync it via `Rooster_epd.exe` or `rooster_epd.pyw` with the `Sync` button.
+
+## Changing setings
+To change any settings, add appointments or add notes you need to first follow the following steps
 1. Connect the Raspberry Pi Pico with the E-Paper display to the computer
 2. Run `Rooster_epd.exe` or `rooster_epd.pyw`
 3. Select the port that the Rapsberry Pi Pico is connected to
@@ -64,34 +78,30 @@ First download the [latest release](https://github.com/duisterethomas/rooster-ep
    ![](/Images/main_window.png)
 
    _Note: If you connected the Raspberry Pi Pico after running the software you need to click on "`Instellingen`->`Refresh ports`" before you can select the port_
-4. Click on `Vandaag` or `Morgen` depending on which day you'd like to upload to the epd
-5. Wait until the led on the Raspberry Pi Pico turns off
-6. Unplug the Raspberry Pi Pico
+4. Click on `Connect`
 
 ### Adding notes
-1. Follow steps 1-3 in [Basic usage](#basic-usage) if you haven't already
-2. Click on "`Bewerken`->`Notities bewerken`"
+1. Click on "`Bewerken`->`Notities bewerken`"
 
    ![](/Images/notities_window.png)
-3. Add your notes
-4. Click on `Save`
-5. Follow steps 4-6 in [Basic usage](#basic-usage) to upload your notes to the epd
+2. Add your notes
+3. Click on `Opslaan` to upload your notes to the epd
+4. Click on `Sync` to sync the display if necessary
 
 ### Adding appointments
-1. Follow steps 1-3 in [Basic usage](#basic-usage) if you haven't already
-2. Click on "`Bewerken`->`Afspraken bewerken`"
+1. Click on "`Bewerken`->`Afspraken bewerken`"
 
    ![](/Images/afspraken_window.png)
-3. If you want to add/edit templates click on the arrow next to `Nieuwe afspraak` and select `Sjablonen bewerken`
+2. If you want to add/edit templates click on the arrow next to `Nieuwe afspraak` and select `Sjablonen bewerken`
 
    ![](/Images/sjablonen_window.png)
-4. From there you can add a new template by clicking on `Nieuw sjabloon` and/or edit existing templates
+3. From there you can add a new template by clicking on `Nieuw sjabloon` and/or edit existing templates
 
    _Note: Entering the name of the template is required, the rest is optional_
-6. When you are done editing templates click on `Save`
-7. To add an appointment either click on `Nieuwe afspraak` to add an empty appointment or click on the arrow next to `Nieuwe afspraak` and select one of your templates
-8. When you are done adding appointments click on `Save`
-9. Follow steps 4-6 in [Basic usage](#basic-usage) to upload your appointments to the epd
+4. When you are done editing templates click on `Opslaan`
+5. To add an appointment either click on `Nieuwe afspraak` to add an empty appointment or click on the arrow next to `Nieuwe afspraak` and select one of your templates
+6. When you are done adding appointments click on `Opslaan`
+7. Click on `Sync` to sync the display if necessary
 
 ## Useful links
 ### Required python modules for the source code
