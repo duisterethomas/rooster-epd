@@ -54,13 +54,13 @@ class notitiesWindow(QDialog, Ui_Rooster_epd_notities):
             recieved = self.pico.read_until().strip().decode()
 
     def checkSaveDisable(self):
-        self.new_notities = (self.maandag.text(),
+        self.new_notities = [self.maandag.text(),
                              self.dinsdag.text(),
                              self.woensdag.text(),
                              self.donderdag.text(),
                              self.vrijdag.text(),
                              self.zaterdag.text(),
-                             self.zondag.text())
+                             self.zondag.text()]
         
         self.buttonBox.button(QDialogButtonBox.Save).setDisabled(self.new_notities == self.save["notes"])
     
