@@ -119,6 +119,7 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         
         self.menuBewerken.setDisabled(False)
         self.actionZermelo_koppelen.setDisabled(False)
+        self.actionWiFi_netwerken.setDisabled(False)
         self.actionTijden_instellen.setDisabled(False)
         self.sync.setDisabled(False)
         
@@ -206,6 +207,7 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         else:
             self.menuBewerken.setDisabled(True)
             self.actionZermelo_koppelen.setDisabled(True)
+            self.actionWiFi_netwerken.setDisabled(True)
             self.actionTijden_instellen.setDisabled(True)
             self.sync.setDisabled(True)
     
