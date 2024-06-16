@@ -54,16 +54,25 @@ class afsprakenWindow(QDialog, Ui_Rooster_epd_afspraken):
         self.scrolllayout = self.scrollAreaWidgetContents.layout()
         
         # Connect buttons to functions
-        self.nieuwButton.clicked.connect(self.addAfspraak)
-        self.buttonBox.accepted.connect(self.saveAfspraken)
+        self.nieuwButton.clicked.connect(self.addAppointment)
+        self.buttonBox.accepted.connect(self.saveAppointments)
         
         # Add all the templates to the template combobox
         self.refreshTemplates()
         
         # Add afspraken if needed
+        today = date.today()
+        
         if len(self.save["appointments"]) > 0:
-            for afspraak in self.save["appointments"]:
-                self.addAfspraak(afspraak)
+            for appointment in self.save["appointments"]:
+                if appointment["date"][2] >= today.day:
+                    self.addAppointment(appointment)
+                else:
+                    # Auto remove old appointments
+                    save["appointments"].remove(appointment)
+        
+        # Save the save
+        self.sendToPico(f"dump {dumps(self.save)}")
         
         # Check if save button should be disabled
         self.checkSaveDisable()
@@ -104,12 +113,12 @@ class afsprakenWindow(QDialog, Ui_Rooster_epd_afspraken):
         
         for sjabloon in self.save["templates"].keys():
             self.sjablonen.append(QAction(text=sjabloon, parent=self.nieuwButton))
-            self.sjablonen[-1].triggered.connect(lambda _ = None, sjab = sjabloon: self.addAfspraak(self.save["templates"][sjab]))
+            self.sjablonen[-1].triggered.connect(lambda _ = None, sjab = sjabloon: self.addAppointment(self.save["templates"][sjab]))
         
         self.nieuwButton.addActions(self.sjablonen)
     
     # Add an afspraak
-    def addAfspraak(self, appointment = None):
+    def addAppointment(self, appointment = None):
         appointment_name = f"appointment{self.count}"
         self.appointments[appointment_name] = afspraakFrame(self.scrollAreaWidgetContents)
         self.appointments[appointment_name].setObjectName(appointment_name)
@@ -166,7 +175,7 @@ class afsprakenWindow(QDialog, Ui_Rooster_epd_afspraken):
         self.buttonBox.button(QDialogButtonBox.Save).setDisabled(self.new_afspraken == self.save["appointments"])
 
     # Save the afspraken
-    def saveAfspraken(self):
+    def saveAppointments(self):
         self.save["appointments"] = deepcopy(self.new_afspraken)
         
         # Save the save
