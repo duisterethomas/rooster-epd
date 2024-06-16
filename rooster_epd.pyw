@@ -5,7 +5,7 @@ from json import loads, dumps
 from zermelo import Client
 from os.path import exists
 from copy import deepcopy
-from glob import glob
+from os import listdir
 import sys
 
 from PySide6.QtCore import QThread
@@ -31,18 +31,19 @@ def serial_ports():
     """
     if sys.platform.startswith('win'):
         ports = ['COM%s' % (i + 1) for i in range(256)]
-    elif sys.platform.startswith('linux') or sys.platform.startswith('cygwin'):
-        # this excludes your current terminal "/dev/tty"
-        ports = glob('/dev/tty[A-Za-z]*')
-    elif sys.platform.startswith('darwin'):
-        ports = glob('/dev/tty.*')
+    elif sys.platform.startswith('linux'):
+        ports = listdir('/dev/serial/by-id')
+        print(ports)
     else:
         raise EnvironmentError('Unsupported platform')
 
     result = []
     for port in ports:
         try:
-            s = Serial(port)
+            if sys.platform.startswith('linux'):
+                s = Serial(f'/dev/serial/by-id/{port}')
+            else:
+                s = Serial(port)
             s.close()
             result.append(port)
         except (OSError, SerialException):
@@ -114,7 +115,10 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
     
     def connectClicked(self):
         # Connect to the pico
-        self.pico = Serial(port=self.selected_port, parity=PARITY_EVEN, stopbits=STOPBITS_ONE, timeout=1)
+        if sys.platform.startswith('linux'):
+            self.pico = Serial(port=f'/dev/serial/by-id/{self.selected_port}', parity=PARITY_EVEN, stopbits=STOPBITS_ONE, timeout=1)
+        else:
+            self.pico = Serial(port=self.selected_port, parity=PARITY_EVEN, stopbits=STOPBITS_ONE, timeout=1)
         self.pico.flush()
         
         self.menuBewerken.setDisabled(False)
