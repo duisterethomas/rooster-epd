@@ -32,8 +32,10 @@ def serial_ports():
     if sys.platform.startswith('win'):
         ports = ['COM%s' % (i + 1) for i in range(256)]
     elif sys.platform.startswith('linux'):
-        ports = listdir('/dev/serial/by-id')
-        print(ports)
+        if exists('/dev/serial/by-id'):
+            ports = listdir('/dev/serial/by-id')
+        else:
+            ports = []
     else:
         raise EnvironmentError('Unsupported platform')
 
