@@ -85,7 +85,7 @@ def sync():
         
         # Add the appointments to lessons_today
         for appointment in save["appointments"]:
-            appointmenttimestamp = time.mktime((appointment["date"][0], appointment["date"][1], appointment["date"][2], appointment["startTime"][0], appointment["startTime"][1], 0, 0, 0))
+            appointmenttimestamp = time.mktime((appointment["date"][0], appointment["date"][1], appointment["date"][2], appointment["startTime"][0], appointment["startTime"][1], 0, 0, 0)) + save["time_offset"]
             
             if starttimestamp <= appointmenttimestamp < endtimestamp:
                 lesson = {}
