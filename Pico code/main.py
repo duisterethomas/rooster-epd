@@ -80,6 +80,9 @@ def sync():
             
             lessons_today.append(lesson.copy())
 
+        # Sort the list based on last modified
+        lessons_today = sorted(lessons_today, key=lambda d: d['lastModified'], reverse=True)
+        
         # Add the appointments to lessons_today
         for appointment in save["appointments"]:
             appointmenttimestamp = time.mktime((appointment["date"][0], appointment["date"][1], appointment["date"][2], appointment["startTime"][0], appointment["startTime"][1], 0, 0, 0))
@@ -102,6 +105,9 @@ def sync():
                 with open("save.json", "w") as file:
                     json.dump(save, file)
 
+        # Print the lessons of today
+        print(lessons_today)
+        
         # Set the max size based on if there is a note
         if save["notes"][weekday] == "": max_size = 298
         else: max_size = 286
