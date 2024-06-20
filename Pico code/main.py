@@ -20,8 +20,8 @@ def connect(timeout : int):
     for w in networks:
         ssid = w[0].decode()
         
-        if ssid in save["wlan"].keys():
-            wlan.connect(ssid, save["wlan"][ssid])
+        if ssid in save['wlan'].keys():
+            wlan.connect(ssid, save['wlan'][ssid])
             
             print(f'Connecting to {ssid}')
             
@@ -30,24 +30,24 @@ def connect(timeout : int):
                 timeout -= 1
                 
             if wlan.isconnected():
-                print("Connected!")
+                print('Connected!')
                 break
             else:
-                print("Connection failed")
+                print('Connection failed')
     
     if wlan.isconnected():
         # Test if token is valid
-        if not save["token"]:
-            print("Zermelo nog niet gekoppeld")
+        if not save['token']:
+            print('Zermelo nog niet gekoppeld')
         else:
             try:
                 # Dummy request to check if token is active
-                Client(save["school"]).get_user(save["token"])
+                Client(save['school']).get_user(save['token'])
             except ValueError:
-                print("Token invalid: koppel zermelo opnieuw")
+                print('Token invalid: koppel zermelo opnieuw')
 
         # Set the time
-        print("Get the current time with NTP")
+        print('Get the current time with NTP')
         set_time()
 
 def sync():
@@ -56,26 +56,26 @@ def sync():
     
     if wlan.isconnected():
         # Get the appointments
-        print("Get the appointments")
-        local_time = time.localtime(time.time() + save["time_offset"])
+        print('Get the appointments')
+        local_time = time.localtime(time.time() + save['time_offset'])
 
-        starttimestamp = round(time.time() + save["time_offset"] - (local_time[3] * 3600) - (local_time[4] * 60) - local_time[5])
+        starttimestamp = round(time.time() + save['time_offset'] - (local_time[3] * 3600) - (local_time[4] * 60) - local_time[5])
         endtimestamp = starttimestamp + 86400
         weekday = local_time[6]
 
         lessons_today = []
 
         # Get the lessons of today
-        appointments = Client(save["school"]).get_appointments(save["token"], str(starttimestamp - save["time_offset"]), str(endtimestamp - save["time_offset"]))
+        appointments = Client(save['school']).get_appointments(save['token'], str(starttimestamp - save['time_offset']), str(endtimestamp - save['time_offset']))
 
         lessons : list = appointments['response']['data']
         for lesson in lessons:
             # Preprocess some of the data
-            lesson['start'] = time.localtime(lesson['start'] + save["time_offset"])
-            lesson['end'] = time.localtime(lesson['end'] + save["time_offset"])
+            lesson['start'] = time.localtime(lesson['start'] + save['time_offset'])
+            lesson['end'] = time.localtime(lesson['end'] + save['time_offset'])
             lesson['startTimeSlotName'] = lesson['startTimeSlotName'].upper()
             
-            for i in range(len(lesson["subjects"])):
+            for i in range(len(lesson['subjects'])):
                 lesson['subjects'][i] = lesson['subjects'][i].upper()
             
             lessons_today.append(lesson.copy())
@@ -84,32 +84,31 @@ def sync():
         lessons_today = sorted(lessons_today, key=lambda d: d['lastModified'], reverse=True)
         
         # Add the appointments to lessons_today
-        for appointment in save["appointments"]:
-            appointmenttimestamp = time.mktime((appointment["date"][0], appointment["date"][1], appointment["date"][2], appointment["startTime"][0], appointment["startTime"][1], 0, 0, 0)) + save["time_offset"]
+        for appointment in save['appointments']:
+            appointmenttimestamp = time.mktime((appointment['date'][0], appointment['date'][1], appointment['date'][2], appointment['startTime'][0], appointment['startTime'][1], 0, 0, 0)) + save['time_offset']
             
             if starttimestamp <= appointmenttimestamp < endtimestamp:
-                lesson = {}
-                lesson["start"] = time.localtime((appointment["startTime"][0] * 3600) + (appointment["startTime"][1] * 60))
-                lesson["end"] = time.localtime((appointment["endTime"][0] * 3600) + (appointment["endTime"][1] * 60))
-                lesson["cancelled"] = False
-                lesson["subjects"] = [appointment["subjects"]]
-                lesson["locations"] = [appointment["locations"]]
-                lesson['startTimeSlotName'] = appointment["timeSlotName"]
+                lesson = {'start': time.localtime((appointment['startTime'][0] * 3600) + (appointment['startTime'][1] * 60)),
+                          'end': time.localtime((appointment['endTime'][0] * 3600) + (appointment['endTime'][1] * 60)),
+                          'cancelled': False,
+                          'subjects': [appointment['subjects']],
+                          'locations': [appointment['locations']],
+                          'startTimeSlotName': appointment['timeSlotName']}
                 
                 lessons_today.append(lesson.copy())
             
             # Automatically remove old appointments
             elif appointmenttimestamp < starttimestamp:
-                save["appointments"].remove(appointment)
+                save['appointments'].remove(appointment)
                 
-                with open("save.json", "w") as file:
+                with open('save.json', 'w') as file:
                     json.dump(save, file)
 
         # Print the lessons of today
         print(lessons_today)
         
         # Set the max size based on if there is a note
-        if save["notes"][weekday] == "": max_size = 298
+        if save['notes'][weekday] == '': max_size = 298
         else: max_size = 286
 
         # Init the layers
@@ -129,8 +128,8 @@ def sync():
             # Set the block position and size
             # (Lesson starttime in minutes - first lesson starttime) / (Last lesson endtime - First lesson starttime) * max_size
             # (Lesson endtime in minutes - first lesson starttime) / (Last lesson endtime - First lesson starttime) * max_size - 2
-            ystartpos = round(((lesson_starttime[3] * 60) + lesson_starttime[4] - save["starttime"]) / (save["endtime"] - save["starttime"]) * max_size)
-            yendpos = round(((lesson_endtime[3] * 60) + lesson_endtime[4] - save["starttime"]) / (save["endtime"] - save["starttime"]) * max_size) - 2
+            ystartpos = round(((lesson_starttime[3] * 60) + lesson_starttime[4] - save['starttime']) / (save['endtime'] - save['starttime']) * max_size)
+            yendpos = round(((lesson_endtime[3] * 60) + lesson_endtime[4] - save['starttime']) / (save['endtime'] - save['starttime']) * max_size) - 2
             ysize = yendpos - ystartpos
             
             # If the startpos and size are greater than or equal to 0 draw a rectangle on the epd
@@ -152,7 +151,7 @@ def sync():
                 epd.imageblack.line(46, lineystartpos, 46, lineyendpos, colour)
             
             # Set the starttimestamp + position
-            starttimestamp = f"{" " if lesson_starttime[3] < 10 else ""}{lesson_starttime[3]}:{"0" if lesson_starttime[4] < 10 else ""}{lesson_starttime[4]}"
+            starttimestamp = f'{' ' if lesson_starttime[3] < 10 else ''}{lesson_starttime[3]}:{'0' if lesson_starttime[4] < 10 else ''}{lesson_starttime[4]}'
             
             # Set the ypos
             starttimestamp_ypos = ystartpos + 4
@@ -163,7 +162,7 @@ def sync():
                 epd.imageblack.text(starttimestamp, 3, starttimestamp_ypos, colour)
             
             # Set the endtimestamp + position
-            endtimestamp = f"{" " if lesson_endtime[3] < 10 else ""}{lesson_endtime[3]}:{"0" if lesson_endtime[4] < 10 else ""}{lesson_endtime[4]}"
+            endtimestamp = f'{' ' if lesson_endtime[3] < 10 else ''}{lesson_endtime[3]}:{'0' if lesson_endtime[4] < 10 else ''}{lesson_endtime[4]}'
             
             # Set the ypos
             endtimestamp_ypos = yendpos - 11
@@ -179,7 +178,7 @@ def sync():
                     if subject[0] == 0:
                         subjects = subject[1]
                     else:
-                        subjects += f",{subject[1]}"
+                        subjects += f',{subject[1]}'
                 subject_ypos = ystartpos + 4
                 
                 # If the subject y pos is greater than or equal to 0 draw the subject on the epd
@@ -193,7 +192,7 @@ def sync():
                     if location[0] == 0:
                         locations = location[1]
                     else:
-                        locations += f",{location[1]}"
+                        locations += f',{location[1]}'
                 
                 # Set the location_ypos to the endtimestamp_ypos if endtimestamp_ypos is smaller than ystartpos + 16
                 location_ypos = min(ystartpos + 16, endtimestamp_ypos)
@@ -214,9 +213,9 @@ def sync():
                 epd.imageblack.text(hour, hour_xpos, hour_ypos, colour)
 
         # Draw the note if it isn't empty
-        if save["notes"][weekday] != "":
-            epd.imagered.text(save["notes"][weekday], 2, 288, 0xff)
-            epd.imageblack.text(save["notes"][weekday], 2, 288, 0xff)
+        if save['notes'][weekday] != '':
+            epd.imagered.text(save['notes'][weekday], 2, 288, 0xff)
+            epd.imageblack.text(save['notes'][weekday], 2, 288, 0xff)
 
         # Display it
         epd.display()
@@ -225,7 +224,7 @@ def sync():
     led.off()
 
 # Set led pin
-led = Pin("LED", Pin.OUT)
+led = Pin('LED', Pin.OUT)
 
 # Init the epd
 epd = EPD_2in9_B()
@@ -239,20 +238,20 @@ led.on()
 
 # Load the save file
 try:
-    with open("save.json", "r") as file:
+    with open('save.json', 'r') as file:
         save = json.load(file)
 except OSError:  # open failed
-    save = {"wlan": {},
-            "time_offset": 3600,
-            "school": "",
-            "token": "",
-            "starttime": 510,
-            "endtime": 970,
-            "notes": ("", "", "", "", "", "", ""),
-            "appointments": [],
-            "templates": {}}
+    save = {'wlan': {},
+            'time_offset': 3600,
+            'school': '',
+            'token': '',
+            'starttime': 510,
+            'endtime': 970,
+            'notes': ('', '', '', '', '', '', ''),
+            'appointments': [],
+            'templates': {}}
     
-    with open("save.json", "w") as file:
+    with open('save.json', 'w') as file:
         json.dump(save, file)
 
 # Check if connected to pc
@@ -274,22 +273,22 @@ if (mem32[SIE_STATUS] & (CONNECTED | SUSPENDED)) == CONNECTED:
             data = sys.stdin.readline().strip()
             
             # Load data command
-            if data == "load":
+            if data == 'load':
                 print(json.dumps(save))
                 
-                print("done")
+                print('done')
             
             # Dump data command
-            elif data[0:4] == "dump":
+            elif data[0:4] == 'dump':
                 save = json.loads(data[5:])
                 
-                with open("save.json", "w") as file:
+                with open('save.json', 'w') as file:
                     json.dump(save, file)
                 
-                print("done")
+                print('done')
             
             # Sync command
-            elif data == "sync":
+            elif data == 'sync':
                 # Connect to wifi if not already
                 if not wlan.isconnected():
                     connect(30)
@@ -297,13 +296,13 @@ if (mem32[SIE_STATUS] & (CONNECTED | SUSPENDED)) == CONNECTED:
                 # Sync the display
                 sync()
                 
-                print("done")
+                print('done')
             
             # Unknown command recieved
             else:
-                print(f"Unknown command: {data}")
+                print(f'Unknown command: {data}')
                 
-                print("done")
+                print('done')
 
 # Else run normal code
 else:
