@@ -81,7 +81,7 @@ def sync():
             lessons_today.append(lesson.copy())
 
         # Sort the list based on last modified
-        lessons_today = sorted(lessons_today, key=lambda d: d['lastModified'], reverse=True)
+        lessons_today.sort(key=lambda d: d['lastModified'], reverse=True)
         
         # Add the appointments to lessons_today
         for appointment in save['appointments']:

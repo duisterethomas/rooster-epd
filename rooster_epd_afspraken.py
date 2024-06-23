@@ -111,7 +111,7 @@ class afsprakenWindow(QDialog, Ui_Rooster_epd_afspraken):
         self.sjablonen = [QAction(text="Sjablonen bewerken", parent=self.nieuwButton)]
         self.sjablonen[0].triggered.connect(self.openSjablonenBewerken)
         
-        for sjabloon in self.save["templates"].keys():
+        for sjabloon in sorted(self.save["templates"].keys()):
             self.sjablonen.append(QAction(text=sjabloon, parent=self.nieuwButton))
             self.sjablonen[-1].triggered.connect(lambda _ = None, sjab = sjabloon: self.addAppointment(self.save["templates"][sjab]))
         

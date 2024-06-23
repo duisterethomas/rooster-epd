@@ -46,7 +46,7 @@ class sjablonenWindow(QDialog, Ui_Rooster_epd_sjablonen):
         
         # Add templates if needed
         if len(save["templates"]) > 0:
-            for template in self.save["templates"].keys():
+            for template in sorted(self.save["templates"].keys()):
                 self.addTemplate(self.save["templates"][template])
         
         # Check if save button should be disabled

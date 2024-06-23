@@ -190,7 +190,7 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
     
     def afsprakenBewerkenClicked(self):
         # Auto sort the appointments
-        self.save["appointments"] = sorted(self.save["appointments"], key=lambda d: datetime(d["date"][0], d["date"][1], d["date"][2], d["startTime"][0], d["startTime"][1]).timestamp())
+        self.save["appointments"].sort(key=lambda d: datetime(d["date"][0], d["date"][1], d["date"][2], d["startTime"][0], d["startTime"][1]).timestamp())
         
         # Open the popup
         dlg = afsprakenWindow(self, self.save, self.pico)
