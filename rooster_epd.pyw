@@ -2,6 +2,7 @@ from serial import Serial, SerialException, PARITY_EVEN, STOPBITS_ONE
 from webbrowser import open_new_tab
 from time import sleep, localtime
 from json import loads, dumps
+from datetime import datetime
 from zermelo import Client
 from os.path import exists
 from copy import deepcopy
@@ -188,6 +189,10 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         dlg.exec()
     
     def afsprakenBewerkenClicked(self):
+        # Auto sort the appointments
+        self.save["appointments"] = sorted(self.save["appointments"], key=lambda d: datetime(d["date"][0], d["date"][1], d["date"][2], d["startTime"][0], d["startTime"][1]).timestamp())
+        
+        # Open the popup
         dlg = afsprakenWindow(self, self.save, self.pico)
         dlg.exec()
     
