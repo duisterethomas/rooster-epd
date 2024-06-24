@@ -399,7 +399,7 @@ class Ui_Rooster_epd_notities(object):
         self.label.setText(QCoreApplication.translate("Rooster_epd_notities", u"Maandag:", None))
         self.label_2.setText(QCoreApplication.translate("Rooster_epd_notities", u"Dinsdag:", None))
         self.label_3.setText(QCoreApplication.translate("Rooster_epd_notities", u"Woensdag:", None))
-        self.label_4.setText(QCoreApplication.translate("Rooster_epd_notities", u"Donderdag;", None))
+        self.label_4.setText(QCoreApplication.translate("Rooster_epd_notities", u"Donderdag:", None))
         self.label_5.setText(QCoreApplication.translate("Rooster_epd_notities", u"Vrijdag:", None))
         self.label_6.setText(QCoreApplication.translate("Rooster_epd_notities", u"Zaterdag:", None))
         self.label_7.setText(QCoreApplication.translate("Rooster_epd_notities", u"Zondag:", None))
