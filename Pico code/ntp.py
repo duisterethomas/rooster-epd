@@ -13,7 +13,7 @@ def set_time():
     addr = socket.getaddrinfo(host, 123)[0][-1]
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     try:
-        s.settimeout(1)
+        s.settimeout(10)
         res = s.sendto(NTP_QUERY, addr)
         msg = s.recv(48)
     finally:
