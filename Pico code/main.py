@@ -14,7 +14,7 @@ def connect(timeout : int):
     # Get a list of all available networks
     networks = wlan.scan() # list with tupples with 6 fields ssid, bssid, channel, RSSI, security, hidden
 
-    networks.sort(key=lambda x:x[3]) # sorted on RSSI (3)
+    networks.sort(key=lambda x: x[3]) # sorted on RSSI (3)
 
     # Connect to network if in list
     for w in networks:
@@ -82,7 +82,7 @@ def sync():
             lessons_today.append(lesson.copy())
 
         # Sort the list based on last modified
-        lessons_today.sort(key=lambda d: d['lastModified'], reverse=True)
+        lessons_today.sort(key=lambda x: (x['lastModified'], x['created']))
         
         # Add the appointments to lessons_today
         for appointment in save['appointments']:
