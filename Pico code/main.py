@@ -74,6 +74,7 @@ def sync():
             lesson['start'] = time.localtime(lesson['start'] + save['time_offset'])
             lesson['end'] = time.localtime(lesson['end'] + save['time_offset'])
             lesson['startTimeSlotName'] = lesson['startTimeSlotName'].upper()
+            lesson['endTimeSlotName'] = lesson['endTimeSlotName'].upper()
             
             for i in range(len(lesson['subjects'])):
                 lesson['subjects'][i] = lesson['subjects'][i].upper()
@@ -93,7 +94,8 @@ def sync():
                           'cancelled': False,
                           'subjects': [appointment['subjects']],
                           'locations': [appointment['locations']],
-                          'startTimeSlotName': appointment['timeSlotName']}
+                          'startTimeSlotName': appointment['timeSlotName'],
+                          'endTimeSlotName': appointment['timeSlotName']}
                 
                 lessons_today.append(lesson.copy())
             
@@ -202,15 +204,25 @@ def sync():
                     epd.imagered.text(locations, 50, location_ypos, colour)
                     epd.imageblack.text(locations, 50, location_ypos, colour)
             
-            # Set the hour + position
-            hour : str = lesson['startTimeSlotName']
-            hour_ypos = ystartpos + 4
-            hour_xpos = 149 - (len(hour) * 8)
+            # Set the hour name
+            if lesson['startTimeSlotName'] != lesson['endTimeSlotName'] and lesson['startTimeSlotName'] and lesson['endTimeSlotName']:
+                hour : str = f"{lesson['startTimeSlotName']}-{lesson['endTimeSlotName']}"
+            elif lesson['startTimeSlotName']:
+                hour : str = lesson['startTimeSlotName']
+            elif lesson['endTimeSlotName']:
+                hour : str = lesson['endTimeSlotName']
+            else:
+                hour = ""
             
-            # if the hour position is greater than or equal to 0 draw the hour
-            if hour_ypos >= 0 and hour_xpos >= 0:
-                epd.imagered.text(hour, hour_xpos, hour_ypos, colour)
-                epd.imageblack.text(hour, hour_xpos, hour_ypos, colour)
+             # Set the hour position and draw it if it isn't empty
+            if hour:
+                hour_ypos = ystartpos + 4
+                hour_xpos = 149 - (len(hour) * 8)
+                
+                # if the hour position is greater than or equal to 0 draw the hour
+                if hour_ypos >= 0 and hour_xpos >= 0:
+                    epd.imagered.text(hour, hour_xpos, hour_ypos, colour)
+                    epd.imageblack.text(hour, hour_xpos, hour_ypos, colour)
 
         # Draw the note if it isn't empty
         if save['notes'][weekday] != '':
