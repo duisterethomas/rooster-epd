@@ -1,6 +1,6 @@
 from serial import Serial, SerialException, PARITY_EVEN, STOPBITS_ONE
 from webbrowser import open_new_tab
-from time import sleep, localtime
+from time import sleep, localtime, time
 from json import loads, dumps
 from datetime import datetime
 from zermelo import Client
@@ -62,15 +62,6 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         # Init save
         self.save = None
         
-        # Check if previous port is saved
-        if exists("prev_port.txt"):
-            with open("prev_port.txt", "r") as file:
-                self.selected_port = file.read()
-        else:
-            self.selected_port = ""
-            with open("prev_port.txt", "w") as file:
-                file.write(self.selected_port)
-        
         # Connect the buttons to functions
         self.actionGithub_repository.triggered.connect(lambda: open_new_tab("https://github.com/duisterethomas/rooster-epd"))
         self.actionOver_Rooster_epd.triggered.connect(self.overClicked)
@@ -79,23 +70,20 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         self.actionWiFi_netwerken.triggered.connect(self.wifiNetwerkenClicked)
         self.actionNotities_bewerken.triggered.connect(self.notitiesBewerkenClicked)
         self.actionAfspraken_bewerken.triggered.connect(self.afsprakenBewerkenClicked)
-        self.actionRefresh_ports.triggered.connect(self.refreshPorts)
-        self.connect_button.clicked.connect(self.connectClicked)
+        self.retry_connection_button.clicked.connect(self.retryConnectionClicked)
         self.sync.clicked.connect(self.syncClicked)
-        self.pico_port.currentTextChanged.connect(self.portSelected)
     	
-        # Put all the available ports in the ports dropdown
-        self.refreshPorts()
+        # Try to connect to the Pico
+        self.retryConnectionClicked()
         
         # Put the focus on the window
         self.activateWindow()
+    
     
     # Function to send a command to the pico with threading
     def sendToPicoThreaded(self, command):
         self.menuBewerken.setDisabled(True)
         self.menuSettings.setDisabled(True)
-        self.pico_port.setDisabled(True)
-        self.connect_button.setDisabled(True)
         self.sync.setDisabled(True)
         
         self.thread = QThread()
@@ -108,60 +96,107 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         
         self.thread.finished.connect(lambda: self.menuBewerken.setDisabled(False))
         self.thread.finished.connect(lambda: self.menuSettings.setDisabled(False))
-        self.thread.finished.connect(lambda: self.pico_port.setDisabled(False))
-        self.thread.finished.connect(lambda: self.connect_button.setDisabled(False))
         self.thread.finished.connect(lambda: self.sync.setDisabled(False))
         
         self.thread.finished.connect(lambda: self.statusbar.showMessage(""))
         
         self.thread.start()
     
-    def connectClicked(self):
-        # Connect to the pico
-        if sys.platform.startswith('linux'):
-            self.pico = Serial(port=f'/dev/serial/by-id/{self.selected_port}', parity=PARITY_EVEN, stopbits=STOPBITS_ONE, timeout=1)
-        else:
-            self.pico = Serial(port=self.selected_port, parity=PARITY_EVEN, stopbits=STOPBITS_ONE, timeout=1)
-        self.pico.flush()
-        
-        self.menuBewerken.setDisabled(False)
-        self.actionZermelo_koppelen.setDisabled(False)
-        self.actionWiFi_netwerken.setDisabled(False)
-        self.actionTijden_instellen.setDisabled(False)
-        self.sync.setDisabled(False)
-        
-        # Load the save data from the pico
-        self.pico.write("load\r".encode())
-        
-        recieved = self.pico.read_until().strip().decode()
-        while recieved != "done":
-            if recieved:
-                print(recieved)
-                last_recieved = recieved
-            
-            sleep(0.1)
-            recieved = self.pico.read_until().strip().decode()
-        
-        self.save = loads(last_recieved)
-        
-        # Automatically set the time zone offset
-        self.save["time_offset"] = localtime().tm_gmtoff
-        
-        # Save the save
-        self.sendToPicoThreaded(f"dump {dumps(self.save)}")
-        
-        # Detect if the Zermelo token is still active
-        try:
-            Client(self.save["school"]).get_user(self.save["token"])
-        except ValueError:
-            self.zermeloKoppelenClicked()
     
-    def checkConnectButtonDisable(self):
-        self.connect_button.setDisabled(self.pico_port.currentText() == "<select port>")
+    def retryConnectionClicked(self):
+        # Get the available ports
+        available_ports = serial_ports()
+        
+        recieved = ""
+        
+        for port in available_ports:
+            try:
+                # Connect to the port
+                if sys.platform.startswith('linux'):
+                    self.pico = Serial(port=f'/dev/serial/by-id/{port}', parity=PARITY_EVEN, stopbits=STOPBITS_ONE, timeout=1)
+                else:
+                    self.pico = Serial(port=port, parity=PARITY_EVEN, stopbits=STOPBITS_ONE, timeout=1) 
+        
+                self.pico.flush()
+                
+                # Detect if it is the pico
+                self.pico.write("ping\r".encode())
+                
+                timeout = time() + 2
+        
+                recieved = self.pico.read_until().strip().decode()
+                while recieved != "rooster_epd" and time() < timeout:
+                    if recieved:
+                        print(recieved)
+                        last_recieved = recieved
+                    
+                    sleep(0.1)
+                    recieved = self.pico.read_until().strip().decode()
+                
+                # If it is the pico break the loop
+                if recieved == "rooster_epd":
+                    break
+                        
+            except SerialException:
+                pass
+                
+        if recieved == "rooster_epd":
+            self.statusbar.showMessage("Connection established", 3)
+            
+            # Disable the retry connection button
+            self.retry_connection_button.setDisabled(True)
+            
+            # Enable all the buttons
+            self.menuBewerken.setDisabled(False)
+            self.menuSettings.setDisabled(False)
+            self.sync.setDisabled(False)
+            
+            # Load the save data from the pico
+            self.pico.write("load\r".encode())
+            
+            recieved = self.pico.read_until().strip().decode()
+            while recieved != "done":
+                if recieved:
+                    print(recieved)
+                    last_recieved = recieved
+                
+                sleep(0.1)
+                recieved = self.pico.read_until().strip().decode()
+            
+            self.save = loads(last_recieved)
+            
+            # Automatically set the time zone offset
+            self.save["time_offset"] = localtime().tm_gmtoff
+            
+            # Save the save
+            self.sendToPicoThreaded(f"dump {dumps(self.save)}")
+            
+            # Detect if the Zermelo token is still active
+            try:
+                Client(self.save["school"]).get_user(self.save["token"])
+            except ValueError:
+                self.zermeloKoppelenClicked()
+        else:
+            self.statusbar.showMessage("Connection failed", 3)
+            
+            # Enable the retry connection button
+            self.retry_connection_button.setDisabled(False)
+            
+            # Disable all the buttons
+            self.menuBewerken.setDisabled(True)
+            self.menuSettings.setDisabled(True)
+            self.sync.setDisabled(True)
+    
+    
+    def syncClicked(self):
+        self.statusbar.showMessage("Syncing...", -1)
+        self.sendToPicoThreaded("sync")
+    
     
     def overClicked(self):
         dlg = overWindow(self)
         dlg.exec()
+    
     
     def zermeloKoppelenClicked(self):
         prev_token = deepcopy(self.save)["token"]
@@ -176,17 +211,21 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         if self.save["token"] != prev_token:
             self.statusbar.showMessage("Zermelo gekoppeld")
     
+    
     def wifiNetwerkenClicked(self):
         dlg = wifiWindow(self, self.save, self.pico)
         dlg.exec()
+    
     
     def tijdenInstellenClicked(self):
         dlg = tijdenWindow(self, self.save, self.pico)
         dlg.exec()
     
+    
     def notitiesBewerkenClicked(self):
         dlg = notitiesWindow(self, self.save, self.pico)
         dlg.exec()
+    
     
     def afsprakenBewerkenClicked(self):
         # Auto sort the appointments
@@ -195,48 +234,8 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         # Open the popup
         dlg = afsprakenWindow(self, self.save, self.pico)
         dlg.exec()
-    
-    def refreshPorts(self):
-        # Get the available ports
-        available_ports = serial_ports()
-        
-        # Add the available ports to the dropdown
-        self.pico_port.clear()
-        self.pico_port.addItem("<select port>")
-        self.pico_port.addItems(available_ports)
-        
-        # Check if the upload buttons should be disabled
-        self.checkConnectButtonDisable()
-        
-        # Set the selected port to the saved port if available
-        if self.selected_port in available_ports:
-            self.pico_port.setCurrentText(self.selected_port)
-            self.pico_port.update()
-            
-            self.connectClicked()
-        
-        else:
-            self.menuBewerken.setDisabled(True)
-            self.actionZermelo_koppelen.setDisabled(True)
-            self.actionWiFi_netwerken.setDisabled(True)
-            self.actionTijden_instellen.setDisabled(True)
-            self.sync.setDisabled(True)
-    
-    def portSelected(self):
-        # Check if the upload buttons should be disabled
-        self.checkConnectButtonDisable()
-        
-        # Save the port
-        if self.pico_port.currentText() != "<select port>":
-            self.selected_port = self.pico_port.currentText()
-            
-            with open("prev_port.txt", "w") as file:
-                file.write(self.selected_port)
-    
-    def syncClicked(self):
-        self.statusbar.showMessage("Syncing...", -1)
-        self.sendToPicoThreaded("sync")
-        
+
+
 # The about screen
 class overWindow(QDialog, Ui_Rooster_epd_over):
     def __init__(self, parent = None):
@@ -245,6 +244,7 @@ class overWindow(QDialog, Ui_Rooster_epd_over):
         
         # Put the version number on the about screen
         self.version.setText("V2.0.2")
+
 
 # Create a QApplication
 app = QApplication(sys.argv)

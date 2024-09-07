@@ -284,8 +284,12 @@ if (mem32[SIE_STATUS] & (CONNECTED | SUSPENDED)) == CONNECTED:
             # Read the data from stdin (read data coming from PC)
             data = sys.stdin.readline().strip()
             
+            # Ping command
+            if data == 'ping':
+                print('rooster_epd')
+            
             # Load data command
-            if data == 'load':
+            elif data == 'load':
                 print(json.dumps(save))
                 
                 print('done')

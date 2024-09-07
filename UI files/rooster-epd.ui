@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>251</width>
+    <width>201</width>
     <height>111</height>
    </rect>
   </property>
@@ -18,13 +18,13 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>251</width>
+    <width>201</width>
     <height>111</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>251</width>
+    <width>201</width>
     <height>111</height>
    </size>
   </property>
@@ -32,38 +32,12 @@
    <string>Rooster epd</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QComboBox" name="pico_port">
-    <property name="geometry">
-     <rect>
-      <x>70</x>
-      <y>10</y>
-      <width>171</width>
-      <height>22</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_pico_port">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>51</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Pico port:</string>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-    </property>
-   </widget>
    <widget class="QPushButton" name="sync">
     <property name="geometry">
      <rect>
-      <x>160</x>
+      <x>10</x>
       <y>40</y>
-      <width>81</width>
+      <width>181</width>
       <height>24</height>
      </rect>
     </property>
@@ -71,17 +45,17 @@
      <string>Sync</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="connect_button">
+   <widget class="QPushButton" name="retry_connection_button">
     <property name="geometry">
      <rect>
-      <x>70</x>
-      <y>40</y>
-      <width>81</width>
+      <x>10</x>
+      <y>10</y>
+      <width>181</width>
       <height>24</height>
      </rect>
     </property>
     <property name="text">
-     <string>Connect</string>
+     <string>Retry connection</string>
     </property>
    </widget>
   </widget>
@@ -91,7 +65,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>251</width>
+     <width>201</width>
      <height>22</height>
     </rect>
    </property>
@@ -102,8 +76,6 @@
     <addaction name="actionZermelo_koppelen"/>
     <addaction name="actionWiFi_netwerken"/>
     <addaction name="actionTijden_instellen"/>
-    <addaction name="separator"/>
-    <addaction name="actionRefresh_ports"/>
    </widget>
    <widget class="QMenu" name="menuBewerken">
     <property name="title">
