@@ -22,7 +22,7 @@ class afspraakFrame(QFrame, Ui_Afspraak):
         # Add a max length check
         self.lesuur.textChanged.connect(lambda: self.onderwerpen.setMaxLength(12-len(self.lesuur.text())))
         
-        # Delete the sjabloon when verwijder is clicked
+        # Delete the template when verwijder is clicked
         self.verwijderButton.clicked.connect(lambda: self.setParent(None))
         self.verwijderButton.clicked.connect(lambda: self.deleteLater())
         
@@ -48,7 +48,7 @@ class afsprakenWindow(QDialog, Ui_Rooster_epd_afspraken):
         # Set required initial values for variables
         self.count = 0
         self.appointments = {}
-        self.sjablonen = []
+        self.templates = []
         
         # Get the layout in the scroll area
         self.scrolllayout = self.scrollAreaWidgetContents.layout()
@@ -65,7 +65,7 @@ class afsprakenWindow(QDialog, Ui_Rooster_epd_afspraken):
         
         if len(self.save["appointments"]) > 0:
             for appointment in self.save["appointments"]:
-                if appointment["date"][2] >= today.day:
+                if appointment["date"][0] >= today.year or appointment["date"][1] >= today.month or appointment["date"][2] >= today.day:
                     self.addAppointment(appointment)
                 else:
                     # Auto remove old appointments
@@ -105,17 +105,17 @@ class afsprakenWindow(QDialog, Ui_Rooster_epd_afspraken):
     
     # Refresh the template buttons
     def refreshTemplates(self):
-        for sjabloon in self.sjablonen:
-            sjabloon.deleteLater()
+        for template in self.templates:
+            template.deleteLater()
             
-        self.sjablonen = [QAction(text="Sjablonen bewerken", parent=self.nieuwButton)]
-        self.sjablonen[0].triggered.connect(self.openSjablonenBewerken)
+        self.templates = [QAction(text="Sjablonen bewerken", parent=self.nieuwButton)]
+        self.templates[0].triggered.connect(self.openSjablonenBewerken)
         
-        for sjabloon in sorted(self.save["templates"].keys()):
-            self.sjablonen.append(QAction(text=sjabloon, parent=self.nieuwButton))
-            self.sjablonen[-1].triggered.connect(lambda _ = None, sjab = sjabloon: self.addAppointment(self.save["templates"][sjab]))
+        for template in sorted(self.save["templates"].keys()):
+            self.templates.append(QAction(text=template, parent=self.nieuwButton))
+            self.templates[-1].triggered.connect(lambda _ = None, templ = template: self.addAppointment(self.save["templates"][templ]))
         
-        self.nieuwButton.addActions(self.sjablonen)
+        self.nieuwButton.addActions(self.templates)
     
     # Add an afspraak
     def addAppointment(self, appointment = None):
@@ -159,24 +159,24 @@ class afsprakenWindow(QDialog, Ui_Rooster_epd_afspraken):
     
     # Check if every template has a name and if there are changes
     def checkSaveDisable(self):
-        self.new_afspraken = []
+        self.new_appointments = []
         
         for widget in self.scrollAreaWidgetContents.children():
             if widget.objectName().startswith("appointment"):
-                afspraak = {"date": (widget.datum.date().year(), widget.datum.date().month(), widget.datum.date().day()),
-                            "startTime": (widget.startTime.time().hour(), widget.startTime.time().minute()),
-                            "endTime": (widget.endTime.time().hour(), widget.endTime.time().minute()),
-                            "subjects": widget.onderwerpen.text(),
-                            "locations": widget.locaties.text(),
-                            "timeSlotName": widget.lesuur.text()}
+                appointment = {"date": (widget.datum.date().year(), widget.datum.date().month(), widget.datum.date().day()),
+                               "startTime": (widget.startTime.time().hour(), widget.startTime.time().minute()),
+                               "endTime": (widget.endTime.time().hour(), widget.endTime.time().minute()),
+                               "subjects": widget.onderwerpen.text(),
+                               "locations": widget.locaties.text(),
+                               "timeSlotName": widget.lesuur.text()}
                 
-                self.new_afspraken.append(deepcopy(afspraak))
+                self.new_appointments.append(deepcopy(appointment))
         
-        self.buttonBox.button(QDialogButtonBox.Save).setDisabled(self.new_afspraken == self.save["appointments"])
+        self.buttonBox.button(QDialogButtonBox.Save).setDisabled(self.new_appointments == self.save["appointments"])
 
     # Save the afspraken
     def saveAppointments(self):
-        self.save["appointments"] = deepcopy(self.new_afspraken)
+        self.save["appointments"] = deepcopy(self.new_appointments)
         
         # Save the save
         self.sendToPico(f"dump {dumps(self.save)}")
