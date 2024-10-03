@@ -67,22 +67,27 @@ def sync():
 
         # Get the lessons of today
         appointments = Client(save['school']).get_appointments(save['token'], str(starttimestamp - save['time_offset']), str(endtimestamp - save['time_offset']))
-
         lessons : list = appointments['response']['data']
+        
+        # Sort the lessons list based on last modified and created
+        lessons.sort(key=lambda x: (x['lastModified'], x['created']), reverse=True)
+        
+        handled_instances = []
         for lesson in lessons:
-            # Preprocess some of the data
-            lesson['start'] = time.localtime(lesson['start'] + save['time_offset'])
-            lesson['end'] = time.localtime(lesson['end'] + save['time_offset'])
-            lesson['startTimeSlotName'] = lesson['startTimeSlotName'].upper()
-            lesson['endTimeSlotName'] = lesson['endTimeSlotName'].upper()
-            
-            for i in range(len(lesson['subjects'])):
-                lesson['subjects'][i] = lesson['subjects'][i].upper()
-            
-            lessons_today.append(lesson.copy())
-
-        # Sort the list based on last modified
-        lessons_today.sort(key=lambda x: (x['lastModified'], x['created']))
+            # Add the lesson to lessons_today if not already in there based on the appointment instance
+            if lesson['appointmentInstance'] not in handled_instances:
+                handled_instances.append(lesson['appointmentInstance'])
+                
+                # Preprocess some of the data
+                lesson['start'] = time.localtime(lesson['start'] + save['time_offset'])
+                lesson['end'] = time.localtime(lesson['end'] + save['time_offset'])
+                lesson['startTimeSlotName'] = lesson['startTimeSlotName'].upper()
+                lesson['endTimeSlotName'] = lesson['endTimeSlotName'].upper()
+                
+                for i in range(len(lesson['subjects'])):
+                    lesson['subjects'][i] = lesson['subjects'][i].upper()
+                
+                lessons_today.append(lesson.copy())
         
         # Add the appointments to lessons_today
         for appointment in save['appointments']:
