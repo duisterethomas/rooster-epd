@@ -2,6 +2,8 @@ import select
 import json
 import sys
 
+from os import remove
+
 from machine import Pin, mem32
 
 # Set led pin
@@ -45,14 +47,14 @@ if (mem32[SIE_STATUS] & (CONNECTED | SUSPENDED)) == CONNECTED:
                     for line in file:
                         print(line)
             
-            # Update start command
-            elif data[:4] == 'upds':
+            # Upload start command
+            elif data[:4] == 'upls':
                 filename = data[5:]
                 
                 file = open(filename, 'w')
                 
-                # Wait until update end command
-                while data != 'upde':
+                # Wait until upload end command
+                while data != 'uple':
                     # Wait for input on stdin
                     poll_results = poll_obj.poll()
                     if poll_results:
@@ -60,6 +62,12 @@ if (mem32[SIE_STATUS] & (CONNECTED | SUSPENDED)) == CONNECTED:
                         data = sys.stdin.readline().strip()
                         
                         file.write(f'{data}\n')
+            
+            # Delete file command
+            elif data[:4] == 'dele':
+                remove(data[5:])
+                
+                print('done')
             
             # Load data command
             elif data == 'load':
