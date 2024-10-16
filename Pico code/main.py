@@ -1,8 +1,9 @@
-import select
-import json
+from json import load, dump, loads, dumps
+from select import poll, POLLIN
+from hashlib import sha256
+from os import remove
 import sys
 
-from os import remove
 
 from machine import Pin, mem32
 
@@ -15,7 +16,7 @@ led.on()
 # Load the save file
 try:
     with open('save.json', 'r') as file:
-        save = json.load(file)
+        save = load(file)
 except OSError:  # open failed
     save = None
 
@@ -27,8 +28,8 @@ if (mem32[SIE_STATUS] & (CONNECTED | SUSPENDED)) == CONNECTED:
     led.off()
     
     # Set up the poll object
-    poll_obj = select.poll()
-    poll_obj.register(sys.stdin, select.POLLIN)
+    poll_obj = poll()
+    poll_obj.register(sys.stdin, POLLIN)
     
     while True:
         # Wait for input on stdin
@@ -58,13 +59,23 @@ if (mem32[SIE_STATUS] & (CONNECTED | SUSPENDED)) == CONNECTED:
                     # Wait for input on stdin
                     poll_results = poll_obj.poll()
                     if poll_results:
+                        # Generate hash
+                        hash_sha256 = sha256()
+                        
                         # Read the data from stdin (read data coming from PC)
                         data = sys.stdin.readline().strip()
                         
-                        file.write(f'{data}\n')
+                        # Write the data to the file if not upload end command
+                        if data != 'uple':
+                            file.write(f'{data}\n')
+                
+                # Save and close the file
+                file.close()
+                
+                print('done')
             
             # Delete file command
-            elif data[:4] == 'dele':
+            elif data[:4] == 'fdel':
                 remove(data[5:])
                 
                 print('done')
@@ -72,7 +83,7 @@ if (mem32[SIE_STATUS] & (CONNECTED | SUSPENDED)) == CONNECTED:
             # Load data command
             elif data == 'load':
                 if save != None:
-                    print(json.dumps(save))
+                    print(dumps(save))
                     
                     print('done')
                 else:
@@ -80,10 +91,10 @@ if (mem32[SIE_STATUS] & (CONNECTED | SUSPENDED)) == CONNECTED:
             
             # Dump data command
             elif data[:4] == 'dump':
-                save = json.loads(data[5:])
+                save = loads(data[5:])
                 
                 with open('save.json', 'w') as file:
-                    json.dump(save, file)
+                    dump(save, file)
                 
                 print('done')
             
