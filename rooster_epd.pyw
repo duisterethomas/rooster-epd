@@ -180,16 +180,18 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
                 # Delete all the unnecessary files from the pico
                 for file in pico_files:
                     if file not in new_files:
-                        self.pico.write(f"fdel {file}\r".encode())
-                        
-                        recieved = self.pico.read_until().strip().decode()
-                        while recieved != "done":
-                            if recieved:
-                                print(recieved)
-                                last_recieved = recieved
+                        # Don't delete the save file
+                        if file != "save.json":
+                            self.pico.write(f"fdel {file}\r".encode())
                             
-                            sleep(0.1)
                             recieved = self.pico.read_until().strip().decode()
+                            while recieved != "done":
+                                if recieved:
+                                    print(recieved)
+                                    last_recieved = recieved
+                                
+                                sleep(0.1)
+                                recieved = self.pico.read_until().strip().decode()
                 
                 # Update the files
                 for file in new_files:
