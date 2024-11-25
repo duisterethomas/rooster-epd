@@ -240,7 +240,19 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
                 sleep(0.1)
                 recieved = self.pico.read_until().strip().decode()
             
-            self.save = loads(last_recieved)
+            # Generate save file if it doesn't exist
+            if last_recieved == "fail":
+                self.save = {'wlan': {},
+                             'time_offset': 3600,
+                             'school': '',
+                             'token': '',
+                             'starttime': 510,
+                             'endtime': 970,
+                             'notes': ('', '', '', '', '', '', ''),
+                             'appointments': [],
+                             'templates': {}}
+            else:
+                self.save = loads(last_recieved)
             
             # Automatically set the time zone offset
             self.save["time_offset"] = localtime().tm_gmtoff

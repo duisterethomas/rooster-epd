@@ -100,6 +100,8 @@ if (mem32[SIE_STATUS] & (CONNECTED | SUSPENDED)) == CONNECTED:
                     print('done')
                 else:
                     print('fail')
+                    
+                    print('done')
             
             # Dump data command
             elif data[:4] == 'dump':
