@@ -12,10 +12,10 @@ led = Pin('LED', Pin.OUT)
 led.on()
 
 # Load the save file
-try:
+if "save.json" in listdir("."):
     with open('save.json', 'r') as file:
         save = load(file)
-except OSError:  # open failed
+else:
     save = None
 
 # Check if connected to pc
@@ -42,9 +42,13 @@ if (mem32[SIE_STATUS] & (CONNECTED | SUSPENDED)) == CONNECTED:
             
             # Version check command
             elif data == 'vchk':
-                with open('version.txt', 'r') as file:
-                    for line in file:
-                        print(line)
+                # Return the version if it exists, otherwise return VX.X.X
+                if "version.txt" in listdir("."):
+                    with open('version.txt', 'r') as file:
+                        for line in file:
+                            print(line)
+                else:
+                    print("VX.X.X")
                 
                 print('done')
             
@@ -79,7 +83,7 @@ if (mem32[SIE_STATUS] & (CONNECTED | SUSPENDED)) == CONNECTED:
                                 firstline = False
                                 
                             # Write the actual line
-                            file.write(data)
+                            file.write(data[1:])
                 
                 # Save and close the file
                 file.close()
