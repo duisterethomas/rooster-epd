@@ -79,7 +79,7 @@ if (mem32[SIE_STATUS] & (CONNECTED | SUSPENDED)) == CONNECTED:
                                 firstline = False
                                 
                             # Write the actual line
-                            file.write(data[1:])
+                            file.write(data)
                 
                 # Save and close the file
                 file.close()
