@@ -1,5 +1,3 @@
-/.vscode
 /__pycache__
-/Pico code/.vscode
-/Pico code/.micropico
+/.vscode
 auto-py-to-exe_config.json

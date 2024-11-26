@@ -3,12 +3,10 @@ from zermelo_api import Client
 from ntp import set_time
 
 import network
-import select
 import json
 import time
-import sys
 
-from machine import Pin, mem32
+from machine import Pin
 
 def connect(timeout : int):
     # Get a list of all available networks
@@ -240,6 +238,24 @@ def sync():
     # Turn off led
     led.off()
 
+def handle_command(data : str):
+    # Sync command
+    if data == 'sync':
+        # Connect to wifi if not already
+        if not wlan.isconnected():
+            connect(30)
+        
+        # Sync the display
+        sync()
+        
+        print('done')
+    
+    # Unknown command recieved
+    else:
+        print(f'Unknown command: {data}')
+        
+        print('done')
+
 # Set led pin
 led = Pin('LED', Pin.OUT)
 
@@ -250,85 +266,9 @@ epd = EPD_2in9_B()
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
 
-# Turn on led
-led.on()
-
 # Load the save file
 try:
     with open('save.json', 'r') as file:
         save = json.load(file)
 except OSError:  # open failed
-    save = {'wlan': {},
-            'time_offset': 3600,
-            'school': '',
-            'token': '',
-            'starttime': 510,
-            'endtime': 970,
-            'notes': ('', '', '', '', '', '', ''),
-            'appointments': [],
-            'templates': {}}
-    
-    with open('save.json', 'w') as file:
-        json.dump(save, file)
-
-# Check if connected to pc
-SIE_STATUS = const(0x50110000+0x50)
-CONNECTED = const(1<<16)
-SUSPENDED = const(1<<4)
-if (mem32[SIE_STATUS] & (CONNECTED | SUSPENDED)) == CONNECTED:
-    led.off()
-    
-    # Set up the poll object
-    poll_obj = select.poll()
-    poll_obj.register(sys.stdin, select.POLLIN)
-    
-    while True:
-        # Wait for input on stdin
-        poll_results = poll_obj.poll()
-        if poll_results:
-            # Read the data from stdin (read data coming from PC)
-            data = sys.stdin.readline().strip()
-            
-            # Ping command
-            if data == 'ping':
-                print('rooster_epd')
-            
-            # Load data command
-            elif data == 'load':
-                print(json.dumps(save))
-                
-                print('done')
-            
-            # Dump data command
-            elif data[0:4] == 'dump':
-                save = json.loads(data[5:])
-                
-                with open('save.json', 'w') as file:
-                    json.dump(save, file)
-                
-                print('done')
-            
-            # Sync command
-            elif data == 'sync':
-                # Connect to wifi if not already
-                if not wlan.isconnected():
-                    connect(30)
-                
-                # Sync the display
-                sync()
-                
-                print('done')
-            
-            # Unknown command recieved
-            else:
-                print(f'Unknown command: {data}')
-                
-                print('done')
-
-# Else run normal code
-else:
-    # Connect wlan
-    connect(60)
-    
-    # Sync with zermelo
-    sync()
+    save = None

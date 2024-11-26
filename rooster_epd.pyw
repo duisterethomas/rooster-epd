@@ -21,6 +21,9 @@ from rooster_epd_wifi import wifiWindow
 from rooster_epd_notities import notitiesWindow
 from rooster_epd_afspraken import afsprakenWindow
 
+# Version constant
+VERSION = 'V2.1.0'
+
 # List available serial ports function
 def serial_ports():
     """ Lists serial port names
@@ -141,6 +144,80 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
                 pass
                 
         if recieved == "rooster_epd":
+            # Check the current version
+            self.pico.write("vchk\r".encode())
+            
+            recieved = self.pico.read_until().strip().decode()
+            while recieved != "done":
+                if recieved:
+                    print(recieved)
+                    last_recieved = recieved
+                
+                sleep(0.1)
+                recieved = self.pico.read_until().strip().decode()
+            
+            # Update the pico if it isn't the latest version
+            if last_recieved != VERSION:
+                # Get a list of the current files
+                self.pico.write("list\r".encode())
+                
+                pico_files = []
+                
+                recieved = self.pico.read_until().strip().decode()
+                while recieved != "done":
+                    if recieved:
+                        pico_files.append(recieved)
+                        
+                        print(recieved)
+                        last_recieved = recieved
+                    
+                    sleep(0.1)
+                    recieved = self.pico.read_until().strip().decode()
+                
+                ### Change before release, doesn't work with pyinstaller!!!!
+                new_files = listdir('pico_code')
+                
+                # Delete all the unnecessary files from the pico
+                for file in pico_files:
+                    if file not in new_files:
+                        # Don't delete the save file
+                        if file != "save.json":
+                            self.pico.write(f"fdel {file}\r".encode())
+                            
+                            recieved = self.pico.read_until().strip().decode()
+                            while recieved != "done":
+                                if recieved:
+                                    print(recieved)
+                                    last_recieved = recieved
+                                
+                                sleep(0.1)
+                                recieved = self.pico.read_until().strip().decode()
+                
+                # Update the files
+                for file in new_files:
+                    # main.py can't be updated automatically
+                    if file != "main.py":
+                        self.pico.write(f"upls {file}\r".encode())
+                        
+                        # Write the file
+                        with open(f'pico_code/{file}', 'r') as file:
+                            for line in file:
+                                # Add an X to the start of every line to indicate the start of the line
+                                line = f"X{line.removesuffix('\n')}"
+                                self.pico.write(f"{line}\r".encode())
+                        
+                        # End the upload
+                        self.pico.write("uple\r".encode())
+                        
+                        recieved = self.pico.read_until().strip().decode()
+                        while recieved != "done":
+                            if recieved:
+                                print(recieved)
+                                last_recieved = recieved
+                            
+                            sleep(0.1)
+                            recieved = self.pico.read_until().strip().decode()
+            
             self.statusbar.showMessage("Connection established", 3)
             
             # Disable the retry connection button
@@ -163,7 +240,19 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
                 sleep(0.1)
                 recieved = self.pico.read_until().strip().decode()
             
-            self.save = loads(last_recieved)
+            # Generate save file if it doesn't exist
+            if last_recieved == "fail":
+                self.save = {'wlan': {},
+                             'time_offset': 3600,
+                             'school': '',
+                             'token': '',
+                             'starttime': 510,
+                             'endtime': 970,
+                             'notes': ('', '', '', '', '', '', ''),
+                             'appointments': [],
+                             'templates': {}}
+            else:
+                self.save = loads(last_recieved)
             
             # Automatically set the time zone offset
             self.save["time_offset"] = localtime().tm_gmtoff
@@ -243,7 +332,7 @@ class overWindow(QDialog, Ui_Rooster_epd_over):
         self.setupUi(self)
         
         # Put the version number on the about screen
-        self.version.setText("V2.0.2")
+        self.version.setText(VERSION)
 
 
 # Create a QApplication
