@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Rooster_epd_over</class>
- <widget class="QDialog" name="Rooster_epd_over">
+ <class>Rooster_EPD_over</class>
+ <widget class="QDialog" name="Rooster_EPD_over">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -23,10 +23,10 @@
     </rect>
    </property>
    <property name="orientation">
-    <enum>Qt::Horizontal</enum>
+    <enum>Qt::Orientation::Horizontal</enum>
    </property>
    <property name="standardButtons">
-    <set>QDialogButtonBox::Close</set>
+    <set>QDialogButtonBox::StandardButton::Close</set>
    </property>
    <property name="centerButtons">
     <bool>true</bool>
@@ -48,10 +48,10 @@
     </font>
    </property>
    <property name="text">
-    <string>Rooster epd</string>
+    <string>Rooster-EPD</string>
    </property>
    <property name="alignment">
-    <set>Qt::AlignCenter</set>
+    <set>Qt::AlignmentFlag::AlignCenter</set>
    </property>
   </widget>
   <widget class="QLabel" name="version">
@@ -64,10 +64,10 @@
     </rect>
    </property>
    <property name="text">
-    <string>V</string>
+    <string>VX.X.X</string>
    </property>
    <property name="alignment">
-    <set>Qt::AlignCenter</set>
+    <set>Qt::AlignmentFlag::AlignCenter</set>
    </property>
   </widget>
  </widget>
@@ -76,7 +76,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>Rooster_epd_over</receiver>
+   <receiver>Rooster_EPD_over</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -92,7 +92,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>Rooster_epd_over</receiver>
+   <receiver>Rooster_EPD_over</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

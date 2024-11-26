@@ -7,7 +7,7 @@ from PySide6.QtCore import QRect, QDate, QTime
 from PySide6.QtWidgets import QFrame, QDialog, QDialogButtonBox
 from PySide6.QtGui import QAction
 
-from rooster_epd_ui import Ui_Afspraak, Ui_Rooster_epd_afspraken
+from rooster_epd_ui import Ui_Afspraak, Ui_Rooster_EPD_afspraken
 
 from rooster_epd_sjablonen import sjablonenWindow
 
@@ -32,7 +32,7 @@ class afspraakFrame(QFrame, Ui_Afspraak):
         min_date.setDate(today.year, today.month, today.day)
         self.datum.setMinimumDate(min_date)
         
-class afsprakenWindow(QDialog, Ui_Rooster_epd_afspraken):
+class afsprakenWindow(QDialog, Ui_Rooster_EPD_afspraken):
     def __init__(self, parent = None, save : dict = None, pico = None):
         super().__init__(parent)
         self.setupUi(self)
@@ -92,8 +92,8 @@ class afsprakenWindow(QDialog, Ui_Rooster_epd_afspraken):
     # Resize the ui if the window is resized
     def resizeEvent(self, event):
         QDialog.resizeEvent(self, event)
-        self.scrollArea.setGeometry(QRect(-1, 0, 396, event.size().height()-40))
-        self.buttonBox.setGeometry(QRect(0, event.size().height()-41, 396, 41))
+        self.scrollArea.setGeometry(QRect(-1, 0, 471, event.size().height()-40))
+        self.buttonBox.setGeometry(QRect(0, event.size().height()-41, 471, 41))
     
     # Open the sjablonen bewerken ui
     def openSjablonenBewerken(self):

@@ -4,10 +4,10 @@ from json import dumps
 
 from PySide6.QtWidgets import QDialog, QDialogButtonBox
 
-from rooster_epd_ui import Ui_Rooster_epd_setup
+from rooster_epd_ui import Ui_Rooster_EPD_setup
 
 # The functionality of the setup window
-class setupWindow(QDialog, Ui_Rooster_epd_setup):
+class setupWindow(QDialog, Ui_Rooster_EPD_setup):
     def __init__(self, parent = None, save : dict = None, pico = None):
         super().__init__(parent)
         self.setupUi(self)

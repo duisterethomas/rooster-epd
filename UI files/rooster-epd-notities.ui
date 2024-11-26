@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Rooster_epd_notities</class>
- <widget class="QDialog" name="Rooster_epd_notities">
+ <class>Rooster_EPD_notities</class>
+ <widget class="QDialog" name="Rooster_EPD_notities">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -41,10 +41,10 @@
     </rect>
    </property>
    <property name="orientation">
-    <enum>Qt::Horizontal</enum>
+    <enum>Qt::Orientation::Horizontal</enum>
    </property>
    <property name="standardButtons">
-    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Save</set>
+    <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Save</set>
    </property>
    <property name="centerButtons">
     <bool>true</bool>
@@ -162,7 +162,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLabel" name="label">
+  <widget class="QLabel" name="labelMaandag">
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -175,10 +175,10 @@
     <string>Maandag:</string>
    </property>
    <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="label_2">
+  <widget class="QLabel" name="labelDinsdag">
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -191,10 +191,10 @@
     <string>Dinsdag:</string>
    </property>
    <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="label_3">
+  <widget class="QLabel" name="labelWoensdag">
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -207,10 +207,10 @@
     <string>Woensdag:</string>
    </property>
    <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="label_4">
+  <widget class="QLabel" name="labelDonderdag">
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -223,10 +223,10 @@
     <string>Donderdag:</string>
    </property>
    <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="label_5">
+  <widget class="QLabel" name="labelVrijdag">
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -239,10 +239,10 @@
     <string>Vrijdag:</string>
    </property>
    <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="label_6">
+  <widget class="QLabel" name="labelZaterdag">
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -255,10 +255,10 @@
     <string>Zaterdag:</string>
    </property>
    <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
    </property>
   </widget>
-  <widget class="QLabel" name="label_7">
+  <widget class="QLabel" name="labelZondag">
    <property name="geometry">
     <rect>
      <x>0</x>
@@ -271,7 +271,7 @@
     <string>Zondag:</string>
    </property>
    <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
    </property>
   </widget>
  </widget>
@@ -280,7 +280,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>Rooster_epd_notities</receiver>
+   <receiver>Rooster_EPD_notities</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -296,7 +296,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>Rooster_epd_notities</receiver>
+   <receiver>Rooster_EPD_notities</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

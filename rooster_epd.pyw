@@ -12,7 +12,7 @@ import sys
 from PySide6.QtCore import QThread
 from PySide6.QtWidgets import QMainWindow, QApplication, QDialog
 
-from rooster_epd_ui import Ui_Rooster_epd, Ui_Rooster_epd_over
+from rooster_epd_ui import Ui_Rooster_EPD, Ui_Rooster_EPD_over
 from rooster_epd_worker import Worker
 
 from rooster_epd_setup import setupWindow
@@ -57,7 +57,7 @@ def serial_ports():
     
     return result
 
-class mainWindow(QMainWindow, Ui_Rooster_epd):
+class mainWindow(QMainWindow, Ui_Rooster_EPD):
     def __init__(self, parent = None):
         super().__init__(parent)
         self.setupUi(self)
@@ -73,11 +73,11 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         self.actionWiFi_netwerken.triggered.connect(self.wifiNetwerkenClicked)
         self.actionNotities_bewerken.triggered.connect(self.notitiesBewerkenClicked)
         self.actionAfspraken_bewerken.triggered.connect(self.afsprakenBewerkenClicked)
-        self.retry_connection_button.clicked.connect(self.retryConnectionClicked)
-        self.sync.clicked.connect(self.syncClicked)
+        self.verbindenButton.clicked.connect(self.verbindenClicked)
+        self.synchroniserenButton.clicked.connect(self.synchroniserenClicked)
     	
         # Try to connect to the Pico
-        self.retryConnectionClicked()
+        self.verbindenClicked()
         
         # Put the focus on the window
         self.activateWindow()
@@ -87,7 +87,7 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
     def sendToPicoThreaded(self, command):
         self.menuBewerken.setDisabled(True)
         self.menuSettings.setDisabled(True)
-        self.sync.setDisabled(True)
+        self.synchroniserenButton.setDisabled(True)
         
         self.thread = QThread()
         self.worker = Worker(self.pico, command)
@@ -99,14 +99,14 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         
         self.thread.finished.connect(lambda: self.menuBewerken.setDisabled(False))
         self.thread.finished.connect(lambda: self.menuSettings.setDisabled(False))
-        self.thread.finished.connect(lambda: self.sync.setDisabled(False))
+        self.thread.finished.connect(lambda: self.synchroniserenButton.setDisabled(False))
         
         self.thread.finished.connect(lambda: self.statusbar.showMessage(""))
         
         self.thread.start()
     
     
-    def retryConnectionClicked(self):
+    def verbindenClicked(self):
         # Get the available ports
         available_ports = serial_ports()
         
@@ -220,13 +220,13 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
             
             self.statusbar.showMessage("Connection established", 3)
             
-            # Disable the retry connection button
-            self.retry_connection_button.setDisabled(True)
+            # Disable the verbinden button
+            self.verbindenButton.setDisabled(True)
             
             # Enable all the buttons
             self.menuBewerken.setDisabled(False)
             self.menuSettings.setDisabled(False)
-            self.sync.setDisabled(False)
+            self.synchroniserenButton.setDisabled(False)
             
             # Load the save data from the pico
             self.pico.write("load\r".encode())
@@ -268,16 +268,16 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
         else:
             self.statusbar.showMessage("Connection failed", 3)
             
-            # Enable the retry connection button
-            self.retry_connection_button.setDisabled(False)
+            # Enable the verbinden button
+            self.verbindenButton.setDisabled(False)
             
             # Disable all the buttons
             self.menuBewerken.setDisabled(True)
             self.menuSettings.setDisabled(True)
-            self.sync.setDisabled(True)
+            self.synchroniserenButton.setDisabled(True)
     
     
-    def syncClicked(self):
+    def synchroniserenClicked(self):
         self.statusbar.showMessage("Syncing...", -1)
         self.sendToPicoThreaded("sync")
     
@@ -326,7 +326,7 @@ class mainWindow(QMainWindow, Ui_Rooster_epd):
 
 
 # The about screen
-class overWindow(QDialog, Ui_Rooster_epd_over):
+class overWindow(QDialog, Ui_Rooster_EPD_over):
     def __init__(self, parent = None):
         super().__init__(parent)
         self.setupUi(self)

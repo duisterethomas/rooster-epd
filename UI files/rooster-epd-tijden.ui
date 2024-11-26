@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Rooster_epd_tijden</class>
- <widget class="QDialog" name="Rooster_epd_tijden">
+ <class>Rooster_EPD_tijden</class>
+ <widget class="QDialog" name="Rooster_EPD_tijden">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>201</width>
+    <width>211</width>
     <height>111</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>201</width>
+    <width>211</width>
     <height>111</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>201</width>
+    <width>211</width>
     <height>111</height>
    </size>
   </property>
@@ -26,22 +26,22 @@
    <string>Tijden instellen</string>
   </property>
   <property name="layoutDirection">
-   <enum>Qt::LeftToRight</enum>
+   <enum>Qt::LayoutDirection::LeftToRight</enum>
   </property>
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>70</y>
-     <width>181</width>
+     <width>191</width>
      <height>32</height>
     </rect>
    </property>
    <property name="orientation">
-    <enum>Qt::Horizontal</enum>
+    <enum>Qt::Orientation::Horizontal</enum>
    </property>
    <property name="standardButtons">
-    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Save</set>
+    <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Save</set>
    </property>
    <property name="centerButtons">
     <bool>true</bool>
@@ -50,9 +50,9 @@
   <widget class="QTimeEdit" name="beginTijd">
    <property name="geometry">
     <rect>
-     <x>120</x>
+     <x>110</x>
      <y>10</y>
-     <width>61</width>
+     <width>81</width>
      <height>22</height>
     </rect>
    </property>
@@ -60,9 +60,9 @@
   <widget class="QTimeEdit" name="eindTijd">
    <property name="geometry">
     <rect>
-     <x>120</x>
+     <x>110</x>
      <y>40</y>
-     <width>61</width>
+     <width>81</width>
      <height>22</height>
     </rect>
    </property>
@@ -72,7 +72,7 @@
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>101</width>
+     <width>91</width>
      <height>21</height>
     </rect>
    </property>
@@ -80,7 +80,7 @@
     <string>Begin eerste uur:</string>
    </property>
    <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
    </property>
   </widget>
   <widget class="QLabel" name="label_2">
@@ -88,7 +88,7 @@
     <rect>
      <x>10</x>
      <y>40</y>
-     <width>101</width>
+     <width>91</width>
      <height>21</height>
     </rect>
    </property>
@@ -96,7 +96,7 @@
     <string>Eind laatste uur:</string>
    </property>
    <property name="alignment">
-    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+    <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
    </property>
   </widget>
  </widget>
@@ -105,7 +105,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>Rooster_epd_tijden</receiver>
+   <receiver>Rooster_EPD_tijden</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -121,7 +121,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>Rooster_epd_tijden</receiver>
+   <receiver>Rooster_EPD_tijden</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

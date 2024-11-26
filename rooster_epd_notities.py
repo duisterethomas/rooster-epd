@@ -4,9 +4,9 @@ from json import dumps
 
 from PySide6.QtWidgets import QDialog, QDialogButtonBox
 
-from rooster_epd_ui import Ui_Rooster_epd_notities
+from rooster_epd_ui import Ui_Rooster_EPD_notities
 
-class notitiesWindow(QDialog, Ui_Rooster_epd_notities):
+class notitiesWindow(QDialog, Ui_Rooster_EPD_notities):
     def __init__(self, parent = None, save : dict = None, pico = None):
         super().__init__(parent)
         self.setupUi(self)

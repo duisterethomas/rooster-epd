@@ -5,7 +5,7 @@ from json import dumps
 from PySide6.QtCore import QRect
 from PySide6.QtWidgets import QFrame, QDialog, QDialogButtonBox
 
-from rooster_epd_ui import Ui_Wifi, Ui_Rooster_epd_wifi
+from rooster_epd_ui import Ui_Wifi, Ui_Rooster_EPD_wifi
 
 class wifiFrame(QFrame, Ui_Wifi):
     def __init__(self, parent=None):
@@ -16,7 +16,7 @@ class wifiFrame(QFrame, Ui_Wifi):
         self.verwijderButton.clicked.connect(lambda: self.setParent(None))
         self.verwijderButton.clicked.connect(lambda: self.deleteLater())
 
-class wifiWindow(QDialog, Ui_Rooster_epd_wifi):
+class wifiWindow(QDialog, Ui_Rooster_EPD_wifi):
     def __init__(self, parent = None, save : dict = None, pico = None):
         super().__init__(parent)
         self.setupUi(self)

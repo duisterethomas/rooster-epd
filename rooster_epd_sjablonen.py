@@ -5,7 +5,7 @@ from json import dumps
 from PySide6.QtCore import QRect, QTime
 from PySide6.QtWidgets import QFrame, QDialog, QDialogButtonBox
 
-from rooster_epd_ui import Ui_Sjabloon, Ui_Rooster_epd_sjablonen
+from rooster_epd_ui import Ui_Sjabloon, Ui_Rooster_EPD_sjablonen
 
 class sjabloonFrame(QFrame, Ui_Sjabloon):
     def __init__(self, parent=None):
@@ -22,7 +22,7 @@ class sjabloonFrame(QFrame, Ui_Sjabloon):
         self.verwijderButton.clicked.connect(lambda: self.setParent(None))
         self.verwijderButton.clicked.connect(lambda: self.deleteLater())
         
-class sjablonenWindow(QDialog, Ui_Rooster_epd_sjablonen):
+class sjablonenWindow(QDialog, Ui_Rooster_EPD_sjablonen):
     def __init__(self, parent = None, save : dict = None, pico = None):
         super().__init__(parent)
         self.setupUi(self)
@@ -67,8 +67,8 @@ class sjablonenWindow(QDialog, Ui_Rooster_epd_sjablonen):
     # Resize the ui if the window is resized
     def resizeEvent(self, event):
         QDialog.resizeEvent(self, event)
-        self.scrollArea.setGeometry(QRect(-1, 0, 396, event.size().height()-40))
-        self.buttonBox.setGeometry(QRect(0, event.size().height()-41, 396, 41))
+        self.scrollArea.setGeometry(QRect(-1, 0, 471, event.size().height()-40))
+        self.buttonBox.setGeometry(QRect(0, event.size().height()-41, 471, 41))
     
     # Add a template
     def addTemplate(self, template):

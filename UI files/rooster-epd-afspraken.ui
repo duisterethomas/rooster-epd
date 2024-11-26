@@ -1,24 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Rooster_epd_afspraken</class>
- <widget class="QDialog" name="Rooster_epd_afspraken">
+ <class>Rooster_EPD_afspraken</class>
+ <widget class="QDialog" name="Rooster_EPD_afspraken">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>396</width>
+    <width>471</width>
     <height>281</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>396</width>
+    <width>471</width>
     <height>171</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>396</width>
+    <width>471</width>
     <height>16777215</height>
    </size>
   </property>
@@ -30,15 +30,15 @@
     <rect>
      <x>0</x>
      <y>240</y>
-     <width>396</width>
+     <width>471</width>
      <height>41</height>
     </rect>
    </property>
    <property name="orientation">
-    <enum>Qt::Horizontal</enum>
+    <enum>Qt::Orientation::Horizontal</enum>
    </property>
    <property name="standardButtons">
-    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Save</set>
+    <set>QDialogButtonBox::StandardButton::Cancel|QDialogButtonBox::StandardButton::Save</set>
    </property>
    <property name="centerButtons">
     <bool>true</bool>
@@ -49,18 +49,18 @@
     <rect>
      <x>-1</x>
      <y>0</y>
-     <width>396</width>
+     <width>471</width>
      <height>241</height>
     </rect>
    </property>
    <property name="frameShape">
-    <enum>QFrame::NoFrame</enum>
+    <enum>QFrame::Shape::NoFrame</enum>
    </property>
    <property name="verticalScrollBarPolicy">
-    <enum>Qt::ScrollBarAlwaysOn</enum>
+    <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOn</enum>
    </property>
    <property name="horizontalScrollBarPolicy">
-    <enum>Qt::ScrollBarAlwaysOff</enum>
+    <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
    </property>
    <property name="widgetResizable">
     <bool>true</bool>
@@ -70,7 +70,7 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>379</width>
+      <width>459</width>
       <height>241</height>
      </rect>
     </property>
@@ -87,17 +87,17 @@
         <string>Nieuwe afspraak</string>
        </property>
        <property name="popupMode">
-        <enum>QToolButton::MenuButtonPopup</enum>
+        <enum>QToolButton::ToolButtonPopupMode::MenuButtonPopup</enum>
        </property>
        <property name="toolButtonStyle">
-        <enum>Qt::ToolButtonTextOnly</enum>
+        <enum>Qt::ToolButtonStyle::ToolButtonTextOnly</enum>
        </property>
       </widget>
      </item>
      <item>
       <spacer name="verticalSpacer">
        <property name="orientation">
-        <enum>Qt::Vertical</enum>
+        <enum>Qt::Orientation::Vertical</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -116,7 +116,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>Rooster_epd_afspraken</receiver>
+   <receiver>Rooster_EPD_afspraken</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -132,7 +132,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>Rooster_epd_afspraken</receiver>
+   <receiver>Rooster_EPD_afspraken</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
