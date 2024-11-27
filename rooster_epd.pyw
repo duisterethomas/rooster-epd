@@ -1,13 +1,14 @@
-from serial import Serial, SerialException, PARITY_EVEN, STOPBITS_ONE
-from webbrowser import open_new_tab
-from time import sleep, localtime, time
-from json import loads, dumps
-from datetime import datetime
-from zermelo import Client
-from os.path import exists
-from copy import deepcopy
-from os import listdir
 import sys
+from copy import deepcopy
+from datetime import datetime
+from json import loads, dumps
+from os import listdir
+from os.path import exists, abspath, join
+from time import sleep, localtime, time
+from webbrowser import open_new_tab
+
+from serial import Serial, SerialException, PARITY_EVEN, STOPBITS_ONE
+from zermelo import Client
 
 from PySide6.QtCore import QThread
 from PySide6.QtWidgets import QMainWindow, QApplication, QDialog
@@ -23,6 +24,16 @@ from rooster_epd_afspraken import afsprakenWindow
 
 # Version constant
 VERSION = 'V2.1.0'
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = abspath(".")
+
+    return join(base_path, relative_path)
 
 # List available serial ports function
 def serial_ports():
@@ -58,7 +69,7 @@ def serial_ports():
     return result
 
 class mainWindow(QMainWindow, Ui_Rooster_EPD):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
         
@@ -327,7 +338,7 @@ class mainWindow(QMainWindow, Ui_Rooster_EPD):
 
 # The about screen
 class overWindow(QDialog, Ui_Rooster_EPD_over):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
         

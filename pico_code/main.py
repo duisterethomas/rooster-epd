@@ -1,9 +1,8 @@
-from json import load, dump, loads, dumps
-from select import poll, POLLIN
-from os import remove, listdir
 import sys
-
+from json import load, dump, loads, dumps
 from machine import Pin, mem32
+from os import remove, listdir
+from select import poll, POLLIN
 
 # Set led pin
 led = Pin('LED', Pin.OUT)

@@ -1,6 +1,6 @@
 from json import dumps
-from time import sleep
 from math import floor
+from time import sleep
 
 from PySide6.QtCore import QTime
 from PySide6.QtWidgets import QDialog, QDialogButtonBox
@@ -8,7 +8,7 @@ from PySide6.QtWidgets import QDialog, QDialogButtonBox
 from rooster_epd_ui import Ui_Rooster_EPD_tijden
 
 class tijdenWindow(QDialog, Ui_Rooster_EPD_tijden):
-    def __init__(self, parent = None, save : dict = None, pico = None):
+    def __init__(self, parent=None, save: dict = None, pico=None):
         super().__init__(parent)
         self.setupUi(self)
         

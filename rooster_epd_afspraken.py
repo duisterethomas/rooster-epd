@@ -1,7 +1,7 @@
 from copy import deepcopy
 from datetime import date
-from time import sleep
 from json import dumps
+from time import sleep
 
 from PySide6.QtCore import QRect, QDate, QTime
 from PySide6.QtWidgets import QFrame, QDialog, QDialogButtonBox
@@ -22,7 +22,7 @@ class afspraakFrame(QFrame, Ui_Afspraak):
         # Add a max length check
         self.lesuur.textChanged.connect(lambda: self.onderwerpen.setMaxLength(12-len(self.lesuur.text())))
         
-        # Delete the template when verwijder is clicked
+        # Delete the appointment when verwijder is clicked
         self.verwijderButton.clicked.connect(lambda: self.setParent(None))
         self.verwijderButton.clicked.connect(lambda: self.deleteLater())
         
@@ -33,7 +33,7 @@ class afspraakFrame(QFrame, Ui_Afspraak):
         self.datum.setMinimumDate(min_date)
         
 class afsprakenWindow(QDialog, Ui_Rooster_EPD_afspraken):
-    def __init__(self, parent = None, save : dict = None, pico = None):
+    def __init__(self, parent=None, save: dict = None, pico=None):
         super().__init__(parent)
         self.setupUi(self)
         
@@ -63,7 +63,7 @@ class afsprakenWindow(QDialog, Ui_Rooster_EPD_afspraken):
         # Add afspraken if needed
         today = date.today()
         
-        if len(self.save["appointments"]) > 0:
+        if self.save["appointments"]:
             for appointment in self.save["appointments"]:
                 if appointment["date"][0] >= today.year or appointment["date"][1] >= today.month or appointment["date"][2] >= today.day:
                     self.addAppointment(appointment)
@@ -118,7 +118,7 @@ class afsprakenWindow(QDialog, Ui_Rooster_EPD_afspraken):
         self.nieuwButton.addActions(self.templates)
     
     # Add an afspraak
-    def addAppointment(self, appointment = None):
+    def addAppointment(self, appointment=None):
         appointment_name = f"appointment{self.count}"
         self.appointments[appointment_name] = afspraakFrame(self.scrollAreaWidgetContents)
         self.appointments[appointment_name].setObjectName(appointment_name)

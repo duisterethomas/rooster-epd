@@ -1,6 +1,6 @@
 from copy import deepcopy
-from time import sleep
 from json import dumps
+from time import sleep
 
 from PySide6.QtCore import QRect
 from PySide6.QtWidgets import QFrame, QDialog, QDialogButtonBox
@@ -17,7 +17,7 @@ class wifiFrame(QFrame, Ui_Wifi):
         self.verwijderButton.clicked.connect(lambda: self.deleteLater())
 
 class wifiWindow(QDialog, Ui_Rooster_EPD_wifi):
-    def __init__(self, parent = None, save : dict = None, pico = None):
+    def __init__(self, parent=None, save: dict = None, pico=None):
         super().__init__(parent)
         self.setupUi(self)
         
@@ -39,7 +39,7 @@ class wifiWindow(QDialog, Ui_Rooster_EPD_wifi):
         self.buttonBox.accepted.connect(self.saveWifi)
         
         # Add networks if needed
-        if len(save["wlan"]) > 0:
+        if save["wlan"]:
             for network in self.save["wlan"].keys():
                 self.addNetwork(network, self.save["wlan"][network])
         
@@ -65,7 +65,7 @@ class wifiWindow(QDialog, Ui_Rooster_EPD_wifi):
         self.buttonBox.setGeometry(QRect(0, event.size().height()-41, 396, 41))
     
     # Add a network
-    def addNetwork(self, ssid : str = "", password : str = ""):
+    def addNetwork(self, ssid: str = "", password: str = ""):
         # Add the new template
         network_name = f"network{self.count}"
         self.networks[network_name] = wifiFrame(self.scrollAreaWidgetContents)

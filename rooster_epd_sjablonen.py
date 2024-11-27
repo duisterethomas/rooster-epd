@@ -1,6 +1,6 @@
 from copy import deepcopy
-from time import sleep
 from json import dumps
+from time import sleep
 
 from PySide6.QtCore import QRect, QTime
 from PySide6.QtWidgets import QFrame, QDialog, QDialogButtonBox
@@ -23,7 +23,7 @@ class sjabloonFrame(QFrame, Ui_Sjabloon):
         self.verwijderButton.clicked.connect(lambda: self.deleteLater())
         
 class sjablonenWindow(QDialog, Ui_Rooster_EPD_sjablonen):
-    def __init__(self, parent = None, save : dict = None, pico = None):
+    def __init__(self, parent=None, save: dict = None, pico=None):
         super().__init__(parent)
         self.setupUi(self)
         
@@ -45,7 +45,7 @@ class sjablonenWindow(QDialog, Ui_Rooster_EPD_sjablonen):
         self.buttonBox.accepted.connect(self.saveTemplates)
         
         # Add templates if needed
-        if len(save["templates"]) > 0:
+        if save["templates"]:
             for template in sorted(self.save["templates"].keys()):
                 self.addTemplate(self.save["templates"][template])
         

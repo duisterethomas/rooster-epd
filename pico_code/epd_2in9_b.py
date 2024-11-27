@@ -1,15 +1,15 @@
-from machine import Pin, SPI
 import framebuf
 import utime
+from machine import Pin, SPI
 
 # Display resolution
-EPD_WIDTH       = 152
-EPD_HEIGHT      = 296
+EPD_WIDTH = 152
+EPD_HEIGHT  = 296
 
-RST_PIN         = 12
-DC_PIN          = 8
-CS_PIN          = 9
-BUSY_PIN        = 13
+RST_PIN = 12
+DC_PIN = 8
+CS_PIN = 9
+BUSY_PIN = 13
 
 WF_PARTIAL_2IN66 =[
 0x00,0x40,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,

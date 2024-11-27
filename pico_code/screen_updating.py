@@ -1,14 +1,13 @@
-from epd_2in9_b import EPD_2in9_B
-from zermelo_api import Client
-from ntp import set_time
-
-import network
 import json
+import network
 import time
-
 from machine import Pin
 
-def connect(timeout : int):
+from epd_2in9_b import EPD_2in9_B
+from ntp import set_time
+from zermelo_api import Client
+
+def connect(timeout: int):
     # Get a list of all available networks
     networks = wlan.scan() # list with tupples with 6 fields ssid, bssid, channel, RSSI, security, hidden
 
@@ -65,7 +64,7 @@ def sync():
 
         # Get the lessons of today
         appointments = Client(save['school']).get_appointments(save['token'], str(starttimestamp - save['time_offset']), str(endtimestamp - save['time_offset']))
-        lessons : list = appointments['response']['data']
+        lessons: list = appointments['response']['data']
         
         # Sort the lessons list based on last modified and created
         lessons.sort(key=lambda x: (x['lastModified'], x['created']), reverse=True)
@@ -209,11 +208,11 @@ def sync():
             
             # Set the hour name
             if lesson['startTimeSlotName'] != lesson['endTimeSlotName'] and lesson['startTimeSlotName'] and lesson['endTimeSlotName']:
-                hour : str = f"{lesson['startTimeSlotName']}-{lesson['endTimeSlotName']}"
+                hour: str = f"{lesson['startTimeSlotName']}-{lesson['endTimeSlotName']}"
             elif lesson['startTimeSlotName']:
-                hour : str = lesson['startTimeSlotName']
+                hour: str = lesson['startTimeSlotName']
             elif lesson['endTimeSlotName']:
-                hour : str = lesson['endTimeSlotName']
+                hour: str = lesson['endTimeSlotName']
             else:
                 hour = ""
             
@@ -238,7 +237,7 @@ def sync():
     # Turn off led
     led.off()
 
-def handle_command(data : str):
+def handle_command(data: str):
     # Sync command
     if data == 'sync':
         # Connect to wifi if not already

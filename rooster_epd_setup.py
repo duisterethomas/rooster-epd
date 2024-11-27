@@ -1,6 +1,7 @@
-from zermelo import Client
-from time import sleep
 from json import dumps
+from time import sleep
+
+from zermelo import Client
 
 from PySide6.QtWidgets import QDialog, QDialogButtonBox
 
@@ -8,7 +9,7 @@ from rooster_epd_ui import Ui_Rooster_EPD_setup
 
 # The functionality of the setup window
 class setupWindow(QDialog, Ui_Rooster_EPD_setup):
-    def __init__(self, parent = None, save : dict = None, pico = None):
+    def __init__(self, parent=None, save: dict = None, pico=None):
         super().__init__(parent)
         self.setupUi(self)
         
@@ -20,7 +21,8 @@ class setupWindow(QDialog, Ui_Rooster_EPD_setup):
         self.pico = pico
         
         # Reset the token if token is "ERROR"
-        if self.save["token"] == "ERROR": self.save["token"] = ""
+        if self.save["token"] == "ERROR":
+            self.save["token"] = ""
         
         # Connect the buttons to functions
         self.buttonBox.accepted.connect(self.saveClicked)
@@ -50,7 +52,7 @@ class setupWindow(QDialog, Ui_Rooster_EPD_setup):
     
     # Check if the save button must be disabled
     def checkSaveDisabled(self):
-        self.buttonBox.button(QDialogButtonBox.Save).setDisabled(len(self.koppelcode.text()) == 0 or len(self.schoolnaam.text()) == 0)
+        self.buttonBox.button(QDialogButtonBox.Save).setDisabled(not self.koppelcode.text() or not self.schoolnaam.text())
     
     def saveClicked(self):
         # Get the schoolnaam

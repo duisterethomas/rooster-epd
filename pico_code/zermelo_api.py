@@ -1,6 +1,5 @@
-from requests import get
 from json import loads
-
+from requests import get
 
 class Client():
     def __init__(self, school=""):
