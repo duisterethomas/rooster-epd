@@ -14,8 +14,8 @@ class setupWindow(QDialog, Ui_Rooster_EPD_setup):
         self.setupUi(self)
         
         # Set the text of the buttonbox buttons
-        self.buttonBox.button(QDialogButtonBox.Save).setText("Opslaan")
-        self.buttonBox.button(QDialogButtonBox.Cancel).setText("Annuleren")
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setText("Opslaan")
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).setText("Annuleren")
         
         self.save = save
         self.pico = pico
@@ -32,7 +32,7 @@ class setupWindow(QDialog, Ui_Rooster_EPD_setup):
         self.schoolnaam.textChanged.connect(self.checkSaveDisabled)
         
         # Disable the save button
-        self.buttonBox.button(QDialogButtonBox.Save).setDisabled(True)
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setDisabled(True)
         
         if "school" in save.keys():
             # Set the schoolnaam text
@@ -52,7 +52,7 @@ class setupWindow(QDialog, Ui_Rooster_EPD_setup):
     
     # Check if the save button must be disabled
     def checkSaveDisabled(self):
-        self.buttonBox.button(QDialogButtonBox.Save).setDisabled(not self.koppelcode.text() or not self.schoolnaam.text())
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setDisabled(not self.koppelcode.text() or not self.schoolnaam.text())
     
     def saveClicked(self):
         # Get the schoolnaam

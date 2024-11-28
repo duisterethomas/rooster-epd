@@ -28,8 +28,8 @@ class sjablonenWindow(QDialog, Ui_Rooster_EPD_sjablonen):
         self.setupUi(self)
         
         # Set the text of the buttonbox buttons
-        self.buttonBox.button(QDialogButtonBox.Save).setText("Opslaan")
-        self.buttonBox.button(QDialogButtonBox.Cancel).setText("Annuleren")
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setText("Opslaan")
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).setText("Annuleren")
         
         self.save = save
         self.pico = pico
@@ -128,7 +128,7 @@ class sjablonenWindow(QDialog, Ui_Rooster_EPD_sjablonen):
                                                           "locations": widget.locaties.text(),
                                                           "timeSlotName": widget.lesuur.text()}
         
-        self.buttonBox.button(QDialogButtonBox.Save).setDisabled(disable or self.new_templates == self.save["templates"])
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setDisabled(disable or self.new_templates == self.save["templates"])
 
     # Save the templates
     def saveTemplates(self):

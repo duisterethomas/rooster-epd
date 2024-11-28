@@ -13,8 +13,8 @@ class tijdenWindow(QDialog, Ui_Rooster_EPD_tijden):
         self.setupUi(self)
         
         # Set the text of the buttonbox buttons
-        self.buttonBox.button(QDialogButtonBox.Save).setText("Opslaan")
-        self.buttonBox.button(QDialogButtonBox.Cancel).setText("Annuleren")
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setText("Opslaan")
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).setText("Annuleren")
         
         self.save = save
         self.pico = pico
@@ -30,7 +30,7 @@ class tijdenWindow(QDialog, Ui_Rooster_EPD_tijden):
         self.eindTijd.timeChanged.connect(self.checkSaveDisabled)
     
         # Disable the save button
-        self.buttonBox.button(QDialogButtonBox.Save).setDisabled(True)
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setDisabled(True)
         
         # Calculate the begin and eind hour and minute
         begin_hour = int(floor(save["starttime"]/60))
@@ -65,7 +65,7 @@ class tijdenWindow(QDialog, Ui_Rooster_EPD_tijden):
     def checkSaveDisabled(self):
         self.begintijd = self.beginTijd.time().hour()*60 + self.beginTijd.time().minute()
         self.eindtijd = self.eindTijd.time().hour()*60 + self.eindTijd.time().minute()
-        self.buttonBox.button(QDialogButtonBox.Save).setDisabled(self.begintijd == self.save["starttime"] and self.eindtijd == self.save["endtime"])
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setDisabled(self.begintijd == self.save["starttime"] and self.eindtijd == self.save["endtime"])
 
     def saveTijden(self):
         self.save["starttime"] = self.beginTijd.time().hour()*60 + self.beginTijd.time().minute()

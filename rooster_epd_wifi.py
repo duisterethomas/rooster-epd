@@ -22,8 +22,8 @@ class wifiWindow(QDialog, Ui_Rooster_EPD_wifi):
         self.setupUi(self)
         
         # Set the text of the buttonbox buttons
-        self.buttonBox.button(QDialogButtonBox.Save).setText("Opslaan")
-        self.buttonBox.button(QDialogButtonBox.Cancel).setText("Annuleren")
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setText("Opslaan")
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).setText("Annuleren")
         
         self.save = save
         self.pico = pico
@@ -97,7 +97,7 @@ class wifiWindow(QDialog, Ui_Rooster_EPD_wifi):
                 else:
                     self.new_wlan[widget.ssid.text()] = widget.password.text()
         
-        self.buttonBox.button(QDialogButtonBox.Save).setDisabled(self.new_wlan == self.save["wlan"])
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setDisabled(self.new_wlan == self.save["wlan"])
     
     # Save the wifi
     def saveWifi(self):

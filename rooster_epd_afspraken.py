@@ -38,8 +38,8 @@ class afsprakenWindow(QDialog, Ui_Rooster_EPD_afspraken):
         self.setupUi(self)
         
         # Set the text of the buttonbox buttons
-        self.buttonBox.button(QDialogButtonBox.Save).setText("Opslaan")
-        self.buttonBox.button(QDialogButtonBox.Cancel).setText("Annuleren")
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setText("Opslaan")
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Cancel).setText("Annuleren")
         
         # Copy the save to self.save
         self.save = save
@@ -172,7 +172,7 @@ class afsprakenWindow(QDialog, Ui_Rooster_EPD_afspraken):
                 
                 self.new_appointments.append(deepcopy(appointment))
         
-        self.buttonBox.button(QDialogButtonBox.Save).setDisabled(self.new_appointments == self.save["appointments"])
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Save).setDisabled(self.new_appointments == self.save["appointments"])
 
     # Save the afspraken
     def saveAppointments(self):
