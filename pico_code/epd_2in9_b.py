@@ -4,7 +4,7 @@ from machine import Pin, SPI
 
 # Display resolution
 EPD_WIDTH = 152
-EPD_HEIGHT  = 296
+EPD_HEIGHT = 296
 
 RST_PIN = 12
 DC_PIN = 8

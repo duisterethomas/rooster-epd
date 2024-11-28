@@ -65,7 +65,7 @@ class afsprakenWindow(QDialog, Ui_Rooster_EPD_afspraken):
         
         if self.save["appointments"]:
             for appointment in self.save["appointments"]:
-                if appointment["date"][0] >= today.year or appointment["date"][1] >= today.month or appointment["date"][2] >= today.day:
+                if date(appointment["date"][0], appointment["date"][1], appointment["date"][2]) >= today:
                     self.addAppointment(appointment)
                 else:
                     # Auto remove old appointments

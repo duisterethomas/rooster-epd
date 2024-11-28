@@ -167,7 +167,7 @@ class mainWindow(QMainWindow, Ui_Rooster_EPD):
                 sleep(0.1)
                 recieved = self.pico.read_until().strip().decode()
             
-            # Update the pico if it isn't the latest version
+            # Update the pico if it isn't on the latest version
             if last_recieved != VERSION:
                 # Get a list of the current files
                 self.pico.write("list\r".encode())
@@ -185,8 +185,8 @@ class mainWindow(QMainWindow, Ui_Rooster_EPD):
                     sleep(0.1)
                     recieved = self.pico.read_until().strip().decode()
                 
-                ### Change before release, doesn't work with pyinstaller!!!!
-                new_files = listdir('pico_code')
+                # Get a list of the new files
+                new_files = listdir(resource_path('pico_code'))
                 
                 # Delete all the unnecessary files from the pico
                 for file in pico_files:
@@ -211,7 +211,7 @@ class mainWindow(QMainWindow, Ui_Rooster_EPD):
                         self.pico.write(f"upls {file}\r".encode())
                         
                         # Write the file
-                        with open(f'pico_code/{file}', 'r') as file:
+                        with open(resource_path(f'pico_code/{file}'), 'r') as file:
                             for line in file:
                                 # Add an X to the start of every line to indicate the start of the line
                                 line = f"X{line.removesuffix('\n')}"
