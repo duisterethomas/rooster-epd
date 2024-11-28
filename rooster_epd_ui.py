@@ -1,5 +1,5 @@
 from PySide6.QtCore import QCoreApplication, QMetaObject, QRect, QSize, Qt
-from PySide6.QtWidgets import QLabel, QLineEdit, QPushButton, QSizePolicy, QStatusBar, QWidget, QDialogButtonBox, QTimeEdit, QDateEdit, QMenu, QMenuBar, QScrollArea, QFrame, QVBoxLayout, QSpacerItem, QToolButton
+from PySide6.QtWidgets import QLabel, QLineEdit, QPushButton, QSizePolicy, QStatusBar, QWidget, QDialogButtonBox, QTimeEdit, QDateEdit, QMenu, QMenuBar, QScrollArea, QFrame, QVBoxLayout, QSpacerItem, QToolButton, QTextBrowser
 from PySide6.QtGui import QAction, QFont
 
 # The main UI
@@ -25,8 +25,8 @@ class Ui_Rooster_EPD(object):
         self.actionNotities_bewerken.setObjectName(u"actionNotities_bewerken")
         self.actionAfspraken_bewerken = QAction(Rooster_EPD)
         self.actionAfspraken_bewerken.setObjectName(u"actionAfspraken_bewerken")
-        self.actionOver_Rooster_epd = QAction(Rooster_EPD)
-        self.actionOver_Rooster_epd.setObjectName(u"actionOver_Rooster_epd")
+        self.actionControleren_op_updates = QAction(Rooster_EPD)
+        self.actionControleren_op_updates.setObjectName(u"actionControleren_op_updates")
         self.actionGithub_repository = QAction(Rooster_EPD)
         self.actionGithub_repository.setObjectName(u"actionGithub_repository")
         self.actionWiFi_netwerken = QAction(Rooster_EPD)
@@ -64,7 +64,7 @@ class Ui_Rooster_EPD(object):
         self.menuBewerken.addAction(self.actionAfspraken_bewerken)
         self.menuHelp.addAction(self.actionGithub_repository)
         self.menuHelp.addSeparator()
-        self.menuHelp.addAction(self.actionOver_Rooster_epd)
+        self.menuHelp.addAction(self.actionControleren_op_updates)
 
         self.retranslateUi(Rooster_EPD)
 
@@ -78,7 +78,7 @@ class Ui_Rooster_EPD(object):
         self.actionRefresh_ports.setText(QCoreApplication.translate("Rooster_EPD", u"Refresh ports", None))
         self.actionNotities_bewerken.setText(QCoreApplication.translate("Rooster_EPD", u"Notities bewerken", None))
         self.actionAfspraken_bewerken.setText(QCoreApplication.translate("Rooster_EPD", u"Afspraken bewerken", None))
-        self.actionOver_Rooster_epd.setText(QCoreApplication.translate("Rooster_EPD", u"Over Rooster-EPD", None))
+        self.actionControleren_op_updates.setText(QCoreApplication.translate("Rooster_EPD", u"Controleren op updates", None))
         self.actionGithub_repository.setText(QCoreApplication.translate("Rooster_EPD", u"Github repository", None))
         self.actionWiFi_netwerken.setText(QCoreApplication.translate("Rooster_EPD", u"Wi-Fi netwerken", None))
         self.synchroniserenButton.setText(QCoreApplication.translate("Rooster_EPD", u"Synchroniseren", None))
@@ -88,42 +88,62 @@ class Ui_Rooster_EPD(object):
         self.menuHelp.setTitle(QCoreApplication.translate("Rooster_EPD", u"Help", None))
     # retranslateUi
 
-# The about UI
-class Ui_Rooster_EPD_over(object):
-    def setupUi(self, Rooster_EPD_over):
-        if not Rooster_EPD_over.objectName():
-            Rooster_EPD_over.setObjectName(u"Rooster_EPD_over")
-        Rooster_EPD_over.resize(141, 81)
-        self.buttonBox = QDialogButtonBox(Rooster_EPD_over)
+# The update UI
+class Ui_Rooster_EPD_update(object):
+    def setupUi(self, Rooster_EPD_update):
+        if not Rooster_EPD_update.objectName():
+            Rooster_EPD_update.setObjectName(u"Rooster_EPD_update")
+        Rooster_EPD_update.resize(401, 321)
+        sizePolicy = QSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(Rooster_EPD_update.sizePolicy().hasHeightForWidth())
+        Rooster_EPD_update.setSizePolicy(sizePolicy)
+        Rooster_EPD_update.setMinimumSize(QSize(401, 321))
+        Rooster_EPD_update.setMaximumSize(QSize(401, 321))
+        self.buttonBox = QDialogButtonBox(Rooster_EPD_update)
         self.buttonBox.setObjectName(u"buttonBox")
-        self.buttonBox.setGeometry(QRect(0, 50, 141, 31))
+        self.buttonBox.setGeometry(QRect(0, 280, 401, 41))
         self.buttonBox.setOrientation(Qt.Orientation.Horizontal)
-        self.buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.Close)
+        self.buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.No|QDialogButtonBox.StandardButton.Yes)
         self.buttonBox.setCenterButtons(True)
-        self.label = QLabel(Rooster_EPD_over)
+        self.label = QLabel(Rooster_EPD_update)
         self.label.setObjectName(u"label")
-        self.label.setGeometry(QRect(0, 0, 141, 31))
+        self.label.setGeometry(QRect(10, 10, 381, 31))
         font = QFont()
         font.setPointSize(16)
         font.setBold(True)
         self.label.setFont(font)
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.version = QLabel(Rooster_EPD_over)
+        self.version = QLabel(Rooster_EPD_update)
         self.version.setObjectName(u"version")
-        self.version.setGeometry(QRect(0, 30, 141, 21))
+        self.version.setGeometry(QRect(10, 40, 381, 21))
         self.version.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.releaseNotes = QTextBrowser(Rooster_EPD_update)
+        self.releaseNotes.setObjectName(u"releaseNotes")
+        self.releaseNotes.setGeometry(QRect(10, 90, 381, 161))
+        self.releaseNotes.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        self.label_3 = QLabel(Rooster_EPD_update)
+        self.label_3.setObjectName(u"label_3")
+        self.label_3.setGeometry(QRect(10, 70, 381, 16))
+        self.label_4 = QLabel(Rooster_EPD_update)
+        self.label_4.setObjectName(u"label_4")
+        self.label_4.setGeometry(QRect(10, 260, 361, 16))
+        self.label_4.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.retranslateUi(Rooster_EPD_over)
-        self.buttonBox.accepted.connect(Rooster_EPD_over.accept)
-        self.buttonBox.rejected.connect(Rooster_EPD_over.reject)
+        self.retranslateUi(Rooster_EPD_update)
+        self.buttonBox.accepted.connect(Rooster_EPD_update.accept)
+        self.buttonBox.rejected.connect(Rooster_EPD_update.reject)
 
-        QMetaObject.connectSlotsByName(Rooster_EPD_over)
+        QMetaObject.connectSlotsByName(Rooster_EPD_update)
     # setupUi
 
-    def retranslateUi(self, Rooster_EPD_over):
-        Rooster_EPD_over.setWindowTitle(QCoreApplication.translate("Rooster_EPD_over", u"Rooster epd", None))
-        self.label.setText(QCoreApplication.translate("Rooster_EPD_over", u"Rooster-EPD", None))
-        self.version.setText(QCoreApplication.translate("Rooster_EPD_over", u"VX.X.X", None))
+    def retranslateUi(self, Rooster_EPD_update):
+        Rooster_EPD_update.setWindowTitle(QCoreApplication.translate("Rooster_EPD_update", u"Update beschikbaar!", None))
+        self.label.setText(QCoreApplication.translate("Rooster_EPD_update", u"Er is een update beschikbaar!", None))
+        self.version.setText(QCoreApplication.translate("Rooster_EPD_update", u"VX.X.X -> VX.X.X", None))
+        self.label_3.setText(QCoreApplication.translate("Rooster_EPD_update", u"Release notes:", None))
+        self.label_4.setText(QCoreApplication.translate("Rooster_EPD_update", u"Wil je nu naar GitHub gaan om de update te downloaden?", None))
     # retranslateUi
 
 # The setup UI

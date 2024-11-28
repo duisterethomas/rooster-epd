@@ -4,6 +4,7 @@ from datetime import datetime
 from json import loads, dumps
 from os import listdir
 from os.path import exists, abspath, join
+from requests import get
 from time import sleep, localtime, time
 from webbrowser import open_new_tab
 
@@ -11,9 +12,9 @@ from serial import Serial, SerialException, PARITY_EVEN, STOPBITS_ONE
 from zermelo import Client
 
 from PySide6.QtCore import QThread
-from PySide6.QtWidgets import QMainWindow, QApplication, QDialog
+from PySide6.QtWidgets import QMainWindow, QApplication, QDialog, QDialogButtonBox
 
-from rooster_epd_ui import Ui_Rooster_EPD, Ui_Rooster_EPD_over
+from rooster_epd_ui import Ui_Rooster_EPD, Ui_Rooster_EPD_update
 from rooster_epd_worker import Worker
 
 from rooster_epd_setup import setupWindow
@@ -76,9 +77,12 @@ class mainWindow(QMainWindow, Ui_Rooster_EPD):
         # Init save
         self.save = None
         
+        # Set the window title
+        self.setWindowTitle(f"Rooster-EPD {VERSION}")
+        
         # Connect the buttons to functions
         self.actionGithub_repository.triggered.connect(lambda: open_new_tab("https://github.com/duisterethomas/rooster-epd"))
-        self.actionOver_Rooster_epd.triggered.connect(self.overClicked)
+        self.actionControleren_op_updates.triggered.connect(self.controlerenOpUpdatesClicked)
         self.actionZermelo_koppelen.triggered.connect(self.zermeloKoppelenClicked)
         self.actionTijden_instellen.triggered.connect(self.tijdenInstellenClicked)
         self.actionWiFi_netwerken.triggered.connect(self.wifiNetwerkenClicked)
@@ -89,6 +93,9 @@ class mainWindow(QMainWindow, Ui_Rooster_EPD):
     	
         # Try to connect to the Pico
         self.verbindenClicked()
+        
+        # Check for updates
+        self.controlerenOpUpdatesClicked()
         
         # Put the focus on the window
         self.activateWindow()
@@ -296,9 +303,15 @@ class mainWindow(QMainWindow, Ui_Rooster_EPD):
         self.sendToPicoThreaded("sync")
     
     
-    def overClicked(self):
-        dlg = overWindow(self)
-        dlg.exec()
+    def controlerenOpUpdatesClicked(self):
+        try:
+            if VERSION != get("https://api.github.com/repos/duisterethomas/rooster-epd/releases/latest").json()["tag_name"]:
+                dlg = updateWindow(self)
+                dlg.exec()
+            else:
+                self.statusbar.showMessage("Geen updates beschikbaar", 3000)
+        except ConnectionError:
+            self.statusbar.showMessage("Geen internet verbinding", 3000)
     
     
     def zermeloKoppelenClicked(self):
@@ -339,14 +352,27 @@ class mainWindow(QMainWindow, Ui_Rooster_EPD):
         dlg.exec()
 
 
-# The about screen
-class overWindow(QDialog, Ui_Rooster_EPD_over):
+# The update screen
+class updateWindow(QDialog, Ui_Rooster_EPD_update):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi(self)
         
-        # Put the version number on the about screen
-        self.version.setText(VERSION)
+        # Set the text of the buttonbox buttons
+        self.buttonBox.button(QDialogButtonBox.StandardButton.Yes).setText("Ja")
+        self.buttonBox.button(QDialogButtonBox.StandardButton.No).setText("Nee")
+        
+        # Get the update info
+        github_update: dict = get("https://api.github.com/repos/duisterethomas/rooster-epd/releases/latest").json()
+        
+        # Put the old and new version in the label
+        self.version.setText(f"{VERSION} -> {github_update["tag_name"]}")
+        
+        # Put the release name and release notes in the text browser
+        self.releaseNotes.setMarkdown(f"# {github_update["name"]}\n{github_update["body"]}")
+        
+        # Open the url when accepted is clicked
+        self.buttonBox.accepted.connect(lambda: open_new_tab(github_update["html_url"]))
 
 
 # Create a QApplication

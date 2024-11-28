@@ -90,7 +90,7 @@
     </property>
     <addaction name="actionGithub_repository"/>
     <addaction name="separator"/>
-    <addaction name="actionOver_Rooster_epd"/>
+    <addaction name="actionControleren_op_updates"/>
    </widget>
    <addaction name="menuBewerken"/>
    <addaction name="menuSettings"/>
@@ -121,9 +121,9 @@
     <string>Afspraken bewerken</string>
    </property>
   </action>
-  <action name="actionOver_Rooster_epd">
+  <action name="actionControleren_op_updates">
    <property name="text">
-    <string>Over Rooster-EPD</string>
+    <string>Controleren op updates</string>
    </property>
   </action>
   <action name="actionGithub_repository">
