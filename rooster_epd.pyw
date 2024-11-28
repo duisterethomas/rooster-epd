@@ -112,7 +112,7 @@ class mainWindow(QMainWindow, Ui_Rooster_EPD):
         self.thread.finished.connect(lambda: self.menuSettings.setDisabled(False))
         self.thread.finished.connect(lambda: self.synchroniserenButton.setDisabled(False))
         
-        self.thread.finished.connect(lambda: self.statusbar.showMessage(""))
+        self.thread.finished.connect(lambda: self.statusbar.clearMessage())
         
         self.thread.start()
     
@@ -229,7 +229,7 @@ class mainWindow(QMainWindow, Ui_Rooster_EPD):
                             sleep(0.1)
                             recieved = self.pico.read_until().strip().decode()
             
-            self.statusbar.showMessage("Connection established", 3)
+            self.statusbar.showMessage("Verbonden", 3000)
             
             # Disable the verbinden button
             self.verbindenButton.setDisabled(True)
@@ -276,8 +276,11 @@ class mainWindow(QMainWindow, Ui_Rooster_EPD):
                 Client(self.save["school"]).get_user(self.save["token"])
             except ValueError:
                 self.zermeloKoppelenClicked()
+            except ConnectionError:
+                self.statusbar.showMessage("Geen internet verbinding", 3000)
+                
         else:
-            self.statusbar.showMessage("Connection failed", 3)
+            self.statusbar.showMessage("Verbinding mislukt", 3000)
             
             # Enable the verbinden button
             self.verbindenButton.setDisabled(False)
@@ -289,7 +292,7 @@ class mainWindow(QMainWindow, Ui_Rooster_EPD):
     
     
     def synchroniserenClicked(self):
-        self.statusbar.showMessage("Syncing...", -1)
+        self.statusbar.showMessage("Synchroniseren...", -1)
         self.sendToPicoThreaded("sync")
     
     
@@ -309,7 +312,7 @@ class mainWindow(QMainWindow, Ui_Rooster_EPD):
         
         # If the token has changed show "Zermelo gekoppeld" in the status bar
         if self.save["token"] != prev_token:
-            self.statusbar.showMessage("Zermelo gekoppeld")
+            self.statusbar.showMessage("Zermelo gekoppeld", 3000)
     
     
     def wifiNetwerkenClicked(self):
