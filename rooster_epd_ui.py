@@ -1,6 +1,6 @@
 from PySide6.QtCore import QCoreApplication, QMetaObject, QRect, QSize, Qt
 from PySide6.QtWidgets import QLabel, QLineEdit, QPushButton, QSizePolicy, QStatusBar, QWidget, QDialogButtonBox, QTimeEdit, QDateEdit, QMenu, QMenuBar, QScrollArea, QFrame, QVBoxLayout, QSpacerItem, QToolButton, QTextBrowser
-from PySide6.QtGui import QAction, QFont
+from PySide6.QtGui import QAction, QFont, QIcon
 
 # The main UI
 class Ui_Rooster_EPD(object):
@@ -193,25 +193,25 @@ class Ui_Rooster_EPD_wifi(object):
     def setupUi(self, Rooster_EPD_wifi):
         if not Rooster_EPD_wifi.objectName():
             Rooster_EPD_wifi.setObjectName(u"Rooster_EPD_wifi")
-        Rooster_EPD_wifi.resize(396, 281)
-        Rooster_EPD_wifi.setMinimumSize(QSize(396, 171))
-        Rooster_EPD_wifi.setMaximumSize(QSize(396, 16777215))
+        Rooster_EPD_wifi.resize(261, 311)
+        Rooster_EPD_wifi.setMinimumSize(QSize(261, 201))
+        Rooster_EPD_wifi.setMaximumSize(QSize(261, 16777215))
         self.buttonBox = QDialogButtonBox(Rooster_EPD_wifi)
         self.buttonBox.setObjectName(u"buttonBox")
-        self.buttonBox.setGeometry(QRect(0, 240, 396, 41))
+        self.buttonBox.setGeometry(QRect(0, 260, 261, 41))
         self.buttonBox.setOrientation(Qt.Orientation.Horizontal)
         self.buttonBox.setStandardButtons(QDialogButtonBox.StandardButton.Cancel|QDialogButtonBox.StandardButton.Save)
         self.buttonBox.setCenterButtons(True)
         self.scrollArea = QScrollArea(Rooster_EPD_wifi)
         self.scrollArea.setObjectName(u"scrollArea")
-        self.scrollArea.setGeometry(QRect(-1, 0, 396, 241))
+        self.scrollArea.setGeometry(QRect(-1, 0, 261, 261))
         self.scrollArea.setFrameShape(QFrame.Shape.NoFrame)
         self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
         self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.scrollArea.setWidgetResizable(True)
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 384, 241))
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 249, 261))
         self.verticalLayout = QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.nieuwButton = QPushButton(self.scrollAreaWidgetContents)
@@ -242,20 +242,22 @@ class Ui_Wifi(object):
     def setupUi(self, Wifi):
         if not Wifi.objectName():
             Wifi.setObjectName(u"Wifi")
-        Wifi.resize(366, 41)
-        Wifi.setMinimumSize(QSize(366, 41))
-        Wifi.setMaximumSize(QSize(366, 41))
+        Wifi.resize(231, 71)
+        Wifi.setMinimumSize(QSize(231, 71))
+        Wifi.setMaximumSize(QSize(231, 71))
         Wifi.setFrameShape(QFrame.Shape.StyledPanel)
         self.ssid = QLineEdit(Wifi)
         self.ssid.setObjectName(u"ssid")
-        self.ssid.setGeometry(QRect(10, 10, 131, 22))
+        self.ssid.setGeometry(QRect(10, 10, 171, 22))
         self.password = QLineEdit(Wifi)
         self.password.setObjectName(u"password")
-        self.password.setGeometry(QRect(150, 10, 131, 22))
+        self.password.setGeometry(QRect(10, 40, 171, 22))
         self.password.setEchoMode(QLineEdit.EchoMode.PasswordEchoOnEdit)
         self.verwijderButton = QPushButton(Wifi)
         self.verwijderButton.setObjectName(u"verwijderButton")
-        self.verwijderButton.setGeometry(QRect(290, 10, 66, 24))
+        self.verwijderButton.setGeometry(QRect(190, 10, 31, 51))
+        icon = QIcon(QIcon.fromTheme(QIcon.ThemeIcon.EditDelete))
+        self.verwijderButton.setIcon(icon)
         QWidget.setTabOrder(self.ssid, self.password)
         QWidget.setTabOrder(self.password, self.verwijderButton)
 
@@ -268,7 +270,7 @@ class Ui_Wifi(object):
         Wifi.setWindowTitle(QCoreApplication.translate("Wifi", u"Frame", None))
         self.ssid.setPlaceholderText(QCoreApplication.translate("Wifi", u"SSID", None))
         self.password.setPlaceholderText(QCoreApplication.translate("Wifi", u"Wachtwoord", None))
-        self.verwijderButton.setText(QCoreApplication.translate("Wifi", u"Verwijder", None))
+        self.verwijderButton.setText("")
     # retranslateUi
 
 # The tijden UI

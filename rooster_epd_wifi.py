@@ -61,8 +61,8 @@ class wifiWindow(QDialog, Ui_Rooster_EPD_wifi):
     # Resize the ui if the window is resized
     def resizeEvent(self, event):
         QDialog.resizeEvent(self, event)
-        self.scrollArea.setGeometry(QRect(-1, 0, 396, event.size().height()-40))
-        self.buttonBox.setGeometry(QRect(0, event.size().height()-41, 396, 41))
+        self.scrollArea.setGeometry(QRect(-1, 0, 261, event.size().height()-40))
+        self.buttonBox.setGeometry(QRect(0, event.size().height()-41, 261, 41))
     
     # Add a network
     def addNetwork(self, ssid: str = "", password: str = ""):
