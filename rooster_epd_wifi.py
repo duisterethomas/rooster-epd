@@ -35,7 +35,7 @@ class wifiWindow(QDialog, Ui_Rooster_EPD_wifi):
         self.scrolllayout = self.scrollAreaWidgetContents.layout()
         
         # Connect buttons to functions
-        self.nieuwButton.clicked.connect(self.addNetwork)
+        self.nieuwButton.clicked.connect(lambda: self.addNetwork())
         self.buttonBox.accepted.connect(self.saveWifi)
         
         # Add networks if needed
@@ -76,7 +76,7 @@ class wifiWindow(QDialog, Ui_Rooster_EPD_wifi):
         self.networks[network_name].ssid.textChanged.connect(self.checkSaveDisable)
         self.networks[network_name].password.textChanged.connect(self.checkSaveDisable)
         
-        # Fill in the info if it was imported form the save
+        # Fill in the info if it was imported from the save
         self.networks[network_name].ssid.setText(ssid)
         self.networks[network_name].password.setText(password)
         
