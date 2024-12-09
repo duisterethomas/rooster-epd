@@ -10,13 +10,6 @@ led = Pin('LED', Pin.OUT)
 # Turn on led
 led.on()
 
-# Load the save file
-if "save.json" in listdir("."):
-    with open('save.json', 'r') as file:
-        save = load(file)
-else:
-    save = None
-
 # Check if connected to pc
 SIE_STATUS = const(0x50110000+0x50)
 CONNECTED = const(1<<16)
@@ -98,6 +91,13 @@ if (mem32[SIE_STATUS] & (CONNECTED | SUSPENDED)) == CONNECTED:
             
             # Load data command
             elif data == 'load':
+                # Load the save file
+                try:
+                    with open('save.json', 'r') as file:
+                        save = load(file)
+                except OSError:  # open failed
+                    save = None
+                
                 if save != None:
                     print(dumps(save))
                     

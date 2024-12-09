@@ -1,6 +1,6 @@
-import json
 import network
 import time
+from json import load, dump
 from machine import Pin
 
 from epd_2in9_b import EPD_2in9_B
@@ -9,6 +9,13 @@ from zermelo_api import Client
 
 
 def connect(timeout: int):
+    # Load the save file
+    try:
+        with open('save.json', 'r') as file:
+            save = load(file)
+    except OSError:  # open failed
+        save = None
+    
     # Get a list of all available networks
     networks = wlan.scan() # list with tupples with 6 fields ssid, bssid, channel, RSSI, security, hidden
 
@@ -66,6 +73,13 @@ def disconnect():
 
 
 def sync():
+    # Load the save file
+    try:
+        with open('save.json', 'r') as file:
+            save = load(file)
+    except OSError:  # open failed
+        save = None
+    
     # Turn on led
     led.on()
     
@@ -124,7 +138,7 @@ def sync():
                 save['appointments'].remove(appointment)
                 
                 with open('save.json', 'w') as file:
-                    json.dump(save, file)
+                    dump(save, file)
 
         # Print the lessons of today
         print(lessons_today)
@@ -284,10 +298,3 @@ epd = EPD_2in9_B()
 # Activate wlan
 wlan = network.WLAN(network.STA_IF)
 wlan.active(True)
-
-# Load the save file
-try:
-    with open('save.json', 'r') as file:
-        save = json.load(file)
-except OSError:  # open failed
-    save = None
