@@ -22,15 +22,18 @@ def connect(timeout: int):
             
             print(f'Connecting to {ssid}')
             
-            while not wlan.isconnected() and timeout != 0:
-                time.sleep(1)
-                timeout -= 1
+            while not wlan.isconnected() and timeout > 0:
+                time.sleep(0.5)
+                timeout -= 0.5
+                led.toggle()
                 
             if wlan.isconnected():
                 print('Connected!')
+                led.on()
                 break
             else:
                 print('Connection failed')
+                led.off()
     
     if wlan.isconnected():
         # Test if token is valid
