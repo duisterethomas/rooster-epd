@@ -21,6 +21,7 @@ else:
 SIE_STATUS = const(0x50110000+0x50)
 CONNECTED = const(1<<16)
 SUSPENDED = const(1<<4)
+
 if (mem32[SIE_STATUS] & (CONNECTED | SUSPENDED)) == CONNECTED:
     led.off()
     
@@ -123,10 +124,13 @@ if (mem32[SIE_STATUS] & (CONNECTED | SUSPENDED)) == CONNECTED:
 
 # Else run normal code
 else:
-    from screen_updating import connect, sync
+    from screen_updating import connect, disconnect, sync
     
     # Connect wlan
     connect(60)
     
     # Sync with zermelo
     sync()
+    
+    # Disconnect the wifi
+    disconnect()

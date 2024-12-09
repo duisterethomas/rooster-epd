@@ -7,6 +7,7 @@ from epd_2in9_b import EPD_2in9_B
 from ntp import set_time
 from zermelo_api import Client
 
+
 def connect(timeout: int):
     # Get a list of all available networks
     networks = wlan.scan() # list with tupples with 6 fields ssid, bssid, channel, RSSI, security, hidden
@@ -49,6 +50,11 @@ def connect(timeout: int):
         # Set the time
         print('Get the current time with NTP')
         set_time()
+
+
+def disconnect():
+    wlan.disconnect()
+
 
 def sync():
     # Turn on led
@@ -240,6 +246,7 @@ def sync():
     # Turn off led
     led.off()
 
+
 def handle_command(data: str):
     # Sync command
     if data == 'sync':
@@ -257,6 +264,7 @@ def handle_command(data: str):
         print(f'Unknown command: {data}')
         
         print('done')
+
 
 # Set led pin
 led = Pin('LED', Pin.OUT)
