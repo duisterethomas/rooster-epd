@@ -28,12 +28,21 @@ def connect(timeout: int):
                 timeout -= 0.5
                 led.toggle()
                 
+                if wlan.status() == network.STAT_WRONG_PASSWORD:
+                    print('Wrong wifi password')
+                    break
+                elif wlan.status() == network.STAT_NO_AP_FOUND:
+                    print('Wifi not found')
+                    break
+                elif wlan.status() == network.STAT_CONNECT_FAIL:
+                    print('Wifi error')
+                    break
+                
             if wlan.isconnected():
                 print('Connected!')
                 led.on()
                 break
             else:
-                print('Connection failed')
                 led.off()
     
     if wlan.isconnected():
