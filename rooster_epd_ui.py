@@ -31,6 +31,8 @@ class Ui_Rooster_EPD(object):
         self.actionGithub_repository.setObjectName(u"actionGithub_repository")
         self.actionWiFi_netwerken = QAction(Rooster_EPD)
         self.actionWiFi_netwerken.setObjectName(u"actionWiFi_netwerken")
+        self.actionForceer_pico_update = QAction(Rooster_EPD)
+        self.actionForceer_pico_update.setObjectName(u"actionForceer_pico_update")
         self.centralwidget = QWidget(Rooster_EPD)
         self.centralwidget.setObjectName(u"centralwidget")
         self.synchroniserenButton = QPushButton(self.centralwidget)
@@ -65,6 +67,7 @@ class Ui_Rooster_EPD(object):
         self.menuHelp.addAction(self.actionGithub_repository)
         self.menuHelp.addSeparator()
         self.menuHelp.addAction(self.actionControleren_op_updates)
+        self.menuHelp.addAction(self.actionForceer_pico_update)
 
         self.retranslateUi(Rooster_EPD)
 
@@ -81,6 +84,7 @@ class Ui_Rooster_EPD(object):
         self.actionControleren_op_updates.setText(QCoreApplication.translate("Rooster_EPD", u"Controleren op updates", None))
         self.actionGithub_repository.setText(QCoreApplication.translate("Rooster_EPD", u"Github repository", None))
         self.actionWiFi_netwerken.setText(QCoreApplication.translate("Rooster_EPD", u"Wi-Fi netwerken", None))
+        self.actionForceer_pico_update.setText(QCoreApplication.translate("Rooster_EPD", u"Forceer pico update", None))
         self.synchroniserenButton.setText(QCoreApplication.translate("Rooster_EPD", u"Synchroniseren", None))
         self.verbindenButton.setText(QCoreApplication.translate("Rooster_EPD", u"Verbinden", None))
         self.menuSettings.setTitle(QCoreApplication.translate("Rooster_EPD", u"Instellingen", None))

@@ -91,6 +91,7 @@
     <addaction name="actionGithub_repository"/>
     <addaction name="separator"/>
     <addaction name="actionControleren_op_updates"/>
+    <addaction name="actionForceer_pico_update"/>
    </widget>
    <addaction name="menuBewerken"/>
    <addaction name="menuSettings"/>
@@ -134,6 +135,11 @@
   <action name="actionWiFi_netwerken">
    <property name="text">
     <string>Wi-Fi netwerken</string>
+   </property>
+  </action>
+  <action name="actionForceer_pico_update">
+   <property name="text">
+    <string>Forceer pico update</string>
    </property>
   </action>
  </widget>

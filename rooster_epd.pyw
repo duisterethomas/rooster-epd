@@ -83,6 +83,7 @@ class mainWindow(QMainWindow, Ui_Rooster_EPD):
         # Connect the buttons to functions
         self.actionGithub_repository.triggered.connect(lambda: open_new_tab("https://github.com/duisterethomas/rooster-epd"))
         self.actionControleren_op_updates.triggered.connect(self.controlerenOpUpdatesClicked)
+        self.actionForceer_pico_update.triggered.connect(self.updatePicoClicked)
         self.actionZermelo_koppelen.triggered.connect(self.zermeloKoppelenClicked)
         self.actionTijden_instellen.triggered.connect(self.tijdenInstellenClicked)
         self.actionWiFi_netwerken.triggered.connect(self.wifiNetwerkenClicked)
@@ -176,65 +177,7 @@ class mainWindow(QMainWindow, Ui_Rooster_EPD):
             
             # Update the pico if it isn't on the latest version
             if last_recieved != VERSION:
-                # Get a list of the current files
-                self.pico.write("list\r".encode())
-                
-                pico_files = []
-                
-                recieved = self.pico.read_until().strip().decode()
-                while recieved != "done":
-                    if recieved:
-                        pico_files.append(recieved)
-                        
-                        print(recieved)
-                        last_recieved = recieved
-                    
-                    sleep(0.1)
-                    recieved = self.pico.read_until().strip().decode()
-                
-                # Get a list of the new files
-                new_files = listdir(resource_path('pico_code'))
-                
-                # Delete all the unnecessary files from the pico
-                for file in pico_files:
-                    if file not in new_files:
-                        # Don't delete the save file
-                        if file != "save.json":
-                            self.pico.write(f"fdel {file}\r".encode())
-                            
-                            recieved = self.pico.read_until().strip().decode()
-                            while recieved != "done":
-                                if recieved:
-                                    print(recieved)
-                                    last_recieved = recieved
-                                
-                                sleep(0.1)
-                                recieved = self.pico.read_until().strip().decode()
-                
-                # Update the files
-                for file in new_files:
-                    # main.py can't be updated automatically
-                    if file != "main.py":
-                        self.pico.write(f"upls {file}\r".encode())
-                        
-                        # Write the file
-                        with open(resource_path(f'pico_code/{file}'), 'r') as file:
-                            for line in file:
-                                # Add an X to the start of every line to indicate the start of the line
-                                line = f"X{line.removesuffix('\n')}"
-                                self.pico.write(f"{line}\r".encode())
-                        
-                        # End the upload
-                        self.pico.write("uple\r".encode())
-                        
-                        recieved = self.pico.read_until().strip().decode()
-                        while recieved != "done":
-                            if recieved:
-                                print(recieved)
-                                last_recieved = recieved
-                            
-                            sleep(0.1)
-                            recieved = self.pico.read_until().strip().decode()
+                self.updatePicoClicked()
             
             self.statusbar.showMessage("Verbonden", 3000)
             
@@ -312,6 +255,68 @@ class mainWindow(QMainWindow, Ui_Rooster_EPD):
                 self.statusbar.showMessage("Geen updates beschikbaar", 3000)
         except ConnectionError:
             self.statusbar.showMessage("Geen internet verbinding", 3000)
+    
+    
+    def updatePicoClicked(self):
+        # Get a list of the current files
+        self.pico.write("list\r".encode())
+        
+        pico_files = []
+        
+        recieved = self.pico.read_until().strip().decode()
+        while recieved != "done":
+            if recieved:
+                pico_files.append(recieved)
+                
+                print(recieved)
+                last_recieved = recieved
+            
+            sleep(0.1)
+            recieved = self.pico.read_until().strip().decode()
+        
+        # Get a list of the new files
+        new_files = listdir(resource_path('pico_code'))
+        
+        # Delete all the unnecessary files from the pico
+        for file in pico_files:
+            if file not in new_files:
+                # Don't delete the save file
+                if file != "save.json":
+                    self.pico.write(f"fdel {file}\r".encode())
+                    
+                    recieved = self.pico.read_until().strip().decode()
+                    while recieved != "done":
+                        if recieved:
+                            print(recieved)
+                            last_recieved = recieved
+                        
+                        sleep(0.1)
+                        recieved = self.pico.read_until().strip().decode()
+        
+        # Update the files
+        for file in new_files:
+            # main.py can't be updated automatically
+            if file != "main.py":
+                self.pico.write(f"upls {file}\r".encode())
+                
+                # Write the file
+                with open(resource_path(f'pico_code/{file}'), 'r') as file:
+                    for line in file:
+                        # Add an X to the start of every line to indicate the start of the line
+                        line = f"X{line.removesuffix('\n')}"
+                        self.pico.write(f"{line}\r".encode())
+                
+                # End the upload
+                self.pico.write("uple\r".encode())
+                
+                recieved = self.pico.read_until().strip().decode()
+                while recieved != "done":
+                    if recieved:
+                        print(recieved)
+                        last_recieved = recieved
+                    
+                    sleep(0.1)
+                    recieved = self.pico.read_until().strip().decode()
     
     
     def zermeloKoppelenClicked(self):
