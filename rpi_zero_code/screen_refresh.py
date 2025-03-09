@@ -68,12 +68,13 @@ for appointment in save['appointments']:
     
     if starttimestamp <= appointmenttimestamp < endtimestamp:
         lesson = {'start': time.localtime((appointment['startTime'][0] * 3600) + (appointment['startTime'][1] * 60)),
-                    'end': time.localtime((appointment['endTime'][0] * 3600) + (appointment['endTime'][1] * 60)),
-                    'cancelled': False,
-                    'subjects': [appointment['subjects']],
-                    'locations': [appointment['locations']],
-                    'startTimeSlotName': appointment['timeSlotName'],
-                    'endTimeSlotName': appointment['timeSlotName']}
+                  'end': time.localtime((appointment['endTime'][0] * 3600) + (appointment['endTime'][1] * 60)),
+                  'cancelled': False,
+                  'type': 'custom',
+                  'subjects': [appointment['subjects']],
+                  'locations': [appointment['locations']],
+                  'startTimeSlotName': appointment['timeSlotName'],
+                  'endTimeSlotName': appointment['timeSlotName']}
         
         lessons_today.append(lesson.copy())
     
