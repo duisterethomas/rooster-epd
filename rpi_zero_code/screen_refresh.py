@@ -31,7 +31,6 @@ while not ip:
 # Get the appointments
 print('Get the appointments')
 today = date.today()
-today = date(2025, 3, 11)
 
 starttimestamp = round(datetime.combine(today, datetime.min.time()).timestamp())
 endtimestamp = starttimestamp + 86400
