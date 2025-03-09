@@ -1,9 +1,9 @@
-import time
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from json import load, dump
 from os.path import expanduser
 from PIL import Image, ImageDraw, ImageFont
 from subprocess import check_output
+from time import sleep
 from waveshare_epd import epd2in13g
 from zermelo import Client
 
@@ -26,7 +26,7 @@ except OSError:  # open failed
 ip = check_output(['hostname', '-I'])
 while not ip:
     ip = check_output(['hostname', '-I'])
-    time.sleep(0.1)
+    sleep(0.1)
 
 # Get the appointments
 print('Get the appointments')
@@ -52,8 +52,8 @@ for lesson in lessons:
         handled_instances.append(lesson['appointmentInstance'])
         
         # Preprocess some of the data
-        lesson['start'] = time.localtime(lesson['start'])
-        lesson['end'] = time.localtime(lesson['end'])
+        lesson['start'] = datetime.fromtimestamp(lesson['start'])
+        lesson['end'] = datetime.fromtimestamp(lesson['end'])
         lesson['startTimeSlotName'] = lesson['startTimeSlotName'].upper()
         lesson['endTimeSlotName'] = lesson['endTimeSlotName'].upper()
         
@@ -67,8 +67,8 @@ for appointment in save['appointments']:
     appointmenttimestamp = datetime(appointment['date'][0], appointment['date'][1], appointment['date'][2], appointment['startTime'][0], appointment['startTime'][1]).timestamp()
     
     if starttimestamp <= appointmenttimestamp < endtimestamp:
-        lesson = {'start': time.localtime((appointment['startTime'][0] * 3600) + (appointment['startTime'][1] * 60)),
-                  'end': time.localtime((appointment['endTime'][0] * 3600) + (appointment['endTime'][1] * 60)),
+        lesson = {'start': datetime.fromtimestamp((appointment['startTime'][0] * 3600) + (appointment['startTime'][1] * 60), timezone.utc),
+                  'end': datetime.fromtimestamp((appointment['endTime'][0] * 3600) + (appointment['endTime'][1] * 60), timezone.utc),
                   'cancelled': False,
                   'type': 'custom',
                   'subjects': [appointment['subjects']],
@@ -110,8 +110,8 @@ for lesson in lessons_today:
     # Set the block position and size
     # (Lesson starttime in minutes - first lesson starttime) / (Last lesson endtime - First lesson starttime) * max_size
     # (Lesson endtime in minutes - first lesson starttime) / (Last lesson endtime - First lesson starttime) * max_size - 2
-    ystartpos = round(((lesson_starttime[3] * 60) + lesson_starttime[4] - save['starttime']) / (save['endtime'] - save['starttime']) * max_size)
-    yendpos = round(((lesson_endtime[3] * 60) + lesson_endtime[4] - save['starttime']) / (save['endtime'] - save['starttime']) * max_size) - 2
+    ystartpos = round(((lesson_starttime.hour * 60) + lesson_starttime.minute - save['starttime']) / (save['endtime'] - save['starttime']) * max_size)
+    yendpos = round(((lesson_endtime.hour * 60) + lesson_endtime.minute - save['starttime']) / (save['endtime'] - save['starttime']) * max_size) - 2
     
     # If the startpos and endpos are greater than or equal to 0 draw a rectangle on the epd
     if ystartpos >= 0 and yendpos >= 0:
@@ -126,7 +126,7 @@ for lesson in lessons_today:
         draw.line((45, lineystartpos, 45, lineyendpos), fill=colour)
     
     # Set the starttimestamp + position
-    starttimestamp = f'{" " if lesson_starttime[3] < 10 else ""}{lesson_starttime[3]}:{"0" if lesson_starttime[4] < 10 else ""}{lesson_starttime[4]}'
+    starttimestamp = f'{" " if lesson_starttime.hour < 10 else ""}{lesson_starttime.hour}:{"0" if lesson_starttime.minute < 10 else ""}{lesson_starttime.minute}'
     
     # Set the ypos
     top_text_ypos = ystartpos + 4
@@ -136,7 +136,7 @@ for lesson in lessons_today:
         draw.text((2, top_text_ypos), starttimestamp, fill=colour, font=font)
     
     # Set the endtimestamp + position
-    endtimestamp = f'{" " if lesson_endtime[3] < 10 else ""}{lesson_endtime[3]}:{"0" if lesson_endtime[4] < 10 else ""}{lesson_endtime[4]}'
+    endtimestamp = f'{" " if lesson_endtime.hour < 10 else ""}{lesson_endtime.hour}:{"0" if lesson_endtime.minute < 10 else ""}{lesson_endtime.minute}'
     
     # Set the ypos
     endtimestamp_ypos = yendpos - 9
