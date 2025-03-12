@@ -14,8 +14,10 @@ from os.path import expanduser, isfile
 from random import choice
 from requests import get
 from string import ascii_letters
-from subprocess import Popen
+from threading import Thread
 from zermelo import Client
+
+import screen_refresh
 
 VERSION = 'V3.0.0'
 
@@ -93,9 +95,6 @@ def main_page() -> None:
         app.storage.user.clear()
         ui.navigate.to('/login')
     
-    def sync() -> None:
-        Popen(('python3', expanduser('~/rooster-epd/screen_refresh.py')))
-    
     def save_changes() -> None:
         save['starttime'] = int(begintijd.value.split(':')[0]) * 60 + int(begintijd.value.split(':')[1])
         save['endtime'] = int(eindtijd.value.split(':')[0]) * 60 + int(eindtijd.value.split(':')[1])
@@ -125,6 +124,20 @@ def main_page() -> None:
         with ui.row():
             ui.button('Nee', on_click=update_dialog.close, color='negative', icon='close')
             ui.button('Ja', on_click=lambda: ui.navigate.to(github_update['html_url'], True), color='positive', icon='launch')
+    
+    # Sync button
+    @ui.refreshable
+    def sync_button_func():
+        def sync_thread() -> None:
+            sync_button.props('loading')
+            screen_refresh.sync()
+            sync_button_func.refresh()
+        
+        def sync() -> None:
+            thread = Thread(target=sync_thread)
+            thread.start()
+        
+        sync_button = ui.button('Synchroniseren', on_click=sync, icon='sync')
     
     # Link Zermelo dialog
     with ui.dialog() as link_zermelo_dialog, ui.card().style('max-width: none'):
@@ -238,7 +251,7 @@ def main_page() -> None:
         
         with ui.row():
             ui.button('Sjabloon toevoegen', on_click=add_template, icon='add')
-            ui.button('Klaar', on_click=done_pressed, color='positive', icon='done')
+            ui.button('Klaar', on_click=done_pressed, icon='done')
         sjablonen()
     
     # Afspraken card
@@ -299,7 +312,7 @@ def main_page() -> None:
                     ui.input('Lesuur', on_change=lambda changes, appointmnt=appointment: set_timeslotname(changes, appointmnt), value=appointment['timeSlotName']).props('size=3 filled dense stack-label')
                     
                     with ui.column():
-                        with ui.input('Date', on_change=lambda changes, appointmnt=appointment: set_date(changes, appointmnt), value='%d-%02d-%02d' % (appointment['date'][0], appointment['date'][1], appointment['date'][2])).props('readonly size=9 filled dense stack-label') as datum:
+                        with ui.input('Datum', on_change=lambda changes, appointmnt=appointment: set_date(changes, appointmnt), value='%d-%02d-%02d' % (appointment['date'][0], appointment['date'][1], appointment['date'][2])).props('readonly size=9 filled dense stack-label') as datum:
                             with ui.menu().props('no-parent-event') as menu:
                                 with ui.date().bind_value(datum):
                                     with ui.row().classes('justify-end'):
@@ -337,7 +350,7 @@ def main_page() -> None:
             # Acties
             with ui.card():
                 ui.label('Acties')
-                ui.button('Synchroniseren', on_click=sync, icon='sync')
+                sync_button_func()
                 ui.button('Koppel met Zermelo', on_click=link_zermelo_dialog.open, icon='link')
                 ui.button('Wijzigingen opslaan', on_click=save_changes, color='positive', icon='save')
                 ui.button('Log uit', on_click=logout, color='negative', icon='logout')
