@@ -14,10 +14,9 @@ from os.path import expanduser, isfile
 from random import choice
 from requests import get
 from string import ascii_letters
+from subprocess import Popen
 from threading import Thread
 from zermelo import Client
-
-import screen_refresh
 
 VERSION = 'V3.0.0'
 
@@ -130,7 +129,8 @@ def main_page() -> None:
     def sync_button_func():
         def sync_thread() -> None:
             sync_button.props('loading')
-            screen_refresh.sync()
+            p = Popen(('python3', expanduser('~/rooster-epd/screen_refresh.py')))
+            p.wait()
             sync_button_func.refresh()
         
         def sync() -> None:
