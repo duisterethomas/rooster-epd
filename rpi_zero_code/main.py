@@ -11,6 +11,7 @@ from copy import deepcopy
 from datetime import datetime, date
 from json import load, dump
 from os.path import expanduser, isfile
+from packaging.version import Version
 from random import choice
 from requests import get
 from string import ascii_letters
@@ -412,7 +413,7 @@ def main_page() -> None:
         ui.label(VERSION).tailwind.font_style('italic')
     
     # Check for updates
-    if VERSION != get('https://api.github.com/repos/duisterethomas/rooster-epd/releases/latest').json()['tag_name']:
+    if Version(VERSION[1:]) < Version(get('https://api.github.com/repos/duisterethomas/rooster-epd/releases/latest').json()['tag_name'][1:]):
         update_dialog.open()
 
 # Create random storage secret if it isn't created yet
