@@ -1,124 +1,135 @@
-# rooster-epd
+# Rooster-EPD V3
 With this you can show your Zermelo schedule on an E-Paper display.
-Front | Back | USB port
-:--:|:--:|:--:
-![](/Images/epd_front.png) | ![](/Images/epd_back.png) | ![](/Images/epd_usb.png)
 
 ## Required materials
-- [Raspberry Pi Pico with wifi and headers](https://www.raspberrystore.nl/PrestaShop/nl/raspberry-pi-pico/486-raspberry-pi-pico-wh-5056561800196.html)
-- [Waveshare 2.66inch E-Paper E-Ink Display Module (B) for Raspberry Pi Pico](https://www.waveshare.com/pico-epaper-2.66-b.htm)
+- [Raspberry Pi Zero 2WH](https://www.raspberrystore.nl/PrestaShop/nl/raspberry-pi-zero-v1-en-v2/588-raspberry-pi-zero-2wh-5056561800011.html)
+  - The original Zero W should also work, however I opted for the Zero 2 W to get better performance
+- [Waveshare 2.13inch E-Paper HAT (G), 250x122, Red/Yellow/Black/White, SPI Interface](https://www.waveshare.com/2.13inch-e-paper-hat-g.htm)
+- Micro SD card
+  - I recommend to get a fast one
+  - Size doesn't really matter, 32GB is more than enough
+- Micro SD card reader
 - Micro USB cable
-### Optional
-- 3D Printed case - [STL files in releases](https://github.com/duisterethomas/rooster-epd/releases)
+- USB Power supply / charger
 
-  _Note: If you want to be able to see the led light I recommend to print it in white PLA_
-- 4x M2.5 x 6 screws - (I bought [this kit](https://www.amazon.nl/dp/B075WY5367?psc=1&ref=ppx_yo2ov_dt_b_product_details))
+### Optional materials
+- 3D Printed case - [STL files in the latest release](https://github.com/duisterethomas/rooster-epd/releases/latest)
+- 4x M2.5 x 6 screw - (I bought [this kit](https://www.amazon.nl/dp/B075WY5367))
+- 4x M2.5 nut - (Also from [this kit](https://www.amazon.nl/dp/B075WY5367))
 
-## First time setup
-First download the [latest release](https://github.com/duisterethomas/rooster-epd/releases) or clone the source code
-   
-### Setting up your Raspberry Pi Pico
-1. Follow [this article](https://projects.raspberrypi.org/en/projects/getting-started-with-the-pico/0) to install Thonny onto your computer and install MicroPython onto your Raspberry Pi Pico
-2. Follow [this article](https://www.freva.com/transfer-files-between-computer-and-raspberry-pi-pico/) to copy all files in `Pico code` to your Raspberry Pi Pico
-3. Unplug the Raspberry Pi Pico
-4. Plug the Raspberry Pi Pico into the E-Paper display and make sure it is facing the right way
+# Installation
+## Prerequisites
+- Any SFTP client, I use [FileZilla](https://filezilla-project.org/)
+- Any SSH client, I use the `ssh` command from PowerShell
 
-   _Tip: The E-Paper display has a "USB" marking_
+## Setting up the Pi
+### Installing Raspberry Pi OS
+1. Download and install [Raspberry Pi Imager](https://www.raspberrypi.com/software/)
+2. Insert the Micro SD card and run Raspberry Pi Imager
+3. Under `Raspberry Pi Device` select `Raspberry Pi Zero 2 W`
+4. Under `Operating System` select `Raspberry Pi OS (other)` and then `Raspberry Pi OS Lite (64-bit)`
+5. Under `Storage` select your Micro SD card
+6. Click `NEXT`
+7. Click `EDIT SETTINGS`
+8. Check `Set hostname` and enter a hostname, I set it to `rooster-epd`
+   - **Remember this as you will need it later on!**
+   - Also note that the final hostname will be what you set + `.local`, so in my case it will be `rooster-epd.local`
+9. Check `Set username and password` and enter a username and password
+   - **Remember these as you will need them later on!**
+10. Check `Configure wireless LAN` and enter your Wi-Fi credentials
+    - Don't forget to set the `Wireless LAN country` to your country
+11. Check `Set locale settings` and select the right time zone
+    - The keyboard layout doesn't matter as we won't be connecting a keyboard.
+12. Go to the `SERVICES` tab
+13. Check `Enable SSH` and select `Use password authentication`
+14. You can set the settings on the `OPTIONS` tab to whatever you like, I disabled telemetry, but that isn't required
+15. Click `SAVE`, `YES`, `YES` and wait for the Imager to finish
+16. Once it's finished you can take the Micro SD card out and put it in the Rasberry Pi
 
-   ![](/Images/epaper_display.png)
+### Installing required packages on the Raspberry Pi
+1. Plug the Micro USB cable into the `PWR IN` port on the Raspberry Pi and plug it into your USB power supply and wait for it to boot and set itself up
+   - You can check if it is done by entering `ping HOSTNAME` where `HOSTNAME` is the hostname you set earlier, so in my case `ping rooster-epd.local`. If you get succesful ping results it's done and online
+2. Connect to the Pi using your SSH client
+   - If you are using PowerShell like me enter `ssh USERNAME@HOSTNAME` where `USERNAME` is the username you set earlier and `HOSTNAME` is the hostname you set earlier, in my case `ssh thomas@rooster-epd.local`. After that enter the password you set earlier
+3. Make sure the Pi is up to date by running `sudo apt update` and then `sudo apt upgrade`
+4. Now install the required packages using the following commands:
+   - `sudo apt install python3-pip`
+   - `sudo apt install python3-pil`
+   - `sudo apt install python3-numpy`
+   - `sudo apt install python3-spidev`
+   - `sudo apt install python3-gpiozero`
+   - `sudo apt install python3-packaging`
+   - `sudo pip3 install nicegui zermelo.py --break-system-packages`
+     - Note: `--break-system-packages` hasn't broken anything as far as I've seen with these two packages
 
-### Setting up the computer side
-First you need to connect to Zermelo
-1. Go to the Zermelo zportal of your school
-2. Click on `Instellingen`
-   
-   ![](/Images/zermelo_home.png)
-3. Then click on `Koppel externe applicatie`
-   
-   ![](/Images/zermelo_settings.png)
-4. Make note of the "Schoolnaam" and "Koppelcode" as shown in the image
-   
-   ![](/Images/zermelo_koppel_externe_app.png)
-5. Connect the Raspberry Pi Pico with the E-Paper display to the computer
-6. Run `Rooster_epd.exe` or `rooster_epd.pyw`
-7. Select the port that the Rapsberry Pi Pico is connected to
+### Enabling SPI
+Enable the SPI interface of the pi using `sudo raspi-config` and then choose `Interfacing Options` -> `SPI` -> `Yes`
 
-   ![](/Images/main_window.png)
+### Installing the python scripts
+1. Connect to the Pi using your SFTP client
+   - If you are using FileZilla like me enter the hostname in the `Host` field, your username and password in their respective fields, enter `22` in the `Port` field and click `Quickconnect`, then check `Always trust this host, add this key to the cache` and click `Ok`
+2. Create a new directory in the home directory of your user called `rooster-epd`, so the full path will be `/home/USER/rooster-epd` where `USER` is your username
+3. Download the `Source code (zip)` from the [latest release](https://github.com/duisterethomas/rooster-epd/releases/latest)
+4. Unzip it and copy the contents of the `rpi_zero_code` directory into the `rooster-epd` directory you just created on the Pi
 
-   _Note: If you connected the Raspberry Pi Pico after running the software you need to click on "`Instellingen`->`Refresh ports`" before you can select the port_
-8. Click on `Connect`
-9. Click on "`Instellingen`->`Zermelo koppelen`"
-10. Enter the "Schoolnaam" and "Koppelcode" into their respective fields
-    
-    ![](/Images/setup_window.png)
+### Setting up systemd services
+Create the following 2 files and replace `USER` with your username of the Raspberry Pi Zero:
+- `/etc/systemd/system/rooster-epd-main.service`
+    ```
+    [Unit]
+    Description=Runs the Rooster-EPD main.py at startup
+    After=rooster-epd-screen-refresh.service
 
-    _Note: This screen can popup again when running this software after some time, this means that Zermelo has logged you out on all of your devices. This is normal, Zermelo does that each year I think. If it happens you only have to enter a new "Koppelcode", the "Schoolnaam" is saved for your convenience._
+    [Service]
+    ExecStart=python3 /home/USER/rooster-epd/main.py
+    WorkingDirectory=/home/USER/rooster-epd
+    Restart=on-failure
+    User=USER
 
-11. Click on `Opslaan`
+    [Install]
+    WantedBy=multi-user.target
+    ```
 
-Now it's time to add your Wi-Fi networks
-1. Click on "`Instellingen`->`Wi-Fi netwerken`"
-2. Add all of your Wi-Fi networks that you want to use by clicking on `Nieuw Wi-Fi netwerk` and filling in the wifi credentials
+- `/etc/systemd/system/rooster-epd-screen-refresh.service`
+    ```
+    [Unit]
+    Description=Runs the Rooster-EPD screen_refresh.py at startup
+    After=network-online.target
 
-    ![](/Images/wifi_window.png)
-  
-3. Click on `Opslaan`
+    [Service]
+    ExecStart=python3 /home/USER/rooster-epd/screen_refresh.py
+    WorkingDirectory=/home/USER/rooster-epd
+    Restart=on-failure
+    User=USER
 
-Then you need to set up the lesson times
-1. Click on "`Instellingen`->`Tijden bewerken`"
-2. Enter the start time of your first possible lesson and the end time of your last possible lesson into their respective fields
+    [Install]
+    WantedBy=multi-user.target
+    ```
 
-    ![](/Images/tijden_window.png)
+Then enable them with the following commands in this order:
+1. `sudo systemctl daemon-reload`
+2. `sudo systemctl enable rooster-epd-main.service`
+3. `sudo systemctl enable rooster-epd-screen-refresh.service`
 
-   _Note: In the example above the first possible lesson (u1) starts at 8:30 and the last possible lesson (u9) ends at 16:10_
+### Adding other Wi-Fi networks (optional)
+1. Run `sudo nmtui`
+2. Select `Edit a connection`
+3. Select `<Add>`
+4. Enter the `SSID` of the Wi-Fi network
+5. Select the right `Security`
+   - Most home Wi-Fi networks are `WPA & WPA2 Personal`
+     - Then enter the `Password`
+   - Most school networks are `WPA & WPA2 Enterprise`
+     - Then you must also select the right `Authentication`, in most cases `PEAP`, if not contact your school's network administrators to ask what security is used
+       - In the case of `PEAP` enter the `Anoymous identity`, `Username` and `Password`
+6. Select `<Ok>`
+7. Press escape twice to exit nmtui
 
-3. Click on `Opslaan`
-
-## Basic usage
-To sync the display with your Zermelo schedule connect the Pico to any usb power source like a usb charger or powerbank and wait for the light to turn off. When the light turns off you can safely disconnect the power again. Note that when you connect it to a computer it won't sync automatically, you will need to sync it via `Rooster_epd.exe` or `rooster_epd.pyw` with the `Sync` button.
-
-If it doesn't work when plugging into a usb power source like a usb charger or powerbank, try plugging it in again, sometimes the WiFi connection fails. If that doesn't work plug Pico into a computer and run `Rooster_epd.exe` or `rooster_epd.pyw`. If the `Zermelo koppelen` window pops up, the Zermelo token has expired so you need to get a new "Koppelcode". If nothing pops up check the wifi settings under "`Instellingen`->`Wi-Fi netwerken`".
-
-## Changing setings
-To change any settings, add appointments or add notes you need to first follow the following steps
-1. Connect the Raspberry Pi Pico with the E-Paper display to the computer
-2. Run `Rooster_epd.exe` or `rooster_epd.pyw`
-3. Select the port that the Rapsberry Pi Pico is connected to
-
-   ![](/Images/main_window.png)
-
-   _Note: If you connected the Raspberry Pi Pico after running the software you need to click on "`Instellingen`->`Refresh ports`" before you can select the port_
-4. Click on `Connect`
-
-### Adding notes
-1. Click on "`Bewerken`->`Notities bewerken`"
-
-   ![](/Images/notities_window.png)
-2. Add your notes
-3. Click on `Opslaan` to upload your notes to the epd
-4. Click on `Sync` to sync the display if necessary
-
-### Adding appointments
-1. Click on "`Bewerken`->`Afspraken bewerken`"
-
-   ![](/Images/afspraken_window.png)
-2. If you want to add/edit templates click on the arrow next to `Nieuwe afspraak` and select `Sjablonen bewerken`
-
-   ![](/Images/sjablonen_window.png)
-3. From there you can add a new template by clicking on `Nieuw sjabloon` and/or edit existing templates
-
-   _Note: Entering the name of the template is required, the rest is optional_
-4. When you are done editing templates click on `Opslaan`
-5. To add an appointment either click on `Nieuwe afspraak` to add an empty appointment or click on the arrow next to `Nieuwe afspraak` and select one of your templates
-6. When you are done adding appointments click on `Opslaan`
-7. Click on `Sync` to sync the display if necessary
+### Finalizing the setup
+After completing all steps listed above reboot the Pi by running `sudo reboot` via your SSH client. Connect the E-Paper HAT as well if you haven't already.
 
 ## Useful links
-### Required python modules for the source code
-- https://pypi.org/project/pyserial/
-- https://pypi.org/project/zermelo.py/
-- https://pypi.org/project/PySide6/
-### Other links
 - https://github.com/wouter173/zermelo.py
-- https://stackoverflow.com/questions/76138267/read-write-data-over-raspberry-pi-pico-usb-cable
-- https://note.nkmk.me/en/python-unix-time-datetime/#convert-unix-time-epoch-time-to-datetime-fromtimestamp
+- https://www.waveshare.com/wiki/2.13inch_e-Paper_HAT_(G)_Manual#Raspberry_Pi
+- https://github.com/Bananattack/omelette_font
+- https://nicegui.io/documentation
