@@ -42,22 +42,18 @@ print(sync_date)
 start_timestamp = round(datetime.combine(sync_date, datetime.min.time()).timestamp())
 end_timestamp = start_timestamp + 86400
 weekday = sync_date.weekday()
+week = sync_date.isocalendar().week
 
-lessons_today = []
+# Get all lessons of this week
+usercode = Client(save['school']).get_user(token=save['token'])['response']['data'][0]['code']
+appointments = Client(save['school']).get_liveschedule(token=save['token'], week=f'{sync_date.year}{"0" * (week < 10)}{week}', usercode=usercode)
+lessons: list = appointments['response']['data'][0]['appointments']
 
 # Get the lessons of today
-appointments = Client(save['school']).get_appointments(token=save['token'], start_unix=str(start_timestamp), end_unix=str(end_timestamp))
-lessons: list = appointments['response']['data']
-
-# Sort the lessons list based on last modified and created
-lessons.sort(key=lambda x: (x['lastModified'], x['created']), reverse=True)
-
-handled_instances = []
+lessons_today = []
 for lesson in lessons:
-    # Add the lesson to lessons_today if not already in there based on the appointment instance
-    if lesson['appointmentInstance'] not in handled_instances:
-        handled_instances.append(lesson['appointmentInstance'])
-        
+    # Add the lesson to lessons_today if appointmentInstance isn't null and it is for today
+    if lesson['appointmentInstance'] and start_timestamp <= lesson['start'] < end_timestamp:
         # Preprocess some of the data
         lesson['start'] = datetime.fromtimestamp(lesson['start'])
         lesson['end'] = datetime.fromtimestamp(lesson['end'])
@@ -69,19 +65,19 @@ for lesson in lessons:
         
         lessons_today.append(lesson.copy())
 
-# Add the appointments to lessons_today
+# Add custom appointments to lessons_today
 for appointment in save['appointments']:
     appointmenttimestamp = datetime(appointment['date'][0], appointment['date'][1], appointment['date'][2], appointment['startTime'][0], appointment['startTime'][1]).timestamp()
     
     if start_timestamp <= appointmenttimestamp < end_timestamp:
         lesson = {'start': datetime.fromtimestamp((appointment['startTime'][0] * 3600) + (appointment['startTime'][1] * 60), timezone.utc),
-                'end': datetime.fromtimestamp((appointment['endTime'][0] * 3600) + (appointment['endTime'][1] * 60), timezone.utc),
-                'cancelled': False,
-                'type': 'custom',
-                'subjects': [appointment['subjects']],
-                'locations': [appointment['locations']],
-                'startTimeSlotName': appointment['timeSlotName'],
-                'endTimeSlotName': appointment['timeSlotName']}
+                  'end': datetime.fromtimestamp((appointment['endTime'][0] * 3600) + (appointment['endTime'][1] * 60), timezone.utc),
+                  'cancelled': False,
+                  'appointmentType': 'custom',
+                  'subjects': [appointment['subjects']],
+                  'locations': [appointment['locations']],
+                  'startTimeSlotName': appointment['timeSlotName'],
+                  'endTimeSlotName': appointment['timeSlotName']}
         
         lessons_today.append(lesson.copy())
     
@@ -111,7 +107,7 @@ for lesson in lessons_today:
     
     # Set the appointment colour
     if lesson['cancelled']: colour = epd.RED
-    elif lesson['type'] == 'exam': colour = epd.YELLOW
+    elif lesson['appointmentType'] == 'exam': colour = epd.YELLOW
     else: colour = epd.BLACK
     
     # Set the block position and size
