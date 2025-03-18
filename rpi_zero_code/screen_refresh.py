@@ -1,6 +1,6 @@
 from datetime import datetime, date, timezone
 from json import load, dump
-from os.path import expanduser
+from os.path import expanduser, isfile
 from PIL import Image, ImageDraw, ImageFont
 from subprocess import check_output
 from sys import argv
@@ -9,7 +9,7 @@ from waveshare_epd import epd2in13g
 from zermelo import Client
 
 # Initializing the epd
-print("Initializing EPD")
+print('Initializing EPD')
 epd = epd2in13g.EPD()
 epd.init()
 
@@ -17,13 +17,13 @@ epd.init()
 font = ImageFont.truetype(expanduser('~/rooster-epd/om_thick_plain.ttf'), 8)
 
 # Load the save file
-try:
+print('Loading save file')
+if isfile(expanduser('~/rooster-epd/save.json')):
     with open(expanduser('~/rooster-epd/save.json'), 'r') as file:
         save = load(file)
-except OSError:  # open failed
-    save = None
 
 # Wait for internet connection
+print('Waiting for internet')
 ip = check_output(['hostname', '-I'])
 while not ip:
     ip = check_output(['hostname', '-I'])
@@ -37,8 +37,9 @@ else:
     # Else use current date
     sync_date = date.today()
 
-print(sync_date)
+print(f'Getting appointments from {sync_date}')
 
+# Convert the date to timestamps, week day and week number
 start_timestamp = round(datetime.combine(sync_date, datetime.min.time()).timestamp())
 end_timestamp = start_timestamp + 86400
 weekday = sync_date.weekday()
@@ -128,25 +129,19 @@ for lesson in lessons_today:
     if lineystartpos >= 0 and lineyendpos >= 0:
         draw.line((45, lineystartpos, 45, lineyendpos), fill=colour)
     
-    # Set the starttimestamp + position
-    start_timestamp = f'{" " if lesson_starttime.hour < 10 else ""}{lesson_starttime.hour}:{"0" if lesson_starttime.minute < 10 else ""}{lesson_starttime.minute}'
-    
-    # Set the ypos
+    # Set the starttimestamp y pos
     top_text_ypos = ystartpos + 4
     
     # If starttimestamp y pos is greater than or equal to 0 draw the start timestamp on the epd
     if top_text_ypos >= 0:
-        draw.text((2, top_text_ypos), start_timestamp, fill=colour, font=font)
+        draw.text((2, top_text_ypos), f'{" " if lesson_starttime.hour < 10 else ""}{lesson_starttime.hour}:{"0" if lesson_starttime.minute < 10 else ""}{lesson_starttime.minute}', fill=colour, font=font)
     
-    # Set the endtimestamp + position
-    end_timestamp = f'{" " if lesson_endtime.hour < 10 else ""}{lesson_endtime.hour}:{"0" if lesson_endtime.minute < 10 else ""}{lesson_endtime.minute}'
-    
-    # Set the ypos
+    # Set the endtimestamp y pos
     endtimestamp_ypos = yendpos - 9
     
     # If endtimestamp y pos is greater than or equal to 0 draw the end timestamp on the epd
     if endtimestamp_ypos >= 0:
-        draw.text((2, endtimestamp_ypos), end_timestamp, fill=colour, font=font)
+        draw.text((2, endtimestamp_ypos), f'{" " if lesson_endtime.hour < 10 else ""}{lesson_endtime.hour}:{"0" if lesson_endtime.minute < 10 else ""}{lesson_endtime.minute}', fill=colour, font=font)
     
     # Set the subjects + position
     if len(lesson['subjects']) != 0:
