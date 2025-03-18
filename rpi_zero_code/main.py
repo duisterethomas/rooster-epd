@@ -430,4 +430,4 @@ if not isfile(expanduser('~/rooster-epd/storage_secret.txt')):
 # Run the ui
 with open(expanduser('~/rooster-epd/storage_secret.txt'), 'r') as file:
     storage_secret = file.read()
-ui.run(storage_secret=storage_secret)
+ui.run(language='nl', storage_secret=storage_secret)
