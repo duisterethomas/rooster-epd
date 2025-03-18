@@ -128,17 +128,23 @@ def main_page() -> None:
     # Sync button
     @ui.refreshable
     def sync_button_func():
-        def sync_thread() -> None:
+        def sync_thread(specific_date: bool) -> None:
             sync_button.props('loading')
-            p = Popen(('python3', expanduser('~/rooster-epd/screen_refresh.py')))
+            sync_button.disable()
+            if specific_date:
+                p = Popen(('python3', expanduser('~/rooster-epd/screen_refresh.py'), sync_date.value))
+            else:
+                p = Popen(('python3', expanduser('~/rooster-epd/screen_refresh.py')))
             p.wait()
             sync_button_func.refresh()
         
-        def sync() -> None:
-            thread = Thread(target=sync_thread)
+        def sync(specific_date: bool) -> None:
+            sync_button.close()
+            thread = Thread(target=lambda: sync_thread(specific_date))
             thread.start()
         
-        sync_button = ui.button('Synchroniseren', on_click=sync, icon='sync')
+        with ui.dropdown_button('Synchroniseren', on_click=lambda: sync(specific_date=False), icon='sync', split=True) as sync_button:
+            sync_date = ui.date(on_change=lambda: sync(specific_date=True)).props('minimal')
     
     # Link Zermelo dialog
     with ui.dialog() as link_zermelo_dialog, ui.card().style('max-width: none'):
