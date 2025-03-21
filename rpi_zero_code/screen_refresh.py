@@ -2,9 +2,7 @@ from datetime import datetime, date, timezone
 from json import load, dump
 from os.path import expanduser, isfile
 from PIL import Image, ImageDraw, ImageFont
-from subprocess import check_output
 from sys import argv
-from time import sleep
 from waveshare_epd import epd2in13g
 from zermelo import Client
 
@@ -21,13 +19,6 @@ print('Loading save file')
 if isfile(expanduser('~/rooster-epd/save.json')):
     with open(expanduser('~/rooster-epd/save.json'), 'r') as file:
         save = load(file)
-
-# Wait for internet connection
-print('Waiting for internet')
-ip = check_output(['hostname', '-I'])
-while not ip:
-    ip = check_output(['hostname', '-I'])
-    sleep(0.1)
 
 # Get the date
 if len(argv) > 1:

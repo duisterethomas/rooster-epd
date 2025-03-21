@@ -94,7 +94,8 @@ Create the following 2 files and replace `USER` with your username of the Raspbe
     ```
     [Unit]
     Description=Runs the Rooster-EPD screen_refresh.py at startup
-    After=network-online.target
+    After=network-online.target time-sync.target
+    Wants=network-online.target time-sync.target
 
     [Service]
     ExecStart=python3 /home/USER/rooster-epd/screen_refresh.py
