@@ -151,7 +151,7 @@ for lesson in lessons_today:
     # Set the endtimestamp y pos
     endtimestamp_ypos = yendpos - 9
     
-    # If endtimestamp y pos is greater than or equal to 0 draw the end timestamp on the epd
+    # If endtimestamp y pos is greater than or equal to the top text y pos + 8 draw the end timestamp on the epd
     if endtimestamp_ypos >= top_text_ypos + 8:
         draw.text((2, endtimestamp_ypos), f'{" " if lesson_endtime.hour < 10 else ""}{lesson_endtime.hour}:{"0" if lesson_endtime.minute < 10 else ""}{lesson_endtime.minute}', fill=colour, font=font)
     
@@ -178,7 +178,7 @@ for lesson in lessons_today:
         # Set the location_ypos to the endtimestamp_ypos if endtimestamp_ypos is smaller than ystartpos + 16
         locations_ypos = min(ystartpos + 16, endtimestamp_ypos)
         
-        # If the location y pos is greater than or equal to 0 draw the location on the epd
+        # If the location y pos is greater than or equal to the top text y pos + 8 draw the location on the epd
         if locations_ypos >= top_text_ypos + 8:
             draw.text((49, locations_ypos), locations, fill=colour, font=font)
         else:
