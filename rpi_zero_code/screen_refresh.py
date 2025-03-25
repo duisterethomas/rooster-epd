@@ -55,26 +55,28 @@ end_timestamp = start_timestamp + 86400
 weekday = sync_date.weekday()
 week = sync_date.isocalendar().week
 
-# Get all lessons of this week
-usercode = Client(save['school']).get_user(token=save['token'])['response']['data'][0]['code']
-appointments = Client(save['school']).get_liveschedule(token=save['token'], week=f'{sync_date.year}{"0" * (week < 10)}{week}', usercode=usercode)
-lessons: list = appointments['response']['data'][0]['appointments']
-
-# Get the lessons of today
+# Get the lessons for today
 lessons_today = []
-for lesson in lessons:
-    # Add the lesson to lessons_today if appointmentInstance isn't null and it is for today
-    if lesson['appointmentInstance'] and start_timestamp <= lesson['start'] < end_timestamp:
-        # Preprocess some of the data
-        lesson['start'] = datetime.fromtimestamp(lesson['start'])
-        lesson['end'] = datetime.fromtimestamp(lesson['end'])
-        lesson['startTimeSlotName'] = lesson['startTimeSlotName'].upper()
-        lesson['endTimeSlotName'] = lesson['endTimeSlotName'].upper()
-        
-        for i in range(len(lesson['subjects'])):
-            lesson['subjects'][i] = lesson['subjects'][i].upper()
-        
-        lessons_today.append(lesson.copy())
+
+# Get lessons from zermelo
+if save['token']:
+    usercode = Client(save['school']).get_user(token=save['token'])['response']['data'][0]['code']
+    appointments = Client(save['school']).get_liveschedule(token=save['token'], week=f'{sync_date.year}{"0" * (week < 10)}{week}', usercode=usercode)
+    lessons: list = appointments['response']['data'][0]['appointments']
+    
+    for lesson in lessons:
+        # Add the lesson to lessons_today if appointmentInstance isn't null and it is for today
+        if lesson['appointmentInstance'] and start_timestamp <= lesson['start'] < end_timestamp:
+            # Preprocess some of the data
+            lesson['start'] = datetime.fromtimestamp(lesson['start'])
+            lesson['end'] = datetime.fromtimestamp(lesson['end'])
+            lesson['startTimeSlotName'] = lesson['startTimeSlotName'].upper()
+            lesson['endTimeSlotName'] = lesson['endTimeSlotName'].upper()
+            
+            for i in range(len(lesson['subjects'])):
+                lesson['subjects'][i] = lesson['subjects'][i].upper()
+            
+            lessons_today.append(lesson.copy())
 
 # Add custom appointments to lessons_today
 for appointment in save['appointments']:
