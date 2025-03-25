@@ -14,11 +14,30 @@ epd.init()
 # Initialize the font
 font = ImageFont.truetype(expanduser('~/rooster-epd/om_thick_plain.ttf'), 8)
 
-# Load the save file
-print('Loading save file')
 if isfile(expanduser('~/rooster-epd/save.json')):
+    # Load the save file
+    print('Loading save file')
     with open(expanduser('~/rooster-epd/save.json'), 'r') as file:
         save = load(file)
+else:
+    # Generate new save file
+    print('Generating new save file')
+    save = {"templates": {},
+            "starttime": 0,
+            "endtime": 0,
+            "token": "",
+            "school": "",
+            "notes": ["",
+                      "",
+                      "",
+                      "",
+                      "",
+                      "",
+                      ""],
+            "appointments": []}
+
+    with open(expanduser('~/rooster-epd/save.json'), 'w') as file:
+            dump(save, file)
 
 # Get the date
 if len(argv) > 1:
