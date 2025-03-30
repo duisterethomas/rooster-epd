@@ -174,32 +174,33 @@ def main_page() -> None:
     
     @ui.refreshable
     def sjablonen() -> None:
+        def delete(template_name) -> None:
+            save['templates'].pop(template_name)
+            sjablonen.refresh()
+        
+        def set_starttime(changes, template) -> None:
+            template['startTime'][0] = int(changes.value.split(':')[0])
+            template['startTime'][1] = int(changes.value.split(':')[1])
+        
+        def set_endtime(changes, template) -> None:
+            template['endTime'][0] = int(changes.value.split(':')[0])
+            template['endTime'][1] = int(changes.value.split(':')[1])
+        
+        def set_subjects(changes, template) -> None:
+            template['subjects'] = changes.value
+        
+        def set_locations(changes, template) -> None:
+            template['locations'] = changes.value
+        
+        def set_timeslotname(changes, template) -> None:
+            template['timeSlotName'] = changes.value                
+        
+        def set_name(changes, template_name) -> None:
+            if changes.value:
+                changed_template_names[template_name] = changes.value
+        
         for template_name in sorted(save['templates'].keys()):
             template = save['templates'][template_name]
-            def delete(template_name) -> None:
-                save['templates'].pop(template_name)
-                sjablonen.refresh()
-            
-            def set_starttime(changes, template) -> None:
-                template['startTime'][0] = int(changes.value.split(':')[0])
-                template['startTime'][1] = int(changes.value.split(':')[1])
-            
-            def set_endtime(changes, template) -> None:
-                template['endTime'][0] = int(changes.value.split(':')[0])
-                template['endTime'][1] = int(changes.value.split(':')[1])
-            
-            def set_subjects(changes, template) -> None:
-                template['subjects'] = changes.value
-            
-            def set_locations(changes, template) -> None:
-                template['locations'] = changes.value
-            
-            def set_timeslotname(changes, template) -> None:
-                template['timeSlotName'] = changes.value                
-            
-            def set_name(changes, template_name) -> None:
-                if changes.value:
-                    changed_template_names[template_name] = changes.value
             
             with ui.card():
                 with ui.row():
@@ -255,6 +256,7 @@ def main_page() -> None:
         with ui.row():
             ui.button('Sjabloon toevoegen', on_click=add_template, icon='add')
             ui.button('Klaar', on_click=done_pressed, icon='done')
+        
         sjablonen()
     
     # Afspraken card
@@ -262,33 +264,33 @@ def main_page() -> None:
     def afspraken() -> None:
         save['appointments'].sort(key=lambda d: datetime(d['date'][0], d['date'][1], d['date'][2], d['startTime'][0], d['startTime'][1]).timestamp())
         
+        def delete(appointment):
+            save['appointments'].remove(appointment)
+            afspraken.refresh()
+        
+        def set_starttime(changes, appointment):
+            appointment['startTime'][0] = int(changes.value.split(':')[0])
+            appointment['startTime'][1] = int(changes.value.split(':')[1])
+        
+        def set_endtime(changes, appointment):
+            appointment['endTime'][0] = int(changes.value.split(':')[0])
+            appointment['endTime'][1] = int(changes.value.split(':')[1])
+        
+        def set_subjects(changes, appointment):
+            appointment['subjects'] = changes.value
+        
+        def set_locations(changes, appointment):
+            appointment['locations'] = changes.value
+        
+        def set_timeslotname(changes, appointment):
+            appointment['timeSlotName'] = changes.value
+        
+        def set_date(changes, appointment):
+            appointment['date'][0] = int(changes.value.split('-')[0])
+            appointment['date'][1] = int(changes.value.split('-')[1])
+            appointment['date'][2] = int(changes.value.split('-')[2])
+
         for appointment in save['appointments']:
-            def delete(appointment):
-                save['appointments'].remove(appointment)
-                afspraken.refresh()
-            
-            def set_starttime(changes, appointment):
-                appointment['startTime'][0] = int(changes.value.split(':')[0])
-                appointment['startTime'][1] = int(changes.value.split(':')[1])
-            
-            def set_endtime(changes, appointment):
-                appointment['endTime'][0] = int(changes.value.split(':')[0])
-                appointment['endTime'][1] = int(changes.value.split(':')[1])
-            
-            def set_subjects(changes, appointment):
-                appointment['subjects'] = changes.value
-            
-            def set_locations(changes, appointment):
-                appointment['locations'] = changes.value
-            
-            def set_timeslotname(changes, appointment):
-                appointment['timeSlotName'] = changes.value
-            
-            def set_date(changes, appointment):
-                appointment['date'][0] = int(changes.value.split('-')[0])
-                appointment['date'][1] = int(changes.value.split('-')[1])
-                appointment['date'][2] = int(changes.value.split('-')[2])
-            
             with ui.card():
                 with ui.row():
                     with ui.column():
