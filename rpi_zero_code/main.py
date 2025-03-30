@@ -206,17 +206,13 @@ def main_page() -> None:
                     with ui.column():
                         with ui.input('Begin tijd', on_change=lambda changes, templt=template: set_starttime(changes, templt), value='%02d:%02d' % (template['startTime'][0], template['startTime'][1])).props('readonly size=4 filled dense stack-label') as begintijd:
                             with ui.menu().props('no-parent-event') as menu:
-                                with ui.time().bind_value(begintijd).props('format24h'):
-                                    with ui.row().classes('justify-end'):
-                                        ui.button('Close', on_click=menu.close).props('flat')
+                                ui.time().bind_value(begintijd).props('format24h')
                             with begintijd.add_slot('append'):
                                 ui.icon('access_time').on('click', menu.open).classes('cursor-pointer')
                         
                         with ui.input('Eind tijd', on_change=lambda changes, templt=template: set_endtime(changes, templt), value='%02d:%02d' % (template['endTime'][0], template['endTime'][1])).props('readonly size=4 filled dense stack-label') as eindtijd:
                             with ui.menu().props('no-parent-event') as menu:
-                                with ui.time().bind_value(eindtijd).props('format24h'):
-                                    with ui.row().classes('justify-end'):
-                                        ui.button('Close', on_click=menu.close).props('flat')
+                                ui.time().bind_value(eindtijd).props('format24h')
                             with eindtijd.add_slot('append'):
                                 ui.icon('access_time').on('click', menu.open).classes('cursor-pointer')
                     
@@ -298,17 +294,13 @@ def main_page() -> None:
                     with ui.column():
                         with ui.input('Begin tijd', on_change=lambda changes, appointmnt=appointment: set_starttime(changes, appointmnt), value='%02d:%02d' % (appointment['startTime'][0], appointment['startTime'][1])).props('readonly size=4 filled dense stack-label') as begintijd:
                             with ui.menu().props('no-parent-event') as menu:
-                                with ui.time().bind_value(begintijd).props('format24h'):
-                                    with ui.row().classes('justify-end'):
-                                        ui.button('Close', on_click=menu.close).props('flat')
+                                ui.time().bind_value(begintijd).props('format24h')
                             with begintijd.add_slot('append'):
                                 ui.icon('access_time').on('click', menu.open).classes('cursor-pointer')
                         
                         with ui.input('Eind tijd', on_change=lambda changes, appointmnt=appointment: set_endtime(changes, appointmnt), value='%02d:%02d' % (appointment['endTime'][0], appointment['endTime'][1])).props('readonly size=4 filled dense stack-label') as eindtijd:
                             with ui.menu().props('no-parent-event') as menu:
-                                with ui.time().bind_value(eindtijd).props('format24h'):
-                                    with ui.row().classes('justify-end'):
-                                        ui.button('Close', on_click=menu.close).props('flat')
+                                ui.time().bind_value(eindtijd).props('format24h')
                             with eindtijd.add_slot('append'):
                                 ui.icon('access_time').on('click', menu.open).classes('cursor-pointer')
                     
@@ -321,9 +313,7 @@ def main_page() -> None:
                     with ui.column():
                         with ui.input('Datum', on_change=lambda changes, appointmnt=appointment: set_date(changes, appointmnt), value='%d-%02d-%02d' % (appointment['date'][0], appointment['date'][1], appointment['date'][2])).props('readonly size=9 filled dense stack-label') as datum:
                             with ui.menu().props('no-parent-event') as menu:
-                                with ui.date().bind_value(datum):
-                                    with ui.row().classes('justify-end'):
-                                        ui.button('Close', on_click=menu.close).props('flat')
+                                ui.date().bind_value(datum)
                             with datum.add_slot('append'):
                                 ui.icon('edit_calendar').on('click', menu.open).classes('cursor-pointer')
                         ui.button('Verwijder', on_click=lambda _, appointmnt=appointment: delete(appointmnt), color='negative', icon='delete')
@@ -368,18 +358,14 @@ def main_page() -> None:
                     hour, minutes = divmod(save['starttime'], 60)
                     with ui.input('Begin tijd', value='%02d:%02d' % (hour, minutes)).props('readonly size=4 filled dense stack-label') as begintijd:
                         with ui.menu().props('no-parent-event') as menu:
-                            with ui.time().bind_value(begintijd).props('format24h'):
-                                with ui.row().classes('justify-end'):
-                                    ui.button('Close', on_click=menu.close).props('flat')
+                            ui.time().bind_value(begintijd).props('format24h')
                         with begintijd.add_slot('append'):
                             ui.icon('access_time').on('click', menu.open).classes('cursor-pointer')
                     
                     hour, minutes = divmod(save['endtime'], 60)
                     with ui.input('Eind tijd', value='%02d:%02d' % (hour, minutes)).props('readonly size=4 filled dense stack-label') as eindtijd:
                         with ui.menu().props('no-parent-event') as menu:
-                            with ui.time().bind_value(eindtijd).props('format24h'):
-                                with ui.row().classes('justify-end'):
-                                    ui.button('Close', on_click=menu.close).props('flat')
+                            ui.time().bind_value(eindtijd).props('format24h')
                         with eindtijd.add_slot('append'):
                             ui.icon('access_time').on('click', menu.open).classes('cursor-pointer')
         
