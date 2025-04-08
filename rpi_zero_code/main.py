@@ -19,7 +19,7 @@ from subprocess import Popen
 from threading import Thread
 from zermelo import Client
 
-VERSION = 'V3.0.2'
+VERSION = 'V3.0.3'
 
 unrestricted_page_routes = {'/login'}
 
