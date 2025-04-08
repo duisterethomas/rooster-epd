@@ -235,8 +235,8 @@ def main_page() -> None:
             count += 1
             name = f"New{count}"
         
-        save['templates'][name] = {'startTime': (0, 0),
-                                   'endTime': (0, 0),
+        save['templates'][name] = {'startTime': [0, 0],
+                                   'endTime': [0, 0],
                                    'subjects': '',
                                    'locations': '',
                                    'timeSlotName': ''}
@@ -323,16 +323,16 @@ def main_page() -> None:
     def add_appointment(template: dict | None = None) -> None:
         today = date.today()
         if template:
-            save['appointments'].append({'date': (today.year, today.month, today.day),
+            save['appointments'].append({'date': [today.year, today.month, today.day],
                                          'startTime': template['startTime'],
                                          'endTime': template['endTime'],
                                          'subjects': template['subjects'],
                                          'locations': template['locations'],
                                          'timeSlotName': template['timeSlotName']})
         else:
-            save['appointments'].append({'date': (today.year, today.month, today.day),
-                                         'startTime': (0, 0),
-                                         'endTime': (0, 0),
+            save['appointments'].append({'date': [today.year, today.month, today.day],
+                                         'startTime': [0, 0],
+                                         'endTime': [0, 0],
                                          'subjects': '',
                                          'locations': '',
                                          'timeSlotName': ''})
