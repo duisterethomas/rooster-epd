@@ -1,5 +1,5 @@
 # Rooster-EPD V3
-With this you can show your Zermelo schedule on an E-Paper display.
+A small e-Paper device that shows your Zermelo schedule.
 
 ## Required materials
 - [Raspberry Pi Zero 2WH](https://www.raspberrystore.nl/PrestaShop/nl/raspberry-pi-zero-v1-en-v2/588-raspberry-pi-zero-2wh-5056561800011.html)
