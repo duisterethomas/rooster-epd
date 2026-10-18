@@ -85,7 +85,7 @@ def login(redirect_to: str = '/') -> Optional[RedirectResponse]:
 
     # Version label
     with ui.page_sticky(position='bottom-left', x_offset=10, y_offset=5):
-        ui.label(VERSION).tailwind.font_style('italic')
+        ui.label(VERSION).classes('italic')
 
 # The save file is loaded in main(), before the UI starts
 save: dict = {}
@@ -405,7 +405,7 @@ def main_page() -> None:
 
     # Version label
     with ui.page_sticky(position='bottom-left', x_offset=10, y_offset=5):
-        ui.label(VERSION).tailwind.font_style('italic')
+        ui.label(VERSION).classes('italic')
 
     # Check for updates
     if Version(VERSION[1:]) < Version(get('https://api.github.com/repos/duisterethomas/rooster-epd/releases/latest').json()['tag_name'][1:]):
