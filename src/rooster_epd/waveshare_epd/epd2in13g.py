@@ -29,7 +29,7 @@
 #
 
 import logging
-from . import epdconfig
+from rooster_epd.waveshare_epd import epdconfig
 
 import PIL
 from PIL import Image
@@ -59,15 +59,15 @@ class EPD:
         else:
             self.Source_BITS = self.width
 
-        
+
     # Hardware reset
     def reset(self):
         epdconfig.digital_write(self.reset_pin, 1)
-        epdconfig.delay_ms(200) 
+        epdconfig.delay_ms(200)
         epdconfig.digital_write(self.reset_pin, 0)         # module reset
         epdconfig.delay_ms(2)
         epdconfig.digital_write(self.reset_pin, 1)
-        epdconfig.delay_ms(200)   
+        epdconfig.delay_ms(200)
 
     def send_command(self, command):
         epdconfig.digital_write(self.dc_pin, 0)
@@ -80,14 +80,14 @@ class EPD:
         epdconfig.digital_write(self.cs_pin, 0)
         epdconfig.spi_writebyte([data])
         epdconfig.digital_write(self.cs_pin, 1)
-        
+
     def ReadBusy(self):
         logger.debug("e-Paper busy H")
         epdconfig.delay_ms(100)
         while(epdconfig.digital_read(self.busy_pin) == 0):      # 0: idle, 1: busy
             epdconfig.delay_ms(5)
         logger.debug("e-Paper busy release")
-        
+
     def SetWindow(self):
         self.send_command(0x61) # SET_RAM_X_ADDRESS_START_END_POSITION
         # x point must be the multiple of 8 or the last 3 bits will be ignored
@@ -100,14 +100,14 @@ class EPD:
         self.send_command(0x12) # DISPLAY_REFRESH
         self.send_data(0X00)
         self.ReadBusy()
-        
+
     def init(self):
         if (epdconfig.module_init() != 0):
             return -1
         # EPD hardware init start
 
         self.reset()
-        
+
         self.ReadBusy()
         self.send_command(0x4D)
         self.send_data(0x78)
@@ -140,9 +140,9 @@ class EPD:
         self.send_command(0x60)
         self.send_data(0x02)
         self.send_data(0x02)
-        
+
         self.SetWindow()
-        
+
         self.send_command(0xE7)
         self.send_data(0x1C)
 
@@ -156,10 +156,10 @@ class EPD:
 
         self.send_command(0xE9)
         self.send_data(0x01)
-        
+
         self.send_command(0x30)
         self.send_data(0x08)
-        
+
         self.send_command(0x04)
         self.ReadBusy()
         return 0
@@ -187,7 +187,7 @@ class EPD:
             Width = self.width // 4
         else :
             Width = self.width // 4 + 1
-        Height = self.height 
+        Height = self.height
         buf = [0x00] * int(Width * Height)
         idx = 0
         for j in range(0, Height):
@@ -214,9 +214,9 @@ class EPD:
                     self.send_data(image[i + j * Width])
                 else :
                     self.send_data(0x00)
-                    
+
         self.TurnOnDisplay()
-        
+
     def Clear(self, color=0x55):
         Width = self.Source_BITS//4
         Height = self.height
@@ -232,11 +232,10 @@ class EPD:
         self.send_command(0x02) # POWER_OFF
         self.ReadBusy()
         epdconfig.delay_ms(100)
-        
+
         self.send_command(0x07) # DEEP_SLEEP
         self.send_data(0XA5)
-        
+
         epdconfig.delay_ms(2000)
         epdconfig.module_exit()
 ### END OF FILE ###
-

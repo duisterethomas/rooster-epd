@@ -18,12 +18,7 @@ A small e-Paper device that shows your Zermelo schedule.
 - 4x M2.5 nut - (Also from [this kit](https://www.amazon.nl/dp/B075WY5367))
 
 # Installation
-## Prerequisites
-- An SSH client, I use OpenSSH
-- Any SFTP client, I use [FileZilla](https://filezilla-project.org/)
-
-## Setting up the Pi
-### Installing Raspberry Pi OS
+## Installing Raspberry Pi OS
 1. Download and install [Raspberry Pi Imager](https://www.raspberrypi.com/software/)
 2. Insert the Micro SD card and run Raspberry Pi Imager
 3. Select `Raspberry Pi Zero 2 W` and click `NEXT`
@@ -45,71 +40,14 @@ A small e-Paper device that shows your Zermelo schedule.
     - This is because of a bug currently somewhere in Raspberry Pi OS that causes the wifi to not work correctly, so this fixes that
 14. Finally you can eject the Micro SD card and put it in the Rasberry Pi
 
-### Installing Rooster-EPD on the Raspberry Pi
+## Installing Rooster-EPD on the Raspberry Pi
 1. Plug the Micro USB cable into the `PWR IN` port on the Raspberry Pi and plug it into your USB power supply and wait for it to boot and set itself up
    - You can check if it is done by entering `ping HOSTNAME` where `HOSTNAME` is the hostname you set earlier, so in my case `ping rooster-epd`. If you get succesful ping results it's done and online
-2. Connect to the Pi using your SSH client
-   - If you are using OpenSSH like me run `ssh USERNAME@HOSTNAME` in a terminal where `USERNAME` is the username you set earlier and `HOSTNAME` is the hostname you set earlier, in my case `ssh thomas@rooster-epd`. After that enter the password you set earlier
-3. Make sure the Pi is up to date by running `sudo apt update` and then `sudo apt upgrade`
-4. Now install the required packages using the following commands:
-   - `sudo apt install python3-pip`
-   - `sudo apt install python3-pil`
-   - `sudo apt install python3-numpy`
-   - `sudo apt install python3-spidev`
-   - `sudo apt install python3-gpiozero`
-   - `sudo apt install python3-packaging`
-   - `sudo pip3 install nicegui zermelo.py --break-system-packages`
-     - Note: `--break-system-packages` hasn't broken anything as far as I've seen with these two packages
-
-### Enabling SPI
-Enable the SPI interface of the pi using `sudo raspi-config` and then choose `Interfacing Options` -> `SPI` -> `Yes`
-
-### Installing the python scripts
-1. Connect to the Pi using your SFTP client
-   - If you are using FileZilla like me enter the hostname in the `Host` field, your username and password in their respective fields, enter `22` in the `Port` field and click `Quickconnect`, then check `Always trust this host, add this key to the cache` and click `Ok`
-2. Create a new directory in the home directory of your user called `rooster-epd`, so the full path will be `/home/USER/rooster-epd` where `USER` is your username
-3. Download the `Source code (zip)` from the [latest release](https://github.com/duisterethomas/rooster-epd/releases/latest)
-4. Unzip it and copy the contents of the `rpi_zero_code` directory into the `rooster-epd` directory you just created on the Pi
-
-### Setting up systemd services
-Create the following 2 files and replace `USER` with your username of the Raspberry Pi Zero:
-- `/etc/systemd/system/rooster-epd-main.service`
-    ```
-    [Unit]
-    Description=Runs the Rooster-EPD main.py at startup
-    After=rooster-epd-screen-refresh.service
-
-    [Service]
-    ExecStart=python3 /home/USER/rooster-epd/main.py
-    WorkingDirectory=/home/USER/rooster-epd
-    Restart=on-failure
-    User=USER
-
-    [Install]
-    WantedBy=multi-user.target
-    ```
-
-- `/etc/systemd/system/rooster-epd-screen-refresh.service`
-    ```
-    [Unit]
-    Description=Runs the Rooster-EPD screen_refresh.py at startup
-    After=network-online.target time-sync.target
-    Wants=network-online.target time-sync.target
-
-    [Service]
-    ExecStart=python3 /home/USER/rooster-epd/screen_refresh.py
-    WorkingDirectory=/home/USER/rooster-epd
-    Restart=on-failure
-    User=USER
-
-    [Install]
-    WantedBy=multi-user.target
-    ```
-
-Then enable them with the following commands in this order:
-1. `sudo systemctl daemon-reload`
-2. `sudo systemctl enable rooster-epd-main.service`
-3. `sudo systemctl enable rooster-epd-screen-refresh.service`
+2. Connect to the Raspberry Pi via SSH by running `ssh USERNAME@HOSTNAME` in a terminal where `USERNAME` is the username you set earlier and `HOSTNAME` is the hostname you set earlier, in my case `ssh thomas@rooster-epd`. After that enter the password you set earlier
+3. Make sure the  Raspberry Pi is up to date by running `sudo apt update` and then `sudo apt upgrade`
+4. Download the latest release by running `wget https://github.com/duisterethomas/rooster-epd/download/V3.0.3/rooster-epd_3.0.3-1_all.deb`
+5. Install the package by running `sudo apt install ./rooster-epd_3.0.3-1_all.deb`
+6. Reboot by running `sudo reboot` and everything should be working!
 
 ### Adding other Wi-Fi networks (optional)
 1. Run `sudo nmtui`
@@ -125,8 +63,12 @@ Then enable them with the following commands in this order:
 6. Select `<Ok>`
 7. Press escape twice to exit nmtui
 
-### Finalizing the setup
-After completing all steps listed above reboot the Pi by running `sudo reboot` via your SSH client. Connect the E-Paper HAT as well if you haven't already.
+# Building the .deb package
+Run these commands in the root of the repo:
+```bash
+sudo apt install dh-virtualenv build-essential python3-dev python3-venv python3-pip python3-wheel python3-pil
+dpkg-buildpackage -b -uc
+```
 
 ## Useful links
 - https://github.com/wouter173/zermelo.py

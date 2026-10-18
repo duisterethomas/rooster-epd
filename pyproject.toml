@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rooster-epd"
+version = "3.0.3"
+requires-python = ">=3.10"
+dependencies = [
+    "bcrypt",
+	"gpiozero",
+    "nicegui",
+    "packaging",
+    "pillow",
+    "requests",
+	"spidev",
+    "zermelo.py",
+]
+
+[project.scripts]
+rooster-epd-main = "rooster_epd.main:main"
+rooster-epd-screen-refresh = "rooster_epd.screen_refresh:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+rooster_epd = ["assets/*.ttf"]

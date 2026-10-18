@@ -1,0 +1,24 @@
+#!/bin/sh
+set -e
+
+if [ "$1" = "configure" ]; then
+    # Service user with access to the SPI/GPIO hardware
+    adduser --system --group --no-create-home \
+        --home /var/lib/rooster-epd rooster-epd
+    for g in spi gpio; do
+        if getent group "$g" >/dev/null; then
+            adduser rooster-epd "$g"
+        fi
+    done
+
+    # The e-paper display talks over SPI, so make sure it is enabled
+    if [ "$(raspi-config nonint get_spi)" != "0" ]; then
+        if raspi-config nonint do_spi 0; then
+            echo "rooster-epd: SPI enabled, reboot to activate it." >&2
+        else
+            echo "rooster-epd: could not enable SPI, run raspi-config." >&2
+        fi
+    fi
+fi
+
+#DEBHELPER#

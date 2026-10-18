@@ -1,0 +1,11 @@
+#!/usr/bin/make -f
+
+%:
+	dh $@ --with python-virtualenv --buildsystem=none
+
+override_dh_virtualenv:
+	dh_virtualenv --python python3 --builtin-venv --use-system-packages
+
+override_dh_installsystemd:
+	dh_installsystemd --name=rooster-epd-main
+	dh_installsystemd --name=rooster-epd-screen-refresh

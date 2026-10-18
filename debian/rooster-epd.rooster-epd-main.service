@@ -1,0 +1,13 @@
+[Unit]
+Description=Runs the Rooster-EPD main app at startup
+After=rooster-epd-screen-refresh.service
+
+[Service]
+ExecStart=/opt/venvs/rooster-epd/bin/rooster-epd-main
+User=rooster-epd
+StateDirectory=rooster-epd
+WorkingDirectory=/var/lib/rooster-epd
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

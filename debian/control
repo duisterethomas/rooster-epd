@@ -1,0 +1,37 @@
+Source: rooster-epd
+Section: misc
+Priority: optional
+Maintainer: Thomas van Keulen <support@duisterethomas.nl>
+Build-Depends:
+    debhelper-compat (= 13),
+    dh-virtualenv,
+    build-essential,
+    python3,
+    python3-bcrypt,
+    python3-dev,
+	python3-gpiozero,
+    python3-packaging,
+    python3-pil,
+    python3-pip,
+    python3-requests,
+	python3-spidev,
+    python3-venv,
+    python3-wheel
+Standards-Version: 4.6.2
+
+Package: rooster-epd
+Architecture: all
+Pre-Depends: ${misc:Pre-Depends}
+Depends:
+    ${misc:Depends},
+    ${shlibs:Depends},
+    python3 (>= 3.10),
+    adduser,
+    raspi-config,
+    python3-bcrypt,
+	python3-gpiozero,
+    python3-packaging,
+    python3-pil,
+    python3-requests,
+	python3-spidev,
+Description: A small e-Paper device that shows your Zermelo schedule.

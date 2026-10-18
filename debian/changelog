@@ -1,0 +1,30 @@
+rooster-epd (3.0.3-1) stable; urgency=medium
+
+  * The time and date input fields of custom appointments and templates will now save
+
+ -- Thomas van Keulen <support@duisterethomas.nl>  Wed, 9 Apr 2025 00:14:14 +0200
+
+rooster-epd (3.0.2-1) stable; urgency=medium
+
+  * The input fields of custom appointments and templates will now save
+
+ -- Thomas van Keulen <support@duisterethomas.nl>  Sun, 30 Mar 2025 18:41:59 +0200
+
+rooster-epd (3.0.1-1) stable; urgency=medium
+
+  * You can now sync a specific day via the webui using the "Synchroniseren" dropdown button
+  * Linking Zermelo isn't required anymore
+  * The language/locale is now set to `nl`, so things like the date pickers now show up correctly
+  * The Zermelo schedule is now acquired via `get_liveschedule()` to show the correct appointments
+  * The systemd service now waits until the time is synchronised with ntp (**Update instructions below**)
+  * The content of shorter appointments will now fit
+  * A new save file will now be generated when running for the first time
+
+ -- Thomas van Keulen <support@duisterethomas.nl>  Fri, 28 Mar 2025 09:27:31 +0200
+
+rooster-epd (3.0.0-1) stable; urgency=medium
+
+  * I've upgraded from the Raspberry Pi Pico W to the Raspberry Pi Zero 2 W
+  * The configuration of the Rooster-EPD now works via your webbrowser, so now you can configure it using any device with a webbrowser that is connected to your local network
+
+ -- Thomas van Keulen <support@duisterethomas.nl>  Mon, 17 Mar 2025 16:39:50 +0200

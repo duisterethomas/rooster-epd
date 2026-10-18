@@ -1,0 +1,14 @@
+[Unit]
+Description=Runs the Rooster-EPD screen refresh at startup
+After=network-online.target time-sync.target
+Wants=network-online.target time-sync.target
+
+[Service]
+ExecStart=/opt/venvs/rooster-epd/bin/rooster-epd-screen-refresh
+User=rooster-epd
+StateDirectory=rooster-epd
+WorkingDirectory=/var/lib/rooster-epd
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
