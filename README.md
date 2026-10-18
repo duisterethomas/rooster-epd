@@ -45,8 +45,8 @@ A small e-Paper device that shows your Zermelo schedule.
    - You can check if it is done by entering `ping HOSTNAME` where `HOSTNAME` is the hostname you set earlier, so in my case `ping rooster-epd`. If you get succesful ping results it's done and online
 2. Connect to the Raspberry Pi via SSH by running `ssh USERNAME@HOSTNAME` in a terminal where `USERNAME` is the username you set earlier and `HOSTNAME` is the hostname you set earlier, in my case `ssh thomas@rooster-epd`. After that enter the password you set earlier
 3. Make sure the  Raspberry Pi is up to date by running `sudo apt update` and then `sudo apt upgrade`
-4. Download the latest release by running `wget https://github.com/duisterethomas/rooster-epd/download/V3.0.3/rooster-epd_3.0.3-1_all.deb`
-5. Install the package by running `sudo apt install ./rooster-epd_3.0.3-1_all.deb`
+4. Download the latest release by running `wget https://github.com/duisterethomas/rooster-epd/download/V3.1.0/rooster-epd_3.1.0-1_all.deb`
+5. Install the package by running `sudo apt install ./rooster-epd_3.1.0-1_all.deb`
 6. Reboot by running `sudo reboot` and everything should be working!
 
 ## Adding more Wi-Fi networks (optional)

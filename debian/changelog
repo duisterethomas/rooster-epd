@@ -1,3 +1,10 @@
+rooster-epd (3.1.0-1) stable; urgency=medium
+
+  * Added .deb package for easier installation
+  * Fix for NiceGUI >= 3.0
+
+ -- Thomas van Keulen <support@duisterethomas.nl>  Sun, 18 Oct 2026 23:18:16 +0200
+
 rooster-epd (3.0.3-1) stable; urgency=medium
 
   * The time and date input fields of custom appointments and templates will now save
