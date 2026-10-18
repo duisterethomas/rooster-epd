@@ -66,7 +66,9 @@ A small e-Paper device that shows your Zermelo schedule.
 # Building the .deb package
 Run these commands in the root of the repo:
 ```bash
-sudo apt install dh-virtualenv build-essential python3-dev python3-venv python3-pip python3-wheel python3-pil
+sudo apt install git debhelper dh-virtualenv build-essential python3-dev python3-venv python3-pip python3-wheel python3-pil
+git clone https://github.com/duisterethomas/rooster-epd.git
+cd rooster-epd
 dpkg-buildpackage -b -uc
 ```
 
