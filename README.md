@@ -2,7 +2,7 @@
 A small e-Paper device that shows your Zermelo schedule.
 
 ## Required materials
-- [Raspberry Pi Zero 2WH](https://www.raspberrystore.nl/PrestaShop/nl/raspberry-pi-zero-v1-en-v2/588-raspberry-pi-zero-2wh-5056561800011.html)
+- [Raspberry Pi Zero 2WH](https://www.raspberrypi.com/products/raspberry-pi-zero-2-w/)
   - The original Zero W should also work, however I opted for the Zero 2 W to get better performance
 - [Waveshare 2.13inch E-Paper HAT (G), 250x122, Red/Yellow/Black/White, SPI Interface](https://www.waveshare.com/2.13inch-e-paper-hat-g.htm)
 - Micro SD card
@@ -29,15 +29,15 @@ A small e-Paper device that shows your Zermelo schedule.
 6. Enter a hostname and click `NEXT`, I set it to `rooster-epd`
    - **Remember this as you will need it later on!**
 7. Set the `National capital`, `Time zone` and `Keyboard layout` and click `NEXT`
-   - The keyboard layout isn't very important, but useful if anything fails and you need to connect a keyboard to the pi itself
-8. Set a username and password and click `NEXT`
+   - The keyboard layout isn't very important, but useful if anything fails and you need to connect a keyboard to the Pi itself
+8. Set a Username and Password and click `NEXT`
    - **Remember these as you will need them later on!**
 9. Enter your Wi-Fi SSID and Password and click `NEXT`
 10. Turn `Enable SSH` on, select `Use password authentication` and click `NEXT`
 11. Turn `Enable Raspberry Pi Connect` off and click `NEXT`
 12. Click `WRITE`, wait a couple of seconds, click `I UNDERSTAND, ERASE AND WRITE` and wait for the Imager to finish
-13. Once it's finished you have to go into the `bootfs` partition of the sd card, edit `cmdline.txt` and add `brcmfmac.feature_disable=0x2282000` to the end of the first line
-    - This is because of a bug currently somewhere in Raspberry Pi OS that causes the wifi to not work correctly, so this fixes that
+13. Once it's finished you have to go into the `bootfs` partition of the sd card, edit `cmdline.txt` and add ` brcmfmac.feature_disable=0x2282000` to the end of the first line
+    - This is because of a bug currently somewhere in Raspberry Pi OS that causes the Wi-Fi to not work correctly, so this fixes that
 14. Finally you can eject the Micro SD card and put it in the Rasberry Pi
 
 ## Installing Rooster-EPD on the Raspberry Pi
@@ -49,7 +49,7 @@ A small e-Paper device that shows your Zermelo schedule.
 5. Install the package by running `sudo apt install ./rooster-epd_3.0.3-1_all.deb`
 6. Reboot by running `sudo reboot` and everything should be working!
 
-### Adding other Wi-Fi networks (optional)
+## Adding more Wi-Fi networks (optional)
 1. Run `sudo nmtui`
 2. Select `Edit a connection`
 3. Select `<Add>`
@@ -70,7 +70,7 @@ sudo apt install dh-virtualenv build-essential python3-dev python3-venv python3-
 dpkg-buildpackage -b -uc
 ```
 
-## Useful links
+# Useful links
 - https://github.com/wouter173/zermelo.py
 - https://www.waveshare.com/wiki/2.13inch_e-Paper_HAT_(G)_Manual#Raspberry_Pi
 - https://github.com/Bananattack/omelette_font
