@@ -19,38 +19,37 @@ A small e-Paper device that shows your Zermelo schedule.
 
 # Installation
 ## Prerequisites
+- An SSH client, I use OpenSSH
 - Any SFTP client, I use [FileZilla](https://filezilla-project.org/)
-- Any SSH client, I use the `ssh` command from PowerShell
 
 ## Setting up the Pi
 ### Installing Raspberry Pi OS
 1. Download and install [Raspberry Pi Imager](https://www.raspberrypi.com/software/)
 2. Insert the Micro SD card and run Raspberry Pi Imager
-3. Under `Raspberry Pi Device` select `Raspberry Pi Zero 2 W`
-4. Under `Operating System` select `Raspberry Pi OS (other)` and then `Raspberry Pi OS Lite (64-bit)`
-5. Under `Storage` select your Micro SD card
-6. Click `NEXT`
-7. Click `EDIT SETTINGS`
-8. Check `Set hostname` and enter a hostname, I set it to `rooster-epd`
+3. Select `Raspberry Pi Zero 2 W` and click `NEXT`
+   - Select `Raspberry Pi Zero W` if you use that one
+4. Select `Raspberry Pi OS (other)` and then `Raspberry Pi OS Lite (64-bit)` and click `NEXT`
+   - Select `Raspberry Pi OS Lite (32-bit)` if you use a Raspberry Pi Zero W
+5. Select your Micro SD card and click `NEXT`
+6. Enter a hostname and click `NEXT`, I set it to `rooster-epd`
    - **Remember this as you will need it later on!**
-   - Also note that the final hostname will be what you set + `.local`, so in my case it will be `rooster-epd.local`
-9. Check `Set username and password` and enter a username and password
+7. Set the `National capital`, `Time zone` and `Keyboard layout` and click `NEXT`
+   - The keyboard layout isn't very important, but useful if anything fails and you need to connect a keyboard to the pi itself
+8. Set a username and password and click `NEXT`
    - **Remember these as you will need them later on!**
-10. Check `Configure wireless LAN` and enter your Wi-Fi credentials
-    - Don't forget to set the `Wireless LAN country` to your country
-11. Check `Set locale settings` and select the right time zone
-    - The keyboard layout doesn't matter as we won't be connecting a keyboard.
-12. Go to the `SERVICES` tab
-13. Check `Enable SSH` and select `Use password authentication`
-14. You can set the settings on the `OPTIONS` tab to whatever you like, I disabled telemetry, but that isn't required
-15. Click `SAVE`, `YES`, `YES` and wait for the Imager to finish
-16. Once it's finished you can take the Micro SD card out and put it in the Rasberry Pi
+9. Enter your Wi-Fi SSID and Password and click `NEXT`
+10. Turn `Enable SSH` on, select `Use password authentication` and click `NEXT`
+11. Turn `Enable Raspberry Pi Connect` off and click `NEXT`
+12. Click `WRITE`, wait a couple of seconds, click `I UNDERSTAND, ERASE AND WRITE` and wait for the Imager to finish
+13. Once it's finished you have to go into the `bootfs` partition of the sd card, edit `cmdline.txt` and add `brcmfmac.feature_disable=0x2282000` to the end of the first line
+    - This is because of a bug currently somewhere in Raspberry Pi OS that causes the wifi to not work correctly, so this fixes that
+14. Finally you can eject the Micro SD card and put it in the Rasberry Pi
 
-### Installing required packages on the Raspberry Pi
+### Installing Rooster-EPD on the Raspberry Pi
 1. Plug the Micro USB cable into the `PWR IN` port on the Raspberry Pi and plug it into your USB power supply and wait for it to boot and set itself up
-   - You can check if it is done by entering `ping HOSTNAME` where `HOSTNAME` is the hostname you set earlier, so in my case `ping rooster-epd.local`. If you get succesful ping results it's done and online
+   - You can check if it is done by entering `ping HOSTNAME` where `HOSTNAME` is the hostname you set earlier, so in my case `ping rooster-epd`. If you get succesful ping results it's done and online
 2. Connect to the Pi using your SSH client
-   - If you are using PowerShell like me enter `ssh USERNAME@HOSTNAME` where `USERNAME` is the username you set earlier and `HOSTNAME` is the hostname you set earlier, in my case `ssh thomas@rooster-epd.local`. After that enter the password you set earlier
+   - If you are using OpenSSH like me run `ssh USERNAME@HOSTNAME` in a terminal where `USERNAME` is the username you set earlier and `HOSTNAME` is the hostname you set earlier, in my case `ssh thomas@rooster-epd`. After that enter the password you set earlier
 3. Make sure the Pi is up to date by running `sudo apt update` and then `sudo apt upgrade`
 4. Now install the required packages using the following commands:
    - `sudo apt install python3-pip`
