@@ -9,6 +9,7 @@ from nicegui import app, ui
 from bcrypt import gensalt, hashpw, checkpw
 from copy import deepcopy
 from datetime import datetime, date
+from os import remove
 from packaging.version import Version
 from random import choice
 from requests import get
@@ -96,6 +97,10 @@ def main_page() -> None:
     def logout() -> None:
         app.storage.user.clear()
         ui.navigate.to('/login')
+
+    def change_password() -> None:
+        remove(PASSWORD_PATH)
+        logout()
 
     def save_changes() -> None:
         save['starttime'] = int(begintijd.value.split(':')[0]) * 60 + int(begintijd.value.split(':')[1])
@@ -353,7 +358,8 @@ def main_page() -> None:
                 sync_button_func()
                 ui.button('Koppel met Zermelo', on_click=link_zermelo_dialog.open, icon='link')
                 ui.button('Wijzigingen opslaan', on_click=save_changes, color='positive', icon='save')
-                ui.button('Log uit', on_click=logout, color='negative', icon='logout')
+                with ui.dropdown_button('Log uit', on_click=logout, color='negative', icon='logout', split=True):
+                    ui.button('Wachtwoord wijzigen', on_click=change_password, color='negative', icon='lock_reset').props('flat')
 
             # Tijden instellen
             with ui.card():
