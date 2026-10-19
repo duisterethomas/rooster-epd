@@ -8,6 +8,8 @@ User=rooster-epd
 StateDirectory=rooster-epd
 WorkingDirectory=/var/lib/rooster-epd
 Restart=on-failure
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
 
 [Install]
 WantedBy=multi-user.target

@@ -424,8 +424,7 @@ def main() -> None:
     with open(STORAGE_SECRET_PATH, 'r') as file:
         storage_secret = file.read()
 
-    ui.run(language='nl', storage_secret=storage_secret, reload=False, show=False)
-
+    ui.run(language='nl', storage_secret=storage_secret, reload=False, show=False, port=80)
 
 if __name__ == "__main__":
     main()
