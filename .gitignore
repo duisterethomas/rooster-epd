@@ -1,1 +1,8 @@
 build
+debian/debhelper-build-stamp
+debian/files
+debian/rooster-epd
+*.debhelper
+*.log
+*.egg-info
+*.substvars
