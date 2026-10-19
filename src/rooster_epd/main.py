@@ -102,9 +102,13 @@ def main_page() -> None:
         remove(PASSWORD_PATH)
         logout()
 
-    def save_changes() -> None:
-        save['starttime'] = int(begintijd.value.split(':')[0]) * 60 + int(begintijd.value.split(':')[1])
-        save['endtime'] = int(eindtijd.value.split(':')[0]) * 60 + int(eindtijd.value.split(':')[1])
+    def save_changes() -> bool:
+        if begintijd.validate() and eindtijd.validate():
+            save['starttime'] = int(begintijd.value.split(':')[0]) * 60 + int(begintijd.value.split(':')[1])
+            save['endtime'] = int(eindtijd.value.split(':')[0]) * 60 + int(eindtijd.value.split(':')[1])
+        else:
+            ui.notify('Eind tijd moet later zijn dan Begin tijd', color='negative')
+            return False
 
         save['notes'][0] = maandag.value
         save['notes'][1] = dinsdag.value
@@ -115,7 +119,10 @@ def main_page() -> None:
         save['notes'][6] = zondag.value
 
         write_save(save)
+
         ui.notify('Wijzigingen opgeslagen', color='positive')
+
+        return True
 
     # Update dialog
     with ui.dialog() as update_dialog, ui.card().style('max-width: none'):
@@ -147,8 +154,9 @@ def main_page() -> None:
 
         def sync(specific_date: bool) -> None:
             sync_button.close()
-            thread = Thread(target=lambda: sync_thread(specific_date))
-            thread.start()
+            if save_changes():
+                thread = Thread(target=lambda: sync_thread(specific_date))
+                thread.start()
 
         with ui.dropdown_button('Synchroniseren', on_click=lambda: sync(specific_date=False), icon='sync', split=True) as sync_button:
             sync_date = ui.date(on_change=lambda: sync(specific_date=True)).props('minimal')
@@ -349,6 +357,28 @@ def main_page() -> None:
         for template_name in sorted(save['templates'].keys()):
             ui.button(template_name, on_click=lambda _, templt_name=template_name: add_appointment(save['templates'][templt_name])).classes('w-full').props('flat')
 
+    def begintijd_validation(value: str):
+        if ':' not in value:
+            return 'Tijd is incompleet'
+
+        starttime_int = int(value.split(':')[0]) * 60 + int(value.split(':')[1])
+        endtime_int = int(eindtijd.value.split(':')[0]) * 60 + int(eindtijd.value.split(':')[1])
+        if endtime_int <= starttime_int:
+            return 'Moet eerder zijn dan eind tijd'
+
+        return None
+
+    def eindtijd_validation(value: str):
+        if ':' not in value:
+            return 'Tijd is incompleet'
+
+        starttime_int = int(begintijd.value.split(':')[0]) * 60 + int(begintijd.value.split(':')[1])
+        endtime_int = int(value.split(':')[0]) * 60 + int(value.split(':')[1])
+        if endtime_int <= starttime_int:
+            return 'Moet later zijn dan begin tijd'
+
+        return None
+
     # Main ui
     with ui.row():
         with ui.column():
@@ -365,14 +395,14 @@ def main_page() -> None:
             with ui.card():
                 with ui.row():
                     hour, minutes = divmod(save['starttime'], 60)
-                    with ui.input('Begin tijd', value='%02d:%02d' % (hour, minutes)).props('readonly size=4 filled dense stack-label') as begintijd:
+                    with ui.input('Begin tijd', value='%02d:%02d' % (hour, minutes), validation=begintijd_validation, on_change=lambda _: eindtijd.validate()).props('readonly size=4 filled dense stack-label') as begintijd:
                         with ui.menu().props('no-parent-event') as menu:
                             ui.time().bind_value(begintijd).props('format24h')
                         with begintijd.add_slot('append'):
                             ui.icon('access_time').on('click', menu.open).classes('cursor-pointer')
 
                     hour, minutes = divmod(save['endtime'], 60)
-                    with ui.input('Eind tijd', value='%02d:%02d' % (hour, minutes)).props('readonly size=4 filled dense stack-label') as eindtijd:
+                    with ui.input('Eind tijd', value='%02d:%02d' % (hour, minutes), validation=eindtijd_validation, on_change=lambda _: begintijd.validate()).props('readonly size=4 filled dense stack-label') as eindtijd:
                         with ui.menu().props('no-parent-event') as menu:
                             ui.time().bind_value(eindtijd).props('format24h')
                         with eindtijd.add_slot('append'):
