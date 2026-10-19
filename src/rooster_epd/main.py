@@ -188,58 +188,77 @@ def main_page() -> None:
 
     @ui.refreshable
     def sjablonen() -> None:
-        def delete(template_name) -> None:
-            save['templates'].pop(template_name)
-            sjablonen.refresh()
-
-        def set_starttime(changes, template) -> None:
-            template['startTime'][0] = int(changes.value.split(':')[0])
-            template['startTime'][1] = int(changes.value.split(':')[1])
-
-        def set_endtime(changes, template) -> None:
-            template['endTime'][0] = int(changes.value.split(':')[0])
-            template['endTime'][1] = int(changes.value.split(':')[1])
-
-        def set_subjects(changes, template) -> None:
-            template['subjects'] = changes.value
-
-        def set_locations(changes, template) -> None:
-            template['locations'] = changes.value
-
-        def set_timeslotname(changes, template) -> None:
-            template['timeSlotName'] = changes.value
-
-        def set_name(changes, template_name) -> None:
-            if changes.value:
-                changed_template_names[template_name] = changes.value
-
-        for template_name in sorted(save['templates'].keys()):
+        def template_card(template_name):
             template = save['templates'][template_name]
+
+            def delete_template(_) -> None:
+                save['templates'].pop(template_name)
+                sjablonen.refresh()
+
+            def set_starttime(changes) -> None:
+                template['startTime'][0] = int(changes.value.split(':')[0])
+                template['startTime'][1] = int(changes.value.split(':')[1])
+
+                if template['startTime'][0] > template['endTime'][0]:
+                    template['endTime'] = deepcopy(template['startTime'])
+                    eindtijd.set_value(changes.value)
+
+                elif template['startTime'][0] == template['endTime'][0] and template['startTime'][1] > template['endTime'][1]:
+                    template['endTime'][1] = deepcopy(template['startTime'][1])
+                    eindtijd.set_value(changes.value)
+
+            def set_endtime(changes) -> None:
+                template['endTime'][0] = int(changes.value.split(':')[0])
+                template['endTime'][1] = int(changes.value.split(':')[1])
+
+                if template['endTime'][0] < template['startTime'][0]:
+                    template['startTime'] = deepcopy(template['endTime'])
+                    begintijd.set_value(changes.value)
+
+                elif template['endTime'][0] == template['startTime'][0] and template['endTime'][1] < template['startTime'][1]:
+                    template['startTime'][1] = deepcopy(template['endTime'][1])
+                    begintijd.set_value(changes.value)
+
+            def set_subjects(changes) -> None:
+                template['subjects'] = changes.value
+
+            def set_locations(changes) -> None:
+                template['locations'] = changes.value
+
+            def set_timeslotname(changes) -> None:
+                template['timeSlotName'] = changes.value
+
+            def set_name(changes) -> None:
+                if changes.value:
+                    changed_template_names[template_name] = changes.value
 
             with ui.card():
                 with ui.row():
                     with ui.column():
-                        with ui.input('Begin tijd', on_change=lambda changes, templt=template: set_starttime(changes, templt), value='%02d:%02d' % (template['startTime'][0], template['startTime'][1])).props('readonly size=4 filled dense stack-label') as begintijd:
+                        with ui.input('Begin tijd', on_change=set_starttime, value='%02d:%02d' % (template['startTime'][0], template['startTime'][1])).props('readonly size=4 filled dense stack-label') as begintijd:
                             with ui.menu().props('no-parent-event') as menu:
                                 ui.time().bind_value(begintijd).props('format24h')
                             with begintijd.add_slot('append'):
                                 ui.icon('access_time').on('click', menu.open).classes('cursor-pointer')
 
-                        with ui.input('Eind tijd', on_change=lambda changes, templt=template: set_endtime(changes, templt), value='%02d:%02d' % (template['endTime'][0], template['endTime'][1])).props('readonly size=4 filled dense stack-label') as eindtijd:
+                        with ui.input('Eind tijd', on_change=set_endtime, value='%02d:%02d' % (template['endTime'][0], template['endTime'][1])).props('readonly size=4 filled dense stack-label') as eindtijd:
                             with ui.menu().props('no-parent-event') as menu:
                                 ui.time().bind_value(eindtijd).props('format24h')
                             with eindtijd.add_slot('append'):
                                 ui.icon('access_time').on('click', menu.open).classes('cursor-pointer')
 
                     with ui.column():
-                        ui.input('Onderwerp(en)', on_change=lambda changes, templt=template: set_subjects(changes, templt), value=template['subjects']).props('filled dense stack-label')
-                        ui.input('Locatie(s)', on_change=lambda changes, templt=template: set_locations(changes, templt), value=template['locations']).props('filled dense stack-label')
+                        ui.input('Onderwerp(en)', on_change=set_subjects, value=template['subjects']).props('filled dense stack-label')
+                        ui.input('Locatie(s)', on_change=set_locations, value=template['locations']).props('filled dense stack-label')
 
-                    ui.input('Lesuur', on_change=lambda changes, templt=template: set_timeslotname(changes, templt), value=template['timeSlotName']).props('size=3 filled dense stack-label')
+                    ui.input('Lesuur', on_change=set_timeslotname, value=template['timeSlotName']).props('size=3 filled dense stack-label')
 
                     with ui.column():
-                        ui.input('Naam', on_change=lambda changes, templt_name=template_name: set_name(changes, templt_name), value=template_name, validation={'Vul een naam in': lambda value: len(value) != 0}).props('filled dense stack-label')
-                        ui.button('Verwijder', on_click=lambda _, templt_name=template_name: delete(templt_name), color='negative', icon='delete')
+                        ui.input('Naam', on_change=set_name, value=template_name, validation={'Vul een naam in': lambda value: len(value) != 0}).props('filled dense stack-label')
+                        ui.button('Verwijder', on_click=delete_template, color='negative', icon='delete')
+
+        for template_name in sorted(save['templates'].keys()):
+            template_card(template_name)
 
     def add_template() -> None:
         name = "Nieuw sjabloon"
@@ -278,61 +297,80 @@ def main_page() -> None:
     def afspraken() -> None:
         save['appointments'].sort(key=lambda d: datetime(d['date'][0], d['date'][1], d['date'][2], d['startTime'][0], d['startTime'][1]).timestamp())
 
-        def delete(appointment):
-            save['appointments'].remove(appointment)
-            afspraken.refresh()
+        def appointment_card(appointment: dict) -> None:
+            def delete_appointment(_) -> None:
+                save['appointments'].remove(appointment)
+                afspraken.refresh()
 
-        def set_starttime(changes, appointment):
-            appointment['startTime'][0] = int(changes.value.split(':')[0])
-            appointment['startTime'][1] = int(changes.value.split(':')[1])
+            def set_starttime(changes) -> None:
+                appointment['startTime'][0] = int(changes.value.split(':')[0])
+                appointment['startTime'][1] = int(changes.value.split(':')[1])
 
-        def set_endtime(changes, appointment):
-            appointment['endTime'][0] = int(changes.value.split(':')[0])
-            appointment['endTime'][1] = int(changes.value.split(':')[1])
+                if appointment['startTime'][0] > appointment['endTime'][0]:
+                    appointment['endTime'] = deepcopy(appointment['startTime'])
+                    eindtijd.set_value(changes.value)
 
-        def set_subjects(changes, appointment):
-            appointment['subjects'] = changes.value
+                elif appointment['startTime'][0] == appointment['endTime'][0] and appointment['startTime'][1] > appointment['endTime'][1]:
+                    appointment['endTime'][1] = deepcopy(appointment['startTime'][1])
+                    eindtijd.set_value(changes.value)
 
-        def set_locations(changes, appointment):
-            appointment['locations'] = changes.value
+            def set_endtime(changes) -> None:
+                appointment['endTime'][0] = int(changes.value.split(':')[0])
+                appointment['endTime'][1] = int(changes.value.split(':')[1])
 
-        def set_timeslotname(changes, appointment):
-            appointment['timeSlotName'] = changes.value
+                if appointment['endTime'][0] < appointment['startTime'][0]:
+                    appointment['startTime'] = deepcopy(appointment['endTime'])
+                    begintijd.set_value(changes.value)
 
-        def set_date(changes, appointment):
-            appointment['date'][0] = int(changes.value.split('-')[0])
-            appointment['date'][1] = int(changes.value.split('-')[1])
-            appointment['date'][2] = int(changes.value.split('-')[2])
+                elif appointment['endTime'][0] == appointment['startTime'][0] and appointment['endTime'][1] < appointment['startTime'][1]:
+                    appointment['startTime'][1] = deepcopy(appointment['endTime'][1])
+                    begintijd.set_value(changes.value)
 
-        for appointment in save['appointments']:
+            def set_subjects(changes) -> None:
+                appointment['subjects'] = changes.value
+
+            def set_locations(changes) -> None:
+                appointment['locations'] = changes.value
+
+            def set_timeslotname(changes) -> None:
+                appointment['timeSlotName'] = changes.value
+
+            def set_date(changes) -> None:
+                appointment['date'][0] = int(changes.value.split('-')[0])
+                appointment['date'][1] = int(changes.value.split('-')[1])
+                appointment['date'][2] = int(changes.value.split('-')[2])
+
             with ui.card():
                 with ui.row():
                     with ui.column():
-                        with ui.input('Begin tijd', on_change=lambda changes, appointmnt=appointment: set_starttime(changes, appointmnt), value='%02d:%02d' % (appointment['startTime'][0], appointment['startTime'][1])).props('readonly size=4 filled dense stack-label') as begintijd:
+                        with ui.input('Begin tijd', on_change=set_starttime, value='%02d:%02d' % (appointment['startTime'][0], appointment['startTime'][1])).props('readonly size=4 filled dense stack-label') as begintijd:
                             with ui.menu().props('no-parent-event') as menu:
                                 ui.time().bind_value(begintijd).props('format24h')
                             with begintijd.add_slot('append'):
                                 ui.icon('access_time').on('click', menu.open).classes('cursor-pointer')
 
-                        with ui.input('Eind tijd', on_change=lambda changes, appointmnt=appointment: set_endtime(changes, appointmnt), value='%02d:%02d' % (appointment['endTime'][0], appointment['endTime'][1])).props('readonly size=4 filled dense stack-label') as eindtijd:
+                        with ui.input('Eind tijd', on_change=set_endtime, value='%02d:%02d' % (appointment['endTime'][0], appointment['endTime'][1])).props('readonly size=4 filled dense stack-label') as eindtijd:
                             with ui.menu().props('no-parent-event') as menu:
                                 ui.time().bind_value(eindtijd).props('format24h')
                             with eindtijd.add_slot('append'):
                                 ui.icon('access_time').on('click', menu.open).classes('cursor-pointer')
 
                     with ui.column():
-                        ui.input('Onderwerp(en)', on_change=lambda changes, appointmnt=appointment: set_subjects(changes, appointmnt), value=appointment['subjects']).props('filled dense stack-label')
-                        ui.input('Locatie(s)', on_change=lambda changes, appointmnt=appointment: set_locations(changes, appointmnt), value=appointment['locations']).props('filled dense stack-label')
+                        ui.input('Onderwerp(en)', on_change=set_subjects, value=appointment['subjects']).props('filled dense stack-label')
+                        ui.input('Locatie(s)', on_change=set_locations, value=appointment['locations']).props('filled dense stack-label')
 
-                    ui.input('Lesuur', on_change=lambda changes, appointmnt=appointment: set_timeslotname(changes, appointmnt), value=appointment['timeSlotName']).props('size=3 filled dense stack-label')
+                    ui.input('Lesuur', on_change=set_timeslotname, value=appointment['timeSlotName']).props('size=3 filled dense stack-label')
 
                     with ui.column():
-                        with ui.input('Datum', on_change=lambda changes, appointmnt=appointment: set_date(changes, appointmnt), value='%d-%02d-%02d' % (appointment['date'][0], appointment['date'][1], appointment['date'][2])).props('readonly size=9 filled dense stack-label') as datum:
+                        with ui.input('Datum', on_change=set_date, value='%d-%02d-%02d' % (appointment['date'][0], appointment['date'][1], appointment['date'][2])).props('readonly size=9 filled dense stack-label') as datum:
                             with ui.menu().props('no-parent-event') as menu:
                                 ui.date().bind_value(datum)
                             with datum.add_slot('append'):
                                 ui.icon('edit_calendar').on('click', menu.open).classes('cursor-pointer')
-                        ui.button('Verwijder', on_click=lambda _, appointmnt=appointment: delete(appointmnt), color='negative', icon='delete')
+                        ui.button('Verwijder', on_click=delete_appointment, color='negative', icon='delete')
+
+        for appointment in save['appointments']:
+            appointment_card(appointment)
 
     def add_appointment(template: dict | None = None) -> None:
         today = date.today()

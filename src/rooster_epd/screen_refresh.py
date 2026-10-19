@@ -60,6 +60,10 @@ def main() -> None:
 
     # Add custom appointments to lessons_today
     for appointment in save['appointments']:
+        # Skip the appointment if the times are invalid
+        if appointment['startTime'] >= appointment['endTime']:
+            continue
+
         appointmenttimestamp = datetime(appointment['date'][0], appointment['date'][1], appointment['date'][2], appointment['startTime'][0], appointment['startTime'][1]).timestamp()
 
         if start_timestamp <= appointmenttimestamp < end_timestamp:
@@ -188,7 +192,6 @@ def main() -> None:
     epd.display(epd.getbuffer(Himage))
 
     epd.sleep()
-
 
 if __name__ == '__main__':
     main()
