@@ -41,7 +41,7 @@ A small e-Paper device that shows your Zermelo schedule.
 14. Finally you can eject the Micro SD card and put it in the Rasberry Pi
 
 ## Installing Rooster-EPD on the Raspberry Pi
-1. Plug the Micro USB cable into the `PWR IN` port on the Raspberry Pi and plug it into your USB power supply and wait for it to boot and set itself up
+1. Plug the Micro USB cable into the `PWR IN` port on the Raspberry Pi, plug it into your USB power supply and wait for it to boot and set itself up
    - You can check if it is done by entering `ping HOSTNAME` where `HOSTNAME` is the hostname you set earlier, so in my case `ping rooster-epd`. If you get succesful ping results it's done and online
 2. Connect to the Raspberry Pi via SSH by running `ssh USERNAME@HOSTNAME` in a terminal where `USERNAME` is the username you set earlier and `HOSTNAME` is the hostname you set earlier, in my case `ssh thomas@rooster-epd`. After that enter the password you set earlier
 3. Make sure the  Raspberry Pi is up to date by running `sudo apt update` and then `sudo apt upgrade`
@@ -62,6 +62,10 @@ A small e-Paper device that shows your Zermelo schedule.
        - In the case of `PEAP` enter the `Anoymous identity`, `Username` and `Password`
 6. Select `<Ok>`
 7. Press escape twice to exit nmtui
+
+# Usage
+1. Plug the Micro USB cable into the `PWR IN` port on the Raspberry Pi, plug it into your USB power supply and wait for it to boot
+2. In a webbrowser go to `http://HOSTNAME/` where `HOSTNAME` is the hostname you set earlier
 
 # Building the .deb package
 Run these commands in the root of the repo:
