@@ -234,12 +234,12 @@ def main_page() -> None:
                         ui.button('Verwijder', on_click=lambda _, templt_name=template_name: delete(templt_name), color='negative', icon='delete')
 
     def add_template() -> None:
-        name = "New"
-        count = 0
+        name = "Nieuw sjabloon"
 
+        count = 0
         while name in save['templates']:
             count += 1
-            name = f"New{count}"
+            name = f"Nieuw sjabloon{count}"
 
         save['templates'][name] = {'startTime': [0, 0],
                                    'endTime': [0, 0],
