@@ -187,6 +187,8 @@ def main() -> None:
     # Display the image
     epd.display(epd.getbuffer(Himage))
 
+    epd.sleep()
+
 
 if __name__ == '__main__':
     main()
