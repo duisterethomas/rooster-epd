@@ -1,3 +1,13 @@
+rooster-epd (3.1.1-1) stable; urgency=medium
+
+  * Changed the port to 80 for easier access
+  * Added change password button
+  * Changed the name of a new template to "Nieuw sjabloon"
+  * The start and end time fields will now be checked before saving and/or syncing
+  * Changes will now be saved before syncing
+
+ -- Thomas van Keulen <support@duisterethomas.nl>  Mon, 19 Oct 2026 23:43:43 +0200
+
 rooster-epd (3.1.0-1) stable; urgency=medium
 
   * Added .deb package for easier installation
